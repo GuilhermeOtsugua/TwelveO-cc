@@ -66,7 +66,7 @@
                             Portfolio / Laravel / Full-stack
                         </p>
 
-                        <h1 class="hero-mark max-w-4xl font-display text-6xl leading-[0.88] tracking-[-0.06em] text-[color:var(--green-900)] sm:text-7xl lg:text-[7.5rem]">
+                        <h1 class="hero-mark font-display-hero max-w-4xl text-6xl leading-[0.88] tracking-[-0.06em] text-[color:var(--green-900)] sm:text-7xl lg:text-[7.5rem]">
                             Otsugua
                         </h1>
 
@@ -171,7 +171,7 @@
                                 </summary>
 
                                 <div
-                                    class="project-snippet rounded-[1.35rem] border border-[rgba(244,239,230,0.18)] bg-[linear-gradient(180deg,rgba(16,40,31,0.96),rgba(16,40,31,0.9))] p-4 text-[color:var(--bg)] shadow-[0_20px_60px_rgba(16,40,31,0.22)]"
+                                    class="project-snippet js-technical-note rounded-[1.35rem] border border-[rgba(244,239,230,0.18)] bg-[linear-gradient(180deg,rgba(16,40,31,0.96),rgba(16,40,31,0.9))] p-4 text-[color:var(--bg)] shadow-[0_20px_60px_rgba(16,40,31,0.22)]"
                                     style="top: var(--snippet-y); left: var(--snippet-x);"
                                 >
                                     <p class="text-[0.64rem] font-semibold uppercase tracking-[0.3em] text-[color:rgba(244,239,230,0.62)]">
@@ -213,10 +213,6 @@
                                     Contact
                                 </h2>
                             </div>
-
-                            <p class="max-w-md text-sm leading-7 text-[color:rgba(244,239,230,0.76)]">
-                                If you want to talk about Laravel, product structure, business, reach out.
-                            </p>
                         </div>
 
                         <div class="mt-6 flex flex-wrap gap-3">

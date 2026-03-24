@@ -9,31 +9,39 @@
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-serif: 'Bodoni Otsugua', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+    --font-serif: 'Bodoni Otsugua Small', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
         'Courier New', monospace;
 }
 
 @font-face {
-    font-family: 'Bodoni Otsugua';
-    src: url('/fonts/bodoni/Bodoni-96-Book.otf') format('opentype');
+    font-family: 'Bodoni Otsugua Small';
+    src: url('/fonts/bodoni/Bodoni-06-Book.otf') format('opentype');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'Bodoni Otsugua';
-    src: url('/fonts/bodoni/Bodoni-96-Medium.otf') format('opentype');
+    font-family: 'Bodoni Otsugua Small';
+    src: url('/fonts/bodoni/Bodoni-06-Medium.otf') format('opentype');
     font-weight: 500;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'Bodoni Otsugua';
-    src: url('/fonts/bodoni/Bodoni-96-Bold.otf') format('opentype');
+    font-family: 'Bodoni Otsugua Small';
+    src: url('/fonts/bodoni/Bodoni-06-Bold.otf') format('opentype');
     font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Bodoni Otsugua Hero';
+    src: url('/fonts/bodoni/Bodoni-96-Book.otf') format('opentype');
+    font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
@@ -114,6 +122,11 @@
         font-weight: 500;
     }
 
+    .font-display-hero {
+        font-family: 'Bodoni Otsugua Hero', var(--font-serif);
+        font-weight: 400;
+    }
+
     .nav-brand {
         font-weight: 700;
     }
@@ -157,15 +170,18 @@
     .project-card {
         position: relative;
         overflow: visible;
+        z-index: 0;
         transform: translateY(0);
         transition:
             transform 180ms ease,
+            z-index 0ms linear 180ms,
             border-color 180ms ease,
             box-shadow 180ms ease;
     }
 
     .project-card:hover,
     .project-card[open] {
+        z-index: 30;
         transform: translateY(-2px);
         box-shadow: 0 24px 80px rgba(16, 40, 31, 0.1);
     }
@@ -208,7 +224,7 @@
 
     .project-snippet {
         position: absolute;
-        z-index: 20;
+        z-index: 50;
         width: min(18rem, 78vw);
         opacity: 0;
         transform: translate3d(var(--snippet-shift-x, 0), var(--snippet-shift-y, 0), 0) scale(0.98);
@@ -225,6 +241,14 @@
         opacity: 1;
         transform: translate3d(var(--snippet-shift-x, 0), var(--snippet-shift-y, 0), 0) scale(1);
         pointer-events: auto;
+    }
+
+    .project-card.is-fading .project-snippet {
+        opacity: 0;
+        transition:
+            opacity 1s ease,
+            transform 1s ease,
+            box-shadow 220ms ease;
     }
 
     .project-card:focus-visible,
