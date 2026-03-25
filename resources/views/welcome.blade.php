@@ -46,7 +46,7 @@
     </head>
     <body class="antialiased">
         <div class="otsugua-page">
-            <header class="sticky top-0 z-30 border-b border-[color:var(--line)] glass-bar">
+            <header class="sticky top-0 z-[100] border-b border-[color:var(--line)] glass-bar">
                 <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-10">
                     <a href="#top" class="font-display nav-brand text-lg tracking-[0.22em] text-[color:var(--green-900)] uppercase sm:text-xl">
                         Otsugua
@@ -131,7 +131,7 @@
                         </p>
                     </div>
 
-                    <div class="mt-8 grid gap-6 lg:grid-cols-3">
+                    <div class="relative z-0 mt-8 grid gap-6 lg:grid-cols-3">
                         @foreach ($projects as $project)
                             <details
                                 class="project-card rounded-[2rem] border border-[color:var(--line)] bg-[rgba(244,239,230,0.72)] p-4 shadow-[0_18px_60px_rgba(16,40,31,0.07)] backdrop-blur-sm"
