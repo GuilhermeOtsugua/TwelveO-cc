@@ -120,8 +120,8 @@ class HomeController extends Controller
                 'principle' => 'Design for impact',
                 'category' => 'Creative studio portal capability demo',
                 'title' => 'Studio Current',
-                'description' => 'A fictional client portal for a creative studio where approvals, deliverables, and handoff details need a memorable interface without losing operational clarity.',
-                'rationale' => 'Interaction design is treated as product strategy: a stronger visual identity helps clients move through feedback and approvals with less friction.',
+                'description' => 'A fictional but plausible client portal for a creative studio where approvals, deliverables, and handoff details need a memorable interface with a strong visual identity without losing operational clarity.',
+                'rationale' => 'Interaction design is treated as product strategy: memorable transitions and branded feedback cues help clients move through reviews and approvals with less friction.',
                 'notes' => [
                     'Motion and visual contrast reinforce the studio brand while keeping the workflow readable on mobile.',
                     'Approvals, asset delivery, and feedback states are obvious at a glance instead of hiding behind ornamental layouts.',
