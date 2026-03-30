@@ -25,6 +25,14 @@ class HomepageTest extends TestCase
             ->assertSee('https://www.anthropic.com/engineering/building-effective-agents')
             ->assertSeeText('TwelveO-cc')
             ->assertSee('https://github.com/GuilhermeOtsugua/TwelveO-cc')
+            ->assertSeeText('Here’s How I Shape Products')
+            ->assertSeeText('fictional but plausible capability demonstrations')
+            ->assertSeeText('Harbor Ledger')
+            ->assertSeeText('TDD')
+            ->assertSeeText('Northline Learning Ops')
+            ->assertSeeText('DDD')
+            ->assertSeeText('Studio Current')
+            ->assertSeeText('Design for impact')
             ->assertSeeText('Contact')
             ->assertSeeText('Email')
             ->assertSee('data-copy-email="guilherme@otsugua.dev"', false)
@@ -33,7 +41,6 @@ class HomepageTest extends TestCase
             ->assertSeeText('LinkedIn')
             ->assertSee('https://www.linkedin.com/in/guilherme-augusto')
             ->assertSeeText('GitHub')
-            ->assertSee('https://github.com/otsugua')
-            ->assertSeeText('Harbor Ledger');
+            ->assertSee('https://github.com/otsugua');
     }
 }

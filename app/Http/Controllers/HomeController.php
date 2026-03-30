@@ -78,13 +78,12 @@ class HomeController extends Controller
     /**
      * @return array<int, array{
      *     index: string,
+     *     principle: string,
+     *     category: string,
      *     title: string,
      *     description: string,
-     *     snippet: string,
-     *     snippet_x: string,
-     *     snippet_y: string,
-     *     snippet_shift_x: string,
-     *     snippet_shift_y: string
+     *     rationale: string,
+     *     notes: array<int, string>
      * }>
      */
     private function featuredProjects(): array
@@ -92,33 +91,42 @@ class HomeController extends Controller
         return [
             [
                 'index' => '01',
+                'principle' => 'TDD',
+                'category' => 'Pricing / Finance capability demo',
                 'title' => 'Harbor Ledger',
-                'description' => 'A full-stack Laravel system that keeps business rules explicit and the operator flow calm.',
-                'snippet' => "// controller stays thin\n// move business rules into a service\n// keep the domain easy to test",
-                'snippet_x' => '66%',
-                'snippet_y' => '-12%',
-                'snippet_shift_x' => '18%',
-                'snippet_shift_y' => '-8%',
+                'description' => 'A fictional but plausible pricing workspace for finance teams who need quote changes, approval paths, and margin rules to stay correct under pressure.',
+                'rationale' => 'Test-first delivery keeps discount thresholds, tax edge cases, and approval rules explicit before interface polish is layered on top.',
+                'notes' => [
+                    'Business rules are written to pass examples before the UI depends on them.',
+                    'Pricing exceptions stay visible instead of being buried in controller conditionals.',
+                    'Operators get a calm review flow because correctness was designed into the workflow first.',
+                ],
             ],
             [
                 'index' => '02',
-                'title' => 'Studio Pulse',
-                'description' => 'A responsive interface focused on fast interaction, predictable state, and clean front-end behavior.',
-                'snippet' => "// local state for transient UI\n// lift only shared state\n// keep renders simple",
-                'snippet_x' => '-12%',
-                'snippet_y' => '60%',
-                'snippet_shift_x' => '-10%',
-                'snippet_shift_y' => '8%',
+                'principle' => 'DDD',
+                'category' => 'Learning operations capability demo',
+                'title' => 'Northline Learning Ops',
+                'description' => 'A fictional learning operations platform shaped for coordinators, instructors, assessors, and students who all touch the same domain from different angles.',
+                'rationale' => 'Shared language keeps scheduling, assessment, attendance, and operations workflows coherent as the product grows more roles and rules.',
+                'notes' => [
+                    'Students, instructors, cohorts, assessments, and interventions are named as domain concepts, not generic records.',
+                    'Each workflow is organized around the language operations teams already use together.',
+                    'The product surface stays coherent because rules are grouped by bounded intent instead of page-by-page convenience.',
+                ],
             ],
             [
                 'index' => '03',
-                'title' => 'Northline Ops',
-                'description' => 'A maintainable product surface designed to grow without turning the structure into noise.',
-                'snippet' => "// composition first\n// extract when patterns repeat\n// let the layout stay semantic",
-                'snippet_x' => '58%',
-                'snippet_y' => '48%',
-                'snippet_shift_x' => '14%',
-                'snippet_shift_y' => '10%',
+                'principle' => 'Design for impact',
+                'category' => 'Creative studio portal capability demo',
+                'title' => 'Studio Current',
+                'description' => 'A fictional client portal for a creative studio where approvals, deliverables, and handoff details need a memorable interface without losing operational clarity.',
+                'rationale' => 'Interaction design is treated as product strategy: a stronger visual identity helps clients move through feedback and approvals with less friction.',
+                'notes' => [
+                    'Motion and visual contrast reinforce the studio brand while keeping the workflow readable on mobile.',
+                    'Approvals, asset delivery, and feedback states are obvious at a glance instead of hiding behind ornamental layouts.',
+                    'Delight supports the operational job to be done rather than competing with it.',
+                ],
             ],
         ];
     }

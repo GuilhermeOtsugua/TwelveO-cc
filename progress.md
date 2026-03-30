@@ -17,3 +17,9 @@ Implemented PRD item #9
 - Moved homepage contact destinations into controller data and expanded the homepage feature test to cover the new visible affordances.
 Next: Pick the next runnable homepage repositioning issue.
 ---
+## 2026-03-30
+Implemented PRD item #4
+- Replaced the compact project cards with three full-width principle-led capability bands driven by homepage controller data.
+- Added explicit fictional-demo framing and expanded the homepage feature test to cover the new section heading, framing copy, and visible band content.
+Next: Pick the next runnable homepage repositioning issue.
+---

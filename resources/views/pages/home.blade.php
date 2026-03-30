@@ -89,19 +89,65 @@
                 <section id="projects" class="mt-20">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.34em] text-[color:rgba(16,40,31,0.58)]">Selected Projects</p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.34em] text-[color:rgba(16,40,31,0.58)]">Capability demonstrations</p>
                             <h2 class="mt-3 font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)] sm:text-4xl">
-                                Three featured works
+                                Here’s How I Shape Products
                             </h2>
                         </div>
                         <p class="max-w-xl text-sm leading-7 text-[color:rgba(16,40,31,0.72)]">
-                            Each card reads cleanly on its own, then reveals a small offset note that explains the architecture or front-end principle behind it.
+                            These are fictional but plausible capability demonstrations. Each band shows the product context, the governing principle, and the rationale behind the shape of the system.
                         </p>
                     </div>
 
-                    <div class="relative z-0 mt-8 grid gap-6 lg:grid-cols-3">
+                    <div class="mt-8 space-y-4">
                         @foreach ($projects as $project)
-                            <x-home.project-card :project="$project" />
+                            <article class="rounded-[2rem] border border-[color:var(--line)] bg-[linear-gradient(180deg,rgba(244,239,230,0.78),rgba(238,230,216,0.58))] p-5 shadow-[0_18px_60px_rgba(16,40,31,0.07)] lg:p-7">
+                                <div class="grid gap-6 lg:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] lg:items-start">
+                                    <div class="flex flex-col gap-4">
+                                        <div>
+                                            <p class="text-xs font-semibold uppercase tracking-[0.32em] text-[color:rgba(16,40,31,0.5)]">
+                                                {{ $project['index'] }}
+                                            </p>
+                                            <p class="mt-3 text-sm font-semibold uppercase tracking-[0.26em] text-[color:rgba(16,40,31,0.66)]">
+                                                {{ $project['principle'] }}
+                                            </p>
+                                        </div>
+
+                                        <p class="text-sm leading-7 text-[color:rgba(16,40,31,0.7)]">
+                                            {{ $project['category'] }}
+                                        </p>
+                                    </div>
+
+                                    <div class="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)]">
+                                        <div>
+                                            <h3 class="font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)]">
+                                                {{ $project['title'] }}
+                                            </h3>
+                                            <p class="mt-4 max-w-2xl text-base leading-8 text-[color:rgba(16,40,31,0.78)]">
+                                                {{ $project['description'] }}
+                                            </p>
+                                        </div>
+
+                                        <div class="rounded-[1.5rem] border border-[color:rgba(16,40,31,0.1)] bg-[rgba(244,239,230,0.62)] p-5">
+                                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[color:rgba(16,40,31,0.5)]">
+                                                Why it is shaped this way
+                                            </p>
+                                            <p class="mt-3 text-sm leading-7 text-[color:rgba(16,40,31,0.74)]">
+                                                {{ $project['rationale'] }}
+                                            </p>
+
+                                            <ul class="mt-4 space-y-3 text-sm leading-7 text-[color:rgba(16,40,31,0.74)]">
+                                                @foreach ($project['notes'] as $note)
+                                                    <li class="flex gap-3">
+                                                        <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--green-900)]"></span>
+                                                        <span>{{ $note }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
                         @endforeach
                     </div>
                 </section>
