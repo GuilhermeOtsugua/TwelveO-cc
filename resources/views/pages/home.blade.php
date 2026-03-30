@@ -58,27 +58,30 @@
                     <aside class="hero-panel rounded-[2rem] border border-[color:var(--line)] p-6 text-[color:var(--green-900)] shadow-[0_22px_70px_rgba(16,40,31,0.08)]">
                         <div class="flex items-center justify-between text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-[color:rgba(16,40,31,0.58)]">
                             <span>Current Focus</span>
-                            <span>Laravel / UX / Systems</span>
+                            <span>Thinking / Building</span>
                         </div>
 
                         <div class="mt-10 space-y-4">
                             <p class="font-display text-3xl leading-tight tracking-[-0.04em]">
-                                Three projects, each carrying a technical idea behind the surface.
+                                {{ $currentFocus['topic'] }}
                             </p>
                             <p class="max-w-md text-sm leading-7 text-[color:rgba(16,40,31,0.74)]">
-                                The homepage is built as a quiet introduction first, then a set of curated works with hover notes that explain the thinking.
+                                {{ $currentFocus['summary'] }}
                             </p>
                         </div>
 
-                        <div class="mt-10 grid grid-cols-2 gap-3 text-sm">
-                            <div class="rounded-2xl border border-[color:var(--line)] bg-[rgba(244,239,230,0.7)] p-4">
-                                <p class="text-xs uppercase tracking-[0.24em] text-[color:rgba(16,40,31,0.54)]">Style</p>
-                                <p class="mt-2 font-medium">Editorial, technical, warm.</p>
-                            </div>
-                            <div class="rounded-2xl border border-[color:var(--line)] bg-[rgba(244,239,230,0.7)] p-4">
-                                <p class="text-xs uppercase tracking-[0.24em] text-[color:rgba(16,40,31,0.54)]">Motion</p>
-                                <p class="mt-2 font-medium">Soft, precise, minimal.</p>
-                            </div>
+                        <div class="mt-10 grid gap-3 text-sm">
+                            @foreach ($currentFocus['links'] as $link)
+                                <a
+                                    href="{{ $link['href'] }}"
+                                    class="rounded-2xl border border-[color:var(--line)] bg-[rgba(244,239,230,0.7)] p-4 transition-transform duration-200 hover:-translate-y-0.5"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <p class="text-xs uppercase tracking-[0.24em] text-[color:rgba(16,40,31,0.54)]">{{ $link['label'] }}</p>
+                                    <p class="mt-2 font-medium">{{ $link['title'] }}</p>
+                                </a>
+                            @endforeach
                         </div>
                     </aside>
                 </section>

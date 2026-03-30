@@ -19,6 +19,12 @@ class HomepageTest extends TestCase
             ->assertSeeText('full-stack Laravel developer')
             ->assertSeeText('clear, testable, and coherent as they grow')
             ->assertSeeText('How I work')
+            ->assertSeeText('Current Focus')
+            ->assertSeeText('Agentic development')
+            ->assertSeeText('Building effective agents')
+            ->assertSee('https://www.anthropic.com/engineering/building-effective-agents')
+            ->assertSeeText('TwelveO-cc')
+            ->assertSee('https://github.com/GuilhermeOtsugua/TwelveO-cc')
             ->assertSeeText('Contact')
             ->assertSeeText('Harbor Ledger');
     }

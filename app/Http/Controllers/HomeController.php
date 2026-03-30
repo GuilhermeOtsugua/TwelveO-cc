@@ -12,8 +12,40 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         return view('pages.home', [
+            'currentFocus' => $this->currentFocus(),
             'projects' => $this->featuredProjects(),
         ]);
+    }
+
+    /**
+     * @return array{
+     *     topic: string,
+     *     summary: string,
+     *     links: array<int, array{
+     *         label: string,
+     *         title: string,
+     *         href: string
+     *     }>
+     * }
+     */
+    private function currentFocus(): array
+    {
+        return [
+            'topic' => 'Agentic development',
+            'summary' => 'I am studying how agent loops, scoped delegation, and acceptance-driven workflows keep AI-assisted product work inspectable instead of noisy.',
+            'links' => [
+                [
+                    'label' => 'Theory',
+                    'title' => 'Building effective agents',
+                    'href' => 'https://www.anthropic.com/engineering/building-effective-agents',
+                ],
+                [
+                    'label' => 'Repository',
+                    'title' => 'TwelveO-cc',
+                    'href' => 'https://github.com/GuilhermeOtsugua/TwelveO-cc',
+                ],
+            ],
+        ];
     }
 
     /**

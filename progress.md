@@ -5,3 +5,9 @@ Implemented PRD item #2
 - Replaced the primary hero CTA with How I work and expanded the homepage feature test to cover the new visible hero message.
 Next: Pick the next runnable homepage repositioning issue.
 ---
+## 2026-03-30
+Implemented PRD item #3
+- Replaced the placeholder Current Focus copy with an agentic development panel sourced from controller data.
+- Added one theory link and one repository link, then expanded the homepage feature test to cover the new visible content.
+Next: Pick the next runnable homepage repositioning issue.
+---
