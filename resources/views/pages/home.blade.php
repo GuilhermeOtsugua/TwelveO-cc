@@ -28,7 +28,7 @@
                 <section class="grid gap-8 lg:grid-cols-[minmax(0,1.02fr)_minmax(18rem,0.78fr)] lg:items-end">
                     <div>
                         <p class="mb-6 text-xs font-semibold uppercase tracking-[0.38em] text-[color:rgba(16,40,31,0.62)]">
-                            Portfolio / Laravel / Full-stack
+                            Laravel / Product engineering / Full-stack
                         </p>
 
                         <h1 class="hero-mark font-display-hero max-w-4xl text-6xl leading-[0.88] tracking-[-0.06em] text-[color:var(--green-900)] sm:text-7xl lg:text-[7.5rem]">
@@ -36,7 +36,7 @@
                         </h1>
 
                         <p class="mt-6 max-w-2xl text-lg leading-relaxed text-[color:rgba(16,40,31,0.8)] sm:text-xl">
-                            Hi! My name is Guilherme Augusto. I'm a software developer mainly focused on full-stack Laravel.
+                            I am Guilherme Augusto, a full-stack Laravel developer who designs software around principles that keep products clear, testable, and coherent as they grow.
                         </p>
 
                         <div class="mt-10 flex flex-wrap items-center gap-3">
@@ -44,7 +44,7 @@
                                 href="#projects"
                                 class="cta-button rounded-full bg-[color:var(--green-900)] px-6 py-3 text-sm font-semibold text-[color:var(--bg)] shadow-[0_18px_40px_rgba(16,40,31,0.18)]"
                             >
-                                View Projects
+                                How I work
                             </a>
                             <a
                                 href="#contact"

@@ -16,7 +16,9 @@ class HomepageTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeText('Otsugua')
-            ->assertSeeText('View Projects')
+            ->assertSeeText('full-stack Laravel developer')
+            ->assertSeeText('clear, testable, and coherent as they grow')
+            ->assertSeeText('How I work')
             ->assertSeeText('Contact')
             ->assertSeeText('Harbor Ledger');
     }
