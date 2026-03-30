@@ -94,12 +94,12 @@ class HomeController extends Controller
                 'principle' => 'TDD',
                 'category' => 'Pricing / Finance capability demo',
                 'title' => 'Harbor Ledger',
-                'description' => 'A fictional but plausible pricing workspace for finance teams who need quote changes, approval paths, and margin rules to stay correct under pressure.',
-                'rationale' => 'Test-first delivery keeps discount thresholds, tax edge cases, and approval rules explicit before interface polish is layered on top.',
+                'description' => 'A fictional but plausible pricing workspace for finance teams where discount ladders, tax rules, approval paths, and margin floors have to stay correct on every quote.',
+                'rationale' => 'Test-first delivery makes rounding behavior, approval gates, and pricing rules executable before anyone relies on the interface.',
                 'notes' => [
-                    'Business rules are written to pass examples before the UI depends on them.',
-                    'Pricing exceptions stay visible instead of being buried in controller conditionals.',
-                    'Operators get a calm review flow because correctness was designed into the workflow first.',
+                    'Example-driven tests lock discount ladders, tax combinations, and approval thresholds before a quote can ship.',
+                    'Strict pricing rules live in named domain behavior instead of being scattered through request handlers.',
+                    'Reviewers can trust each quote because exceptions and margin risks are surfaced as part of the workflow.',
                 ],
             ],
             [

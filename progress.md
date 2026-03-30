@@ -23,3 +23,9 @@ Implemented PRD item #4
 - Added explicit fictional-demo framing and expanded the homepage feature test to cover the new section heading, framing copy, and visible band content.
 Next: Pick the next runnable homepage repositioning issue.
 ---
+## 2026-03-30
+Implemented PRD item #5
+- Refined the Harbor Ledger capability band so the TDD example now spells out discount ladders, tax rules, approval gates, and a trust-oriented review flow.
+- Expanded the homepage feature test to assert the pricing example\s visible copy and rationale.
+Next: Pick the next runnable homepage repositioning issue.
+---
