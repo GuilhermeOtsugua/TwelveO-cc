@@ -99,52 +99,138 @@
                         </p>
                     </div>
 
-                    <div class="mt-8 space-y-4">
+                    <div class="mt-8 space-y-5">
                         @foreach ($projects as $project)
-                            <article class="rounded-[2rem] border border-[color:var(--line)] bg-[linear-gradient(180deg,rgba(244,239,230,0.78),rgba(238,230,216,0.58))] p-5 shadow-[0_18px_60px_rgba(16,40,31,0.07)] lg:p-7">
-                                <div class="grid gap-6 lg:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] lg:items-start">
-                                    <div class="flex flex-col gap-4">
+                            <article
+                                class="project-band rounded-[2.2rem] border border-[color:var(--line)] bg-[linear-gradient(180deg,rgba(244,239,230,0.84),rgba(238,230,216,0.7))] p-5 shadow-[0_24px_80px_rgba(16,40,31,0.08)] lg:p-7"
+                                data-project-band
+                                style="--band-delay: {{ $loop->index * 120 }}ms;"
+                            >
+                                <div class="grid gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-7">
+                                    <div class="flex flex-col justify-between gap-5">
                                         <div>
-                                            <p class="text-xs font-semibold uppercase tracking-[0.32em] text-[color:rgba(16,40,31,0.5)]">
-                                                {{ $project['index'] }}
-                                            </p>
+                                            <div class="flex items-center justify-between gap-3">
+                                                <p class="text-xs font-semibold uppercase tracking-[0.32em] text-[color:rgba(16,40,31,0.5)]">
+                                                    {{ $project['index'] }}
+                                                </p>
+                                                <p class="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(16,40,31,0.44)]">
+                                                    {{ $project['sequence'] }}
+                                                </p>
+                                            </div>
                                             <p class="mt-3 text-sm font-semibold uppercase tracking-[0.26em] text-[color:rgba(16,40,31,0.66)]">
                                                 {{ $project['principle'] }}
                                             </p>
                                         </div>
 
-                                        <p class="text-sm leading-7 text-[color:rgba(16,40,31,0.7)]">
-                                            {{ $project['category'] }}
-                                        </p>
+                                        <div>
+                                            <p class="text-sm leading-7 text-[color:rgba(16,40,31,0.7)]">
+                                                {{ $project['category'] }}
+                                            </p>
+
+                                            <div class="mt-4 flex flex-wrap gap-2">
+                                                @foreach ($project['tags'] as $tag)
+                                                    <span class="rounded-full border border-[color:rgba(16,40,31,0.1)] bg-[rgba(244,239,230,0.74)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(16,40,31,0.6)]">
+                                                        {{ $tag }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)]">
-                                        <div>
-                                            <h3 class="font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)]">
-                                                {{ $project['title'] }}
-                                            </h3>
-                                            <p class="mt-4 max-w-2xl text-base leading-8 text-[color:rgba(16,40,31,0.78)]">
-                                                {{ $project['description'] }}
-                                            </p>
+                                    <div class="project-band__body">
+                                        <div class="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(19rem,1.08fr)] xl:items-start">
+                                            <div>
+                                                <h3 class="font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)] sm:text-[2.2rem]">
+                                                    {{ $project['title'] }}
+                                                </h3>
+                                                <p class="mt-4 max-w-2xl text-base leading-8 text-[color:rgba(16,40,31,0.78)]">
+                                                    {{ $project['description'] }}
+                                                </p>
+                                            </div>
+
+                                            <section class="project-surface rounded-[1.7rem] border border-[color:rgba(16,40,31,0.1)] bg-[linear-gradient(160deg,rgba(16,40,31,0.93),rgba(25,53,42,0.86)_48%,rgba(95,126,105,0.74))] p-4 text-[color:var(--bg)] shadow-[0_26px_60px_rgba(16,40,31,0.16)] sm:p-5">
+                                                <div class="flex flex-wrap items-start justify-between gap-4">
+                                                    <div>
+                                                        <p class="text-[0.62rem] font-semibold uppercase tracking-[0.32em] text-[color:rgba(244,239,230,0.62)]">
+                                                            {{ $project['surface']['eyebrow'] }}
+                                                        </p>
+                                                        <p class="mt-3 font-display text-[1.75rem] leading-none tracking-[-0.04em] text-[color:rgba(244,239,230,0.94)]">
+                                                            {{ $project['surface']['title'] }}
+                                                        </p>
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        class="project-note-trigger inline-flex items-center gap-2 rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.08)] px-4 py-2 text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.88)]"
+                                                        data-project-note-toggle
+                                                        data-project-note-label-open="Hide note"
+                                                        data-project-note-label-closed="{{ $project['note']['trigger'] }}"
+                                                        data-project-note-desktop-anchor
+                                                        aria-controls="project-note-{{ $loop->index }}"
+                                                        aria-expanded="false"
+                                                    >
+                                                        <span>{{ $project['note']['trigger'] }}</span>
+                                                    </button>
+                                                </div>
+
+                                                <p class="mt-4 max-w-2xl text-sm leading-7 text-[color:rgba(244,239,230,0.78)]">
+                                                    {{ $project['surface']['summary'] }}
+                                                </p>
+
+                                                <div class="mt-5 grid gap-3 sm:grid-cols-3">
+                                                    @foreach ($project['surface']['metrics'] as $metric)
+                                                        <div class="rounded-[1.1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-4 py-3">
+                                                            <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.54)]">
+                                                                {{ $metric['label'] }}
+                                                            </p>
+                                                            <p class="mt-2 text-base font-semibold text-[color:rgba(244,239,230,0.94)]">
+                                                                {{ $metric['value'] }}
+                                                            </p>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+
+                                                <div class="mt-5 grid gap-3 lg:grid-cols-3">
+                                                    @foreach ($project['surface']['lanes'] as $lane)
+                                                        <section class="rounded-[1.2rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4">
+                                                            <div class="flex items-center justify-between gap-3">
+                                                                <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
+                                                                    {{ $lane['label'] }}
+                                                                </p>
+                                                                <span
+                                                                    @class([
+                                                                        'h-2.5 w-2.5 rounded-full',
+                                                                        'bg-[color:#9fd1a7]' => $lane['tone'] === 'stable',
+                                                                        'bg-[color:#f2cf8c] shadow-[0_0_0_4px_rgba(242,207,140,0.16)]' => $lane['tone'] === 'active',
+                                                                        'bg-[color:rgba(244,239,230,0.48)]' => $lane['tone'] === 'muted',
+                                                                    ])
+                                                                ></span>
+                                                            </div>
+                                                            <p class="mt-4 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                {{ $lane['value'] }}
+                                                            </p>
+                                                        </section>
+                                                    @endforeach
+                                                </div>
+                                            </section>
                                         </div>
 
-                                        <div class="rounded-[1.5rem] border border-[color:rgba(16,40,31,0.1)] bg-[rgba(244,239,230,0.62)] p-5">
-                                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[color:rgba(16,40,31,0.5)]">
-                                                Why it is shaped this way
+                                        <aside
+                                            id="project-note-{{ $loop->index }}"
+                                            class="project-note hidden rounded-[1.45rem] border border-[color:rgba(16,40,31,0.12)] bg-[linear-gradient(180deg,rgba(244,239,230,0.96),rgba(238,230,216,0.92))] p-5 text-[color:var(--green-900)] shadow-[0_24px_70px_rgba(16,40,31,0.14)]"
+                                            data-project-note-panel
+                                            data-project-note-inline-label="{{ $project['note']['trigger'] }}"
+                                        >
+                                            <p class="text-[0.64rem] font-semibold uppercase tracking-[0.3em] text-[color:rgba(16,40,31,0.54)]">
+                                                {{ $project['note']['trigger'] }}
                                             </p>
-                                            <p class="mt-3 text-sm leading-7 text-[color:rgba(16,40,31,0.74)]">
-                                                {{ $project['rationale'] }}
+                                            <p class="mt-3 text-sm leading-7 text-[color:rgba(16,40,31,0.76)]">
+                                                {{ $project['note']['body'] }}
                                             </p>
-
-                                            <ul class="mt-4 space-y-3 text-sm leading-7 text-[color:rgba(16,40,31,0.74)]">
-                                                @foreach ($project['notes'] as $note)
-                                                    <li class="flex gap-3">
-                                                        <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--green-900)]"></span>
-                                                        <span>{{ $note }}</span>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
+                                            <p class="mt-4 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(16,40,31,0.46)]">
+                                                {{ $project['note']['citation'] }}
+                                            </p>
+                                        </aside>
                                     </div>
                                 </div>
                             </article>

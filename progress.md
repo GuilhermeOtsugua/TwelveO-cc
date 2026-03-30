@@ -47,3 +47,9 @@ Implemented PRD item #8
 - Centered the Laravel certification in a verifiable credential block with a direct certificate action and expanded the homepage feature test to cover the visible credibility content.
 Next: Pick the next runnable homepage repositioning issue.
 ---
+## 2026-03-30
+Implemented PRD item #11
+- Rebuilt the homepage capability rows into a shared Phase 2 band framework with sequence cues, tags, staged product-surface scaffolding, and one integrated note trigger per band.
+- Added accessible note toggles that float as contextual annotations on desktop, stack inline on mobile, and expanded the homepage feature test to cover the new visible framework hooks.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---

@@ -66,6 +66,36 @@ document.querySelectorAll('details.project-card').forEach((details) => {
     });
 });
 
+document.querySelectorAll('[data-project-band]').forEach((band) => {
+    const toggle = band.querySelector('[data-project-note-toggle]');
+    const panel = band.querySelector('[data-project-note-panel]');
+
+    if (!toggle || !panel) {
+        return;
+    }
+
+    const closedLabel = toggle.dataset.projectNoteLabelClosed ?? 'Why it is shaped this way';
+    const openLabel = toggle.dataset.projectNoteLabelOpen ?? 'Hide note';
+    const label = toggle.querySelector('span');
+
+    const setOpenState = (isOpen) => {
+        panel.classList.toggle('hidden', !isOpen);
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+        if (label) {
+            label.textContent = isOpen ? openLabel : closedLabel;
+        }
+    };
+
+    setOpenState(false);
+
+    toggle.addEventListener('click', () => {
+        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+
+        setOpenState(!isOpen);
+    });
+});
+
 const contactCopyFeedback = document.querySelector('[data-copy-email-feedback]');
 let copyFeedbackTimer = null;
 

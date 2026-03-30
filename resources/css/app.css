@@ -286,6 +286,84 @@
     .credibility-chip {
         background: linear-gradient(180deg, rgba(244, 239, 230, 0.72), rgba(238, 230, 216, 0.54));
     }
+
+    .project-band {
+        position: relative;
+        overflow: hidden;
+        animation: project-band-rise 720ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        animation-delay: var(--band-delay, 0ms);
+    }
+
+    .project-band::before {
+        content: '';
+        position: absolute;
+        inset: 1.2rem auto auto 1.2rem;
+        width: 18rem;
+        height: 18rem;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(95, 126, 105, 0.14), transparent 70%);
+        pointer-events: none;
+    }
+
+    .project-band__body {
+        position: relative;
+    }
+
+    .project-surface {
+        position: relative;
+        isolation: isolate;
+        min-height: 26rem;
+        overflow: hidden;
+    }
+
+    .project-surface::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 16% 16%, rgba(244, 239, 230, 0.12), transparent 18%),
+            radial-gradient(circle at 82% 24%, rgba(244, 239, 230, 0.08), transparent 16%),
+            linear-gradient(180deg, rgba(244, 239, 230, 0.04), transparent 38%);
+        pointer-events: none;
+    }
+
+    .project-surface > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .project-note-trigger {
+        transition:
+            transform 180ms ease,
+            background-color 180ms ease,
+            border-color 180ms ease,
+            box-shadow 180ms ease;
+    }
+
+    .project-note-trigger:hover,
+    .project-note-trigger:focus-visible,
+    .project-note-trigger[aria-expanded='true'] {
+        transform: translateY(-1px);
+        background-color: rgba(244, 239, 230, 0.14);
+        border-color: rgba(244, 239, 230, 0.28);
+        box-shadow: 0 18px 36px rgba(16, 40, 31, 0.12);
+    }
+
+    .project-note {
+        position: absolute;
+        top: 4.5rem;
+        right: 1.25rem;
+        width: min(22rem, calc(100% - 2.5rem));
+        z-index: 20;
+        backdrop-filter: blur(12px);
+    }
+}
+
+@layer utilities {
+    .project-note[data-project-note-panel]:not(.hidden) {
+        display: block;
+        animation: project-note-reveal 220ms ease;
+    }
 }
 
 @media (max-width: 1023px) {
@@ -296,5 +374,35 @@
         transform: none !important;
         opacity: 1;
         pointer-events: auto;
+    }
+
+    .project-note {
+        position: static;
+        width: 100%;
+        margin-top: 1rem;
+    }
+}
+
+@keyframes project-band-rise {
+    0% {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes project-note-reveal {
+    0% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }

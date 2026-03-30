@@ -108,11 +108,30 @@ class HomeController extends Controller
      * @return array<int, array{
      *     index: string,
      *     principle: string,
+     *     sequence: string,
      *     category: string,
      *     title: string,
      *     description: string,
-     *     rationale: string,
-     *     notes: array<int, string>
+     *     tags: array<int, string>,
+     *     note: array{
+     *         trigger: string,
+     *         body: string,
+     *         citation: string
+     *     },
+     *     surface: array{
+     *         eyebrow: string,
+     *         title: string,
+     *         summary: string,
+     *         metrics: array<int, array{
+     *             label: string,
+     *             value: string
+     *         }>,
+     *         lanes: array<int, array{
+     *             label: string,
+     *             value: string,
+     *             tone: string
+     *         }>
+     *     }
      * }>
      */
     private function featuredProjects(): array
@@ -121,40 +140,88 @@ class HomeController extends Controller
             [
                 'index' => '01',
                 'principle' => 'TDD',
+                'sequence' => 'Quiet verification',
                 'category' => 'Pricing / Finance capability demo',
                 'title' => 'Harbor Ledger',
                 'description' => 'A fictional but plausible pricing workspace for finance teams where discount ladders, tax rules, approval paths, and margin floors have to stay correct on every quote.',
-                'rationale' => 'Test-first delivery makes rounding behavior, approval gates, and pricing rules executable before anyone relies on the interface.',
-                'notes' => [
-                    'Example-driven tests lock discount ladders, tax combinations, and approval thresholds before a quote can ship.',
-                    'Strict pricing rules live in named domain behavior instead of being scattered through request handlers.',
-                    'Reviewers can trust each quote because exceptions and margin risks are surfaced as part of the workflow.',
+                'tags' => ['Executable rules', 'Scenario coverage', 'Approval flow'],
+                'note' => [
+                    'trigger' => 'Why it is shaped this way',
+                    'body' => 'Test-first delivery makes rounding behavior, approval gates, and pricing rules executable before anyone relies on the interface. The interface is framed so rule logic and scenario verification can stay in view together, following the discipline Kent Beck describes in Test-Driven Development.',
+                    'citation' => 'Principle: TDD',
+                ],
+                'surface' => [
+                    'eyebrow' => 'Rules / Cases / Approvals',
+                    'title' => 'Quote release workspace',
+                    'summary' => 'A shared frame for rule review, case validation, and sign-off visibility.',
+                    'metrics' => [
+                        ['label' => 'Linked cases', 'value' => '12'],
+                        ['label' => 'Variance watch', 'value' => '0.4%'],
+                        ['label' => 'Approval path', 'value' => '2 gates'],
+                    ],
+                    'lanes' => [
+                        ['label' => 'Rule set', 'value' => 'Margin floor / tax district / renewal ladder', 'tone' => 'stable'],
+                        ['label' => 'Scenario queue', 'value' => 'Wholesale renewal / exception path / region cross-check', 'tone' => 'active'],
+                        ['label' => 'Release state', 'value' => 'Awaiting controller sign-off', 'tone' => 'muted'],
+                    ],
                 ],
             ],
             [
                 'index' => '02',
                 'principle' => 'DDD',
+                'sequence' => 'Coordinated language',
                 'category' => 'Learning operations capability demo',
                 'title' => 'Northline Learning Ops',
                 'description' => 'A fictional but plausible learning operations platform for coordinators, instructors, assessors, students, and operations leads who all apply different rules inside the same domain.',
-                'rationale' => 'Shared language keeps scheduling, assessment, attendance, interventions, and handoffs coherent as the product grows more roles, more workflows, and more rules.',
-                'notes' => [
-                    'Students, instructors, cohorts, assessments, attendance cases, and interventions are modeled as domain concepts, not generic records.',
-                    'Each workflow is organized around the language operations teams already use together, so rules follow the domain instead of the screen.',
-                    'The product surface stays coherent because rules are grouped by bounded intent instead of page-by-page convenience.',
+                'tags' => ['Shared language', 'Role views', 'Intervention case'],
+                'note' => [
+                    'trigger' => 'Why it is shaped this way',
+                    'body' => 'Shared language keeps scheduling, assessment, attendance, interventions, and handoffs coherent as the product grows more roles, more workflows, and more rules. The same intervention case is allowed to appear differently across the surface so the domain stays unified without flattening role responsibility, echoing Evans on ubiquitous language and bounded context.',
+                    'citation' => 'Principle: DDD',
+                ],
+                'surface' => [
+                    'eyebrow' => 'Students / Instructors / Operations',
+                    'title' => 'Learning operations board',
+                    'summary' => 'One operational frame, split into role-shaped views around the same domain objects.',
+                    'metrics' => [
+                        ['label' => 'Active interventions', 'value' => '08'],
+                        ['label' => 'Role views', 'value' => '3 zones'],
+                        ['label' => 'Shared concept', 'value' => 'Case #184'],
+                    ],
+                    'lanes' => [
+                        ['label' => 'Student progress', 'value' => 'Attendance risk watch / support milestone / case status', 'tone' => 'stable'],
+                        ['label' => 'Instructor planning', 'value' => 'Session adjustment / rubric follow-up / intervention note', 'tone' => 'active'],
+                        ['label' => 'Operations desk', 'value' => 'Escalation owner / family outreach / compliance trail', 'tone' => 'muted'],
+                    ],
                 ],
             ],
             [
                 'index' => '03',
                 'principle' => 'Design for impact',
+                'sequence' => 'Crafted responsiveness',
                 'category' => 'Creative studio portal capability demo',
                 'title' => 'Studio Current',
                 'description' => 'A fictional but plausible client portal for a creative studio where approvals, deliverables, and handoff details need a memorable interface with a strong visual identity without losing operational clarity.',
-                'rationale' => 'Interaction design is treated as product strategy: memorable transitions and branded feedback cues help clients move through reviews and approvals with less friction.',
-                'notes' => [
-                    'Motion and visual contrast reinforce the studio brand while keeping the workflow readable on mobile.',
-                    'Approvals, asset delivery, and feedback states are obvious at a glance instead of hiding behind ornamental layouts.',
-                    'Delight supports the operational job to be done rather than competing with it.',
+                'tags' => ['Review cycles', 'Asset delivery', 'Brand feedback'],
+                'note' => [
+                    'trigger' => 'Why it is shaped this way',
+                    'body' => 'Interaction design is treated as product strategy: memorable transitions and branded feedback cues help clients move through reviews and approvals with less friction. The shared frame stays restrained so tactile responses and branded review moments feel useful instead of ornamental, in line with product-minded interaction design practice.',
+                    'citation' => 'Principle: Design for impact',
+                ],
+                'surface' => [
+                    'eyebrow' => 'Review / Delivery / Feedback',
+                    'title' => 'Studio client portal',
+                    'summary' => 'A common surface model tuned for active work, review loops, and delivery clarity.',
+                    'metrics' => [
+                        ['label' => 'Assets in review', 'value' => '14'],
+                        ['label' => 'Feedback cycle', 'value' => 'Round 3'],
+                        ['label' => 'Client response', 'value' => '2.4h'],
+                    ],
+                    'lanes' => [
+                        ['label' => 'Active work', 'value' => 'Launch kit / social pack / event markups', 'tone' => 'stable'],
+                        ['label' => 'Review queue', 'value' => 'Annotated proof / motion cut / brand feedback', 'tone' => 'active'],
+                        ['label' => 'Delivery window', 'value' => 'Final exports / usage pack / handoff note', 'tone' => 'muted'],
+                    ],
                 ],
             ],
         ];
