@@ -266,16 +266,40 @@ class HomeController extends Controller
                 'surface' => [
                     'eyebrow' => 'Review / Delivery / Feedback',
                     'title' => 'Studio client portal',
-                    'summary' => 'A common surface model tuned for active work, review loops, and delivery clarity.',
+                    'summary' => 'A studio-facing workspace tuned for active work, review loops, and delivery clarity without losing a crafted client feel.',
                     'metrics' => [
-                        ['label' => 'Assets in review', 'value' => '14'],
-                        ['label' => 'Feedback cycle', 'value' => 'Round 3'],
-                        ['label' => 'Client response', 'value' => '2.4h'],
+                        ['label' => 'Active briefs', 'value' => '06'],
+                        ['label' => 'Review cycle', 'value' => 'Round 3'],
+                        ['label' => 'Delivery packs', 'value' => '11'],
                     ],
-                    'lanes' => [
-                        ['label' => 'Active work', 'value' => 'Launch kit / social pack / event markups', 'tone' => 'stable'],
-                        ['label' => 'Review queue', 'value' => 'Annotated proof / motion cut / brand feedback', 'tone' => 'active'],
-                        ['label' => 'Delivery window', 'value' => 'Final exports / usage pack / handoff note', 'tone' => 'muted'],
+                    'workstreams' => [
+                        [
+                            'label' => 'Active work',
+                            'title' => 'Motion system refresh',
+                            'status' => 'Editing now',
+                            'detail' => 'Channel cutdowns, keynote loops, and social variants stay grouped inside one launch sprint so the client always sees the live work surface.',
+                        ],
+                        [
+                            'label' => 'Review cycle',
+                            'title' => 'Launch kit approval stack',
+                            'status' => 'Feedback window open',
+                            'detail' => 'Annotated proof, motion cut, and logo lockup review remain in one queue so approval history stays legible while the branded cues do the emotional work.',
+                        ],
+                    ],
+                    'feedback' => [
+                        'label' => 'Client review moment',
+                        'title' => 'Marked for client pickup',
+                        'detail' => 'Response settles inside a branded review state: one decisive callout, one confirm action, and one clear owner so the interaction feels tactile without turning into a showcase gimmick.',
+                        'badges' => ['Pulse comment', 'Glow hold', 'Approve with note'],
+                    ],
+                    'delivery' => [
+                        'label' => 'Asset delivery',
+                        'value' => 'Exports queued for handoff',
+                        'items' => [
+                            'Usage pack and export checklist ready',
+                            'Final social crops scheduled for 16:30',
+                            'Handoff note includes brand-safe fallback assets',
+                        ],
                     ],
                 ],
             ],

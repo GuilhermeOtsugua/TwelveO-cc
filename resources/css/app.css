@@ -354,6 +354,17 @@
         pointer-events: none;
     }
 
+    .project-surface--impact::after {
+        content: '';
+        position: absolute;
+        inset: auto 2rem 2rem auto;
+        width: 13rem;
+        height: 13rem;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(242, 207, 140, 0.15), transparent 72%);
+        pointer-events: none;
+    }
+
     .project-surface__case {
         backdrop-filter: blur(8px);
     }
@@ -398,6 +409,55 @@
         background: linear-gradient(90deg, rgba(242, 207, 140, 0.2), rgba(242, 207, 140, 0.88), rgba(242, 207, 140, 0.2));
         transform-origin: left;
         animation: project-trace-flow 2.6s ease-in-out infinite;
+    }
+
+    .project-surface__impact-card,
+    .project-surface__feedback,
+    .project-surface__delivery {
+        backdrop-filter: blur(10px);
+        transition:
+            transform 220ms ease,
+            border-color 220ms ease,
+            box-shadow 220ms ease,
+            background-color 220ms ease;
+    }
+
+    .project-surface__impact-card:hover,
+    .project-surface__impact-card:focus-within,
+    .project-surface__feedback:hover,
+    .project-surface__feedback:focus-within {
+        transform: translateY(-2px);
+        border-color: rgba(244, 239, 230, 0.2);
+        box-shadow: 0 22px 50px rgba(10, 25, 19, 0.18);
+    }
+
+    .project-surface__impact-card::before {
+        content: '';
+        display: block;
+        width: 4rem;
+        height: 1px;
+        margin-bottom: 1rem;
+        background: linear-gradient(90deg, rgba(244, 239, 230, 0.42), rgba(244, 239, 230, 0));
+    }
+
+    .project-surface__feedback {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .project-surface__feedback::after {
+        content: '';
+        position: absolute;
+        inset: 1rem auto auto 1rem;
+        width: 4.5rem;
+        height: 4.5rem;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(242, 207, 140, 0.18), transparent 72%);
+        pointer-events: none;
+    }
+
+    .project-surface__feedback-chip {
+        animation: project-feedback-breathe 3.4s ease-in-out infinite;
     }
 
     .project-note-trigger {
@@ -485,6 +545,19 @@
     50% {
         opacity: 1;
         transform: scaleX(1);
+    }
+}
+
+@keyframes project-feedback-breathe {
+    0%,
+    100% {
+        transform: translateY(0);
+        background-color: rgba(244, 239, 230, 0.08);
+    }
+
+    50% {
+        transform: translateY(-1px);
+        background-color: rgba(244, 239, 230, 0.12);
     }
 }
 
