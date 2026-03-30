@@ -11,3 +11,9 @@ Implemented PRD item #3
 - Added one theory link and one repository link, then expanded the homepage feature test to cover the new visible content.
 Next: Pick the next runnable homepage repositioning issue.
 ---
+## 2026-03-30
+Implemented PRD item #9
+- Replaced the contact mailto link with a copy-first email control backed by a small clipboard hook and lightweight Copied feedback.
+- Moved homepage contact destinations into controller data and expanded the homepage feature test to cover the new visible affordances.
+Next: Pick the next runnable homepage repositioning issue.
+---

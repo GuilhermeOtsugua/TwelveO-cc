@@ -12,9 +12,36 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         return view('pages.home', [
+            'contactLinks' => $this->contactLinks(),
             'currentFocus' => $this->currentFocus(),
             'projects' => $this->featuredProjects(),
         ]);
+    }
+
+    /**
+     * @return array{
+     *     email: string,
+     *     profiles: array<int, array{
+     *         label: string,
+     *         href: string
+     *     }>
+     * }
+     */
+    private function contactLinks(): array
+    {
+        return [
+            'email' => 'guilherme@otsugua.dev',
+            'profiles' => [
+                [
+                    'label' => 'LinkedIn',
+                    'href' => 'https://www.linkedin.com/in/guilherme-augusto',
+                ],
+                [
+                    'label' => 'GitHub',
+                    'href' => 'https://github.com/otsugua',
+                ],
+            ],
+        ];
     }
 
     /**

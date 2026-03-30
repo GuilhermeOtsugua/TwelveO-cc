@@ -26,6 +26,14 @@ class HomepageTest extends TestCase
             ->assertSeeText('TwelveO-cc')
             ->assertSee('https://github.com/GuilhermeOtsugua/TwelveO-cc')
             ->assertSeeText('Contact')
+            ->assertSeeText('Email')
+            ->assertSee('data-copy-email="guilherme@otsugua.dev"', false)
+            ->assertSeeText('Copied')
+            ->assertDontSee('mailto:guilherme@otsugua.dev')
+            ->assertSeeText('LinkedIn')
+            ->assertSee('https://www.linkedin.com/in/guilherme-augusto')
+            ->assertSeeText('GitHub')
+            ->assertSee('https://github.com/otsugua')
             ->assertSeeText('Harbor Ledger');
     }
 }

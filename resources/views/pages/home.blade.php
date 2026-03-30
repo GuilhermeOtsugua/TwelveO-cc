@@ -138,16 +138,36 @@
                         </div>
 
                         <div class="mt-6 flex flex-wrap gap-3">
-                            <a href="mailto:guilherme@otsugua.dev" class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium">
+                            <button
+                                type="button"
+                                class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium"
+                                data-copy-email="{{ $contactLinks['email'] }}"
+                                aria-describedby="contact-copy-feedback"
+                            >
                                 Email
-                            </a>
-                            <a href="https://www.linkedin.com/in/guilherme-augusto" class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium">
-                                LinkedIn
-                            </a>
-                            <a href="https://github.com/otsugua" class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium">
-                                GitHub
-                            </a>
+                            </button>
+
+                            @foreach ($contactLinks['profiles'] as $profile)
+                                <a
+                                    href="{{ $profile['href'] }}"
+                                    class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {{ $profile['label'] }}
+                                </a>
+                            @endforeach
                         </div>
+
+                        <p
+                            id="contact-copy-feedback"
+                            class="mt-4 text-sm text-[color:rgba(244,239,230,0.72)]"
+                            data-copy-email-feedback
+                            aria-live="polite"
+                            hidden
+                        >
+                            Copied
+                        </p>
                     </div>
                 </section>
             </main>

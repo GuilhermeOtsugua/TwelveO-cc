@@ -65,3 +65,36 @@ document.querySelectorAll('details.project-card').forEach((details) => {
         armAutoClose(details);
     });
 });
+
+const contactCopyFeedback = document.querySelector('[data-copy-email-feedback]');
+let copyFeedbackTimer = null;
+
+document.querySelectorAll('[data-copy-email]').forEach((button) => {
+    button.addEventListener('click', async () => {
+        const email = button.dataset.copyEmail;
+
+        if (!email || !navigator.clipboard) {
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(email);
+        } catch {
+            return;
+        }
+
+        if (!contactCopyFeedback) {
+            return;
+        }
+
+        contactCopyFeedback.hidden = false;
+
+        if (copyFeedbackTimer) {
+            window.clearTimeout(copyFeedbackTimer);
+        }
+
+        copyFeedbackTimer = window.setTimeout(() => {
+            contactCopyFeedback.hidden = true;
+        }, 1800);
+    });
+});
