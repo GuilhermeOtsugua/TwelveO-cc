@@ -89,3 +89,9 @@ Implemented PRD item #18
 - Updated the homepage feature test to cover the new thread and zone states that make the DDD slice read like one coordinated workflow instead of parallel scaffolding.
 Next: Pick the next runnable Phase 2 capability-band issue.
 ---
+## 2026-03-30
+Implemented PRD item #19
+- Reworked Studio Current into a clearer review-and-handoff workspace with a dedicated review-flow rail, one dominant approval moment, and a separate final delivery handoff state.
+- Updated the homepage feature test to cover the new approval focal point and delivery-state language that define the completed Studio Current slice.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
