@@ -95,3 +95,9 @@ Implemented PRD item #19
 - Updated the homepage feature test to cover the new approval focal point and delivery-state language that define the completed Studio Current slice.
 Next: Pick the next runnable Phase 2 capability-band issue.
 ---
+## 2026-03-30
+Implemented PRD item #20
+- Hardened the homepage capability bands with explicit structural hooks for the completed TDD, DDD, and design-for-impact surfaces so verification now targets product regions and stateful UI slices instead of broad narrative copy.
+- Reduced the section framing to one short instruction and updated the homepage feature test to assert the new hooks alongside the critical finished-surface states.
+Next: All PRD-derived capability-band work is complete; close parent PRD #16 if no follow-up issues remain.
+---

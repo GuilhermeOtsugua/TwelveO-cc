@@ -86,7 +86,7 @@
                     </aside>
                 </section>
 
-                <section id="projects" class="mt-20">
+                <section id="projects" class="mt-20" data-capability-bands>
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.34em] text-[color:rgba(16,40,31,0.58)]">Capability demonstrations</p>
@@ -94,12 +94,12 @@
                                 Here’s How I Shape Products
                             </h2>
                         </div>
-                        <p class="max-w-xl text-sm leading-7 text-[color:rgba(16,40,31,0.72)]">
-                            These are fictional but plausible capability demonstrations. Each band shows the product context, the governing principle, and the rationale behind the shape of the system.
+                        <p class="max-w-xl text-sm leading-7 text-[color:rgba(16,40,31,0.72)]" data-capability-framing>
+                            Three finished product surfaces. Scan the interface first; the notes only clarify the decisions.
                         </p>
                     </div>
 
-                    <div class="project-sequence mt-8 grid gap-5 rounded-[1.8rem] border border-[color:rgba(16,40,31,0.1)] bg-[linear-gradient(180deg,rgba(244,239,230,0.74),rgba(238,230,216,0.56))] p-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-end lg:p-6">
+                    <div class="project-sequence mt-8 grid gap-5 rounded-[1.8rem] border border-[color:rgba(16,40,31,0.1)] bg-[linear-gradient(180deg,rgba(244,239,230,0.74),rgba(238,230,216,0.56))] p-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-end lg:p-6" data-capability-sequence>
                         <div>
                             <p class="text-[0.64rem] font-semibold uppercase tracking-[0.32em] text-[color:rgba(16,40,31,0.52)]">
                                 One composed argument
@@ -128,6 +128,8 @@
                             <article
                                 class="project-band rounded-[2.2rem] border border-[color:var(--line)] bg-[linear-gradient(180deg,rgba(244,239,230,0.84),rgba(238,230,216,0.7))] p-5 shadow-[0_24px_80px_rgba(16,40,31,0.08)] lg:p-7"
                                 data-project-band
+                                data-project-band-index="{{ $project['index'] }}"
+                                data-project-band-principle="{{ $project['principle'] }}"
                                 style="--band-delay: {{ $loop->index * 120 }}ms;"
                             >
                                 <div class="grid gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-7">
@@ -189,6 +191,7 @@
                                                     'project-surface--impact bg-[linear-gradient(160deg,rgba(16,40,31,0.92),rgba(36,69,56,0.82)_48%,rgba(143,117,90,0.42)_100%)]' => $project['principle'] === 'Design for impact',
                                                     'bg-[linear-gradient(160deg,rgba(16,40,31,0.93),rgba(25,53,42,0.86)_48%,rgba(95,126,105,0.74))]' => $project['principle'] !== 'TDD',
                                                 ])
+                                                data-project-surface
                                             >
                                                 <div class="flex flex-wrap items-start justify-between gap-4">
                                                     <div>
@@ -233,7 +236,7 @@
 
                                                 @if ($project['principle'] === 'TDD')
                                                     <div class="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(18rem,0.82fr)]">
-                                                        <section class="rounded-[1.35rem] border border-[rgba(242,207,140,0.26)] bg-[linear-gradient(180deg,rgba(242,207,140,0.16),rgba(242,207,140,0.07))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]">
+                                                        <section class="rounded-[1.35rem] border border-[rgba(242,207,140,0.26)] bg-[linear-gradient(180deg,rgba(242,207,140,0.16),rgba(242,207,140,0.07))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]" data-tdd-focus>
                                                             <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                                                                 <div>
                                                                     <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
@@ -318,7 +321,7 @@
                                                         </section>
 
                                                         <div class="space-y-4">
-                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4">
+                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4" data-tdd-scenario-queue>
                                                                 <div class="flex items-center justify-between gap-3">
                                                                     <div>
                                                                         <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.52)]">
@@ -358,7 +361,7 @@
                                                                 </div>
                                                             </section>
 
-                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.32)] p-4">
+                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.32)] p-4" data-tdd-release-gates>
                                                                 <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.5)]">
                                                                     {{ $project['surface']['release']['label'] }}
                                                                 </p>
@@ -385,7 +388,7 @@
                                                         </div>
                                                     </div>
                                                 @elseif ($project['principle'] === 'DDD')
-                                                    <section class="project-surface__case mt-5 rounded-[1.25rem] border border-[rgba(244,239,230,0.14)] bg-[rgba(8,21,16,0.28)] px-4 py-4">
+                                                    <section class="project-surface__case mt-5 rounded-[1.25rem] border border-[rgba(244,239,230,0.14)] bg-[rgba(8,21,16,0.28)] px-4 py-4" data-ddd-shared-case>
                                                         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                                                             <div>
                                                                 <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.52)]">
@@ -400,7 +403,7 @@
                                                             </p>
                                                         </div>
 
-                                                        <div class="project-surface__thread mt-4 grid gap-3 rounded-[1.05rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.06)] p-3.5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+                                                        <div class="project-surface__thread mt-4 grid gap-3 rounded-[1.05rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.06)] p-3.5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]" data-ddd-shared-thread>
                                                             <div>
                                                                 <p class="text-[0.56rem] font-semibold uppercase tracking-[0.26em] text-[color:rgba(244,239,230,0.48)]">
                                                                     {{ $project['surface']['thread']['label'] }}
@@ -437,6 +440,7 @@
                                                                     'project-surface__zone--active border-[rgba(242,207,140,0.24)] bg-[linear-gradient(180deg,rgba(242,207,140,0.16),rgba(244,239,230,0.08))]' => $zone['density'] === 'active',
                                                                     'project-surface__zone--compressed border-[rgba(244,239,230,0.1)] bg-[rgba(8,21,16,0.3)]' => $zone['density'] === 'compressed',
                                                                 ])
+                                                                data-ddd-role-zone="{{ $zone['density'] }}"
                                                             >
                                                                 <div class="flex items-start justify-between gap-3">
                                                                     <div>
@@ -535,7 +539,7 @@
                                                                 </section>
                                                             @endforeach
 
-                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.22)] p-4">
+                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.22)] p-4" data-impact-review-flow>
                                                                 <div class="flex items-center justify-between gap-3">
                                                                     <div>
                                                                         <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
@@ -565,7 +569,7 @@
                                                             </section>
                                                         </div>
 
-                                                        <section class="project-surface__feedback rounded-[1.35rem] border border-[rgba(218,163,122,0.42)] bg-[linear-gradient(180deg,rgba(235,168,119,0.18),rgba(244,239,230,0.08)_38%,rgba(8,21,16,0.26))] p-4 shadow-[0_30px_65px_rgba(10,25,19,0.2)]">
+                                                        <section class="project-surface__feedback rounded-[1.35rem] border border-[rgba(218,163,122,0.42)] bg-[linear-gradient(180deg,rgba(235,168,119,0.18),rgba(244,239,230,0.08)_38%,rgba(8,21,16,0.26))] p-4 shadow-[0_30px_65px_rgba(10,25,19,0.2)]" data-impact-approval>
                                                             <div class="flex items-start justify-between gap-3">
                                                                 <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
                                                                     {{ $project['surface']['feedback']['label'] }}
@@ -622,7 +626,7 @@
                                                         </section>
                                                     </div>
 
-                                                    <section class="project-surface__delivery mt-4 rounded-[1.25rem] border border-[rgba(159,209,167,0.18)] bg-[linear-gradient(180deg,rgba(8,21,16,0.32),rgba(8,21,16,0.16))] px-4 py-4">
+                                                    <section class="project-surface__delivery mt-4 rounded-[1.25rem] border border-[rgba(159,209,167,0.18)] bg-[linear-gradient(180deg,rgba(8,21,16,0.32),rgba(8,21,16,0.16))] px-4 py-4" data-impact-delivery>
                                                         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                                             <div class="max-w-xl">
                                                                 <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
