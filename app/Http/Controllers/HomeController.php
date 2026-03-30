@@ -12,10 +12,39 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         return view('pages.home', [
+            'credential' => $this->credential(),
             'contactLinks' => $this->contactLinks(),
             'currentFocus' => $this->currentFocus(),
             'projects' => $this->featuredProjects(),
         ]);
+    }
+
+    /**
+     * @return array{
+     *     eyebrow: string,
+     *     bridge: string,
+     *     title: string,
+     *     issuer: string,
+     *     description: string,
+     *     action: array{
+     *         label: string,
+     *         href: string
+     *     }
+     * }
+     */
+    private function credential(): array
+    {
+        return [
+            'eyebrow' => 'Credibility',
+            'bridge' => 'From system thinking to working software.',
+            'title' => 'Laravel Certified Developer',
+            'issuer' => 'Certification for Laravel',
+            'description' => 'A verifiable Laravel credential that anchors the portfolio in concrete implementation proof.',
+            'action' => [
+                'label' => 'View certificate',
+                'href' => 'https://verifier.certificationforlaravel.org/b98145cf-0305-4e77-bc70-30d685ec434a',
+            ],
+        ];
     }
 
     /**

@@ -155,19 +155,35 @@
                 <section class="mt-20 grid gap-6 rounded-[2rem] border border-[color:var(--line)] bg-[linear-gradient(180deg,rgba(244,239,230,0.74),rgba(238,230,216,0.54))] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.34em] text-[color:rgba(16,40,31,0.58)]">
-                            Credibility
+                            {{ $credential['eyebrow'] }}
                         </p>
-                        <h2 class="mt-3 font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)]">
-                            Calm delivery, clear structure.
+                        <p class="mt-3 text-sm font-semibold uppercase tracking-[0.28em] text-[color:rgba(16,40,31,0.58)]">
+                            {{ $credential['bridge'] }}
+                        </p>
+                        <h2 class="mt-4 font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)]">
+                            {{ $credential['title'] }}
                         </h2>
                     </div>
 
-                    <div class="flex flex-wrap gap-3">
-                        <span class="credibility-chip rounded-full border border-[color:var(--line)] px-4 py-2 text-sm text-[color:rgba(16,40,31,0.78)]">Laravel</span>
-                        <span class="credibility-chip rounded-full border border-[color:var(--line)] px-4 py-2 text-sm text-[color:rgba(16,40,31,0.78)]">Architecture</span>
-                        <span class="credibility-chip rounded-full border border-[color:var(--line)] px-4 py-2 text-sm text-[color:rgba(16,40,31,0.78)]">Front-end</span>
-                        <span class="credibility-chip rounded-full border border-[color:var(--line)] px-4 py-2 text-sm text-[color:rgba(16,40,31,0.78)]">Product thinking</span>
-                    </div>
+                    <article class="grid gap-4 rounded-[1.5rem] border border-[color:rgba(16,40,31,0.12)] bg-[rgba(244,239,230,0.76)] p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[color:rgba(16,40,31,0.54)]">
+                                {{ $credential['issuer'] }}
+                            </p>
+                            <p class="mt-3 max-w-xl text-sm leading-7 text-[color:rgba(16,40,31,0.74)]">
+                                {{ $credential['description'] }}
+                            </p>
+                        </div>
+
+                        <a
+                            href="{{ $credential['action']['href'] }}"
+                            class="inline-flex items-center justify-center rounded-full border border-[color:var(--line)] bg-[color:var(--green-900)] px-5 py-3 text-sm font-semibold text-[color:var(--bg)] shadow-[0_18px_40px_rgba(16,40,31,0.16)]"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            {{ $credential['action']['label'] }}
+                        </a>
+                    </article>
                 </section>
 
                 <section id="contact" class="mt-10">

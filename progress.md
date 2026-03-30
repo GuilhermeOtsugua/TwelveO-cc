@@ -41,3 +41,9 @@ Implemented PRD item #7
 - Expanded the homepage feature test to assert the third example visible description, rationale, and architectural note.
 Next: Pick the next runnable homepage repositioning issue.
 ---
+## 2026-03-30
+Implemented PRD item #8
+- Replaced the generic credibility chips with a credential-first section backed by controller data and the required bridge line.
+- Centered the Laravel certification in a verifiable credential block with a direct certificate action and expanded the homepage feature test to cover the visible credibility content.
+Next: Pick the next runnable homepage repositioning issue.
+---
