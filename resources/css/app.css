@@ -343,6 +343,40 @@
         pointer-events: none;
     }
 
+    .project-surface--ddd::after {
+        content: '';
+        position: absolute;
+        inset: 5.5rem 1.4rem auto auto;
+        width: 12rem;
+        height: 12rem;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(159, 209, 167, 0.12), transparent 70%);
+        pointer-events: none;
+    }
+
+    .project-surface__case {
+        backdrop-filter: blur(8px);
+    }
+
+    .project-surface__zone {
+        position: relative;
+        min-height: 17.5rem;
+    }
+
+    .project-surface__zone::before {
+        content: '';
+        position: absolute;
+        inset: 1rem auto auto 1rem;
+        width: 3.5rem;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(244, 239, 230, 0.34), rgba(244, 239, 230, 0));
+        opacity: 0.9;
+    }
+
+    .project-surface__zone-dot {
+        animation: project-zone-pulse 2.8s ease-in-out infinite;
+    }
+
     .project-surface__trace {
         align-items: center;
         gap: 0.6rem;
@@ -464,5 +498,18 @@
     50% {
         box-shadow: 0 0 0 8px rgba(242, 207, 140, 0);
         opacity: 1;
+    }
+}
+
+@keyframes project-zone-pulse {
+    0%,
+    100% {
+        opacity: 0.78;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.08);
     }
 }

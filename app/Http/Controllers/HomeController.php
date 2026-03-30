@@ -196,16 +196,57 @@ class HomeController extends Controller
                 'surface' => [
                     'eyebrow' => 'Students / Instructors / Operations',
                     'title' => 'Learning operations board',
-                    'summary' => 'One operational frame, split into role-shaped views around the same domain objects.',
+                    'summary' => 'One operational frame, split into role-shaped views around the same intervention case.',
                     'metrics' => [
                         ['label' => 'Active interventions', 'value' => '08'],
                         ['label' => 'Role views', 'value' => '3 zones'],
                         ['label' => 'Shared concept', 'value' => 'Case #184'],
                     ],
-                    'lanes' => [
-                        ['label' => 'Student progress', 'value' => 'Attendance risk watch / support milestone / case status', 'tone' => 'stable'],
-                        ['label' => 'Instructor planning', 'value' => 'Session adjustment / rubric follow-up / intervention note', 'tone' => 'active'],
-                        ['label' => 'Operations desk', 'value' => 'Escalation owner / family outreach / compliance trail', 'tone' => 'muted'],
+                    'case' => [
+                        'label' => 'Shared intervention case',
+                        'value' => 'Case #184 / Maya Chen / Attendance recovery',
+                        'detail' => 'The same case moves through progress review, teaching adjustments, and operational follow-up without changing names or intent.',
+                    ],
+                    'zones' => [
+                        [
+                            'label' => 'Student progress',
+                            'tone' => 'stable',
+                            'headline' => 'Support milestone / Week 3',
+                            'case_label' => 'Case #184',
+                            'status' => 'Attendance recovered to 91%',
+                            'detail' => 'Student-facing risk tracking keeps the intervention legible as progress, not as internal escalation language.',
+                            'items' => [
+                                'Reading lab check-in complete',
+                                'Family update scheduled for Thursday',
+                                'Confidence trend up 12%',
+                            ],
+                        ],
+                        [
+                            'label' => 'Instructor planning',
+                            'tone' => 'active',
+                            'headline' => 'Plan adjustment / Cohort B',
+                            'case_label' => 'Instruction response',
+                            'status' => 'Workshop regrouping requested',
+                            'detail' => 'Instructors see the same case as a teaching intervention with pacing changes, rubric follow-up, and session planning responsibilities.',
+                            'items' => [
+                                'Shift seminar pairings for Friday',
+                                'Add rubric checkpoint before unit close',
+                                'Review mentor note before session start',
+                            ],
+                        ],
+                        [
+                            'label' => 'Operations desk',
+                            'tone' => 'muted',
+                            'headline' => 'Escalation owner / Student support',
+                            'case_label' => 'Operations handoff',
+                            'status' => 'Outreach logged and compliant',
+                            'detail' => 'Operations keeps the case grounded in outreach, owner assignment, and compliance history so the intervention can move across teams cleanly.',
+                            'items' => [
+                                'Guardian outreach logged at 09:12',
+                                'Transportation exception resolved',
+                                'Support review closes after next attendance sync',
+                            ],
+                        ],
                     ],
                 ],
             ],

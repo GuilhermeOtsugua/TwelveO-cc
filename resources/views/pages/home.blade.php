@@ -152,6 +152,7 @@
                                                 @class([
                                                     'project-surface rounded-[1.7rem] border border-[color:rgba(16,40,31,0.1)] p-4 text-[color:var(--bg)] shadow-[0_26px_60px_rgba(16,40,31,0.16)] sm:p-5',
                                                     'project-surface--tdd bg-[linear-gradient(180deg,rgba(11,28,21,0.98),rgba(16,40,31,0.94)_48%,rgba(24,54,42,0.92))]' => $project['principle'] === 'TDD',
+                                                    'project-surface--ddd bg-[linear-gradient(160deg,rgba(12,31,24,0.98),rgba(20,48,39,0.94)_42%,rgba(55,84,71,0.9)_76%,rgba(116,149,127,0.76))]' => $project['principle'] === 'DDD',
                                                     'bg-[linear-gradient(160deg,rgba(16,40,31,0.93),rgba(25,53,42,0.86)_48%,rgba(95,126,105,0.74))]' => $project['principle'] !== 'TDD',
                                                 ])
                                             >
@@ -278,6 +279,73 @@
                                                             </p>
                                                         </div>
                                                     </section>
+                                                @elseif ($project['principle'] === 'DDD')
+                                                    <section class="project-surface__case mt-5 rounded-[1.25rem] border border-[rgba(244,239,230,0.14)] bg-[rgba(8,21,16,0.28)] px-4 py-4">
+                                                        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                                            <div>
+                                                                <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.52)]">
+                                                                    {{ $project['surface']['case']['label'] }}
+                                                                </p>
+                                                                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.92)]">
+                                                                    {{ $project['surface']['case']['value'] }}
+                                                                </p>
+                                                            </div>
+                                                            <p class="max-w-2xl text-sm leading-7 text-[color:rgba(244,239,230,0.78)]">
+                                                                {{ $project['surface']['case']['detail'] }}
+                                                            </p>
+                                                        </div>
+                                                    </section>
+
+                                                    <div class="mt-4 grid gap-3 lg:grid-cols-3">
+                                                        @foreach ($project['surface']['zones'] as $zone)
+                                                            <section class="project-surface__zone rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4">
+                                                                <div class="flex items-start justify-between gap-3">
+                                                                    <div>
+                                                                        <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
+                                                                            {{ $zone['label'] }}
+                                                                        </p>
+                                                                        <p class="mt-3 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.92)]">
+                                                                            {{ $zone['headline'] }}
+                                                                        </p>
+                                                                    </div>
+                                                                    <span
+                                                                        @class([
+                                                                            'project-surface__zone-dot mt-1 h-2.5 w-2.5 rounded-full',
+                                                                            'bg-[color:#9fd1a7]' => $zone['tone'] === 'stable',
+                                                                            'bg-[color:#f2cf8c] shadow-[0_0_0_4px_rgba(242,207,140,0.16)]' => $zone['tone'] === 'active',
+                                                                            'bg-[color:rgba(244,239,230,0.48)]' => $zone['tone'] === 'muted',
+                                                                        ])
+                                                                    ></span>
+                                                                </div>
+
+                                                                <div class="mt-4 flex items-center justify-between gap-3 rounded-[1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.2)] px-3 py-3">
+                                                                    <div>
+                                                                        <p class="text-[0.56rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.5)]">
+                                                                            {{ $zone['case_label'] }}
+                                                                        </p>
+                                                                        <p class="mt-2 text-sm font-semibold text-[color:rgba(244,239,230,0.94)]">
+                                                                            {{ $zone['status'] }}
+                                                                        </p>
+                                                                    </div>
+                                                                    <span class="rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-3 py-1 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.68)]">
+                                                                        Case #184
+                                                                    </span>
+                                                                </div>
+
+                                                                <p class="mt-4 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                    {{ $zone['detail'] }}
+                                                                </p>
+
+                                                                <div class="mt-4 space-y-2">
+                                                                    @foreach ($zone['items'] as $item)
+                                                                        <div class="rounded-[0.95rem] border border-[rgba(244,239,230,0.08)] bg-[rgba(244,239,230,0.05)] px-3 py-2.5 text-sm leading-6 text-[color:rgba(244,239,230,0.74)]">
+                                                                            {{ $item }}
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </section>
+                                                        @endforeach
+                                                    </div>
                                                 @else
                                                     <div class="mt-5 grid gap-3 lg:grid-cols-3">
                                                         @foreach ($project['surface']['lanes'] as $lane)
