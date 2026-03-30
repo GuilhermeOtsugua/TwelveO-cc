@@ -99,6 +99,30 @@
                         </p>
                     </div>
 
+                    <div class="project-sequence mt-8 grid gap-5 rounded-[1.8rem] border border-[color:rgba(16,40,31,0.1)] bg-[linear-gradient(180deg,rgba(244,239,230,0.74),rgba(238,230,216,0.56))] p-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-end lg:p-6">
+                        <div>
+                            <p class="text-[0.64rem] font-semibold uppercase tracking-[0.32em] text-[color:rgba(16,40,31,0.52)]">
+                                One composed argument
+                            </p>
+                            <p class="mt-3 max-w-2xl font-display text-2xl leading-tight tracking-[-0.035em] text-[color:var(--green-900)]">
+                                The section moves from executable correctness, through shared domain language, to crafted responsiveness at the client edge.
+                            </p>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            @foreach ($projects as $project)
+                                <div class="project-sequence__step rounded-[1.2rem] border border-[color:rgba(16,40,31,0.1)] bg-[rgba(244,239,230,0.72)] px-4 py-4">
+                                    <p class="text-[0.58rem] font-semibold uppercase tracking-[0.3em] text-[color:rgba(16,40,31,0.44)]">
+                                        Step {{ $project['index'] }}
+                                    </p>
+                                    <p class="mt-3 text-sm font-semibold uppercase tracking-[0.2em] text-[color:rgba(16,40,31,0.68)]">
+                                        {{ $project['sequence'] }}
+                                    </p>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="mt-8 space-y-5">
                         @foreach ($projects as $project)
                             <article
@@ -119,6 +143,15 @@
                                             </div>
                                             <p class="mt-3 text-sm font-semibold uppercase tracking-[0.26em] text-[color:rgba(16,40,31,0.66)]">
                                                 {{ $project['principle'] }}
+                                            </p>
+                                            <p class="project-band__cue mt-4 max-w-[14rem] text-sm leading-6 text-[color:rgba(16,40,31,0.7)]">
+                                                @if ($loop->first)
+                                                    Start with explicit correctness.
+                                                @elseif ($loop->last)
+                                                    Finish with memorable responsiveness.
+                                                @else
+                                                    Then align the shared language.
+                                                @endif
                                             </p>
                                         </div>
 

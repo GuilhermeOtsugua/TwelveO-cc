@@ -71,3 +71,9 @@ Implemented PRD item #14
 - Expanded the homepage feature test to cover the new review, delivery, and tactile feedback content that makes the band read like a believable client portal.
 Next: Pick the next runnable Phase 2 capability-band issue.
 ---
+## 2026-03-30
+Implemented PRD item #15
+- Added a compact sequence staging panel and per-band progression cues so the three capability bands read as one deliberate argument instead of isolated rows.
+- Layered a small settle animation with reduced-motion handling and extended the homepage feature test to cover the new sequencing copy.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
