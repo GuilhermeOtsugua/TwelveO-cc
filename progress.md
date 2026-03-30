@@ -77,3 +77,9 @@ Implemented PRD item #15
 - Layered a small settle animation with reduced-motion handling and extended the homepage feature test to cover the new sequencing copy.
 Next: Pick the next runnable Phase 2 capability-band issue.
 ---
+## 2026-03-30
+Implemented PRD item 17
+- Sharpened Harbor Ledger into a pricing-release workspace with one dominant release-decision focal panel, explicit controller and tax gates, and a linked scenario queue that reads like executable review work.
+- Updated the homepage feature test to assert the new Harbor Ledger release state and gate language instead of the prior balanced scaffold.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---

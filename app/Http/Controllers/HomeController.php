@@ -126,16 +126,22 @@ class HomeController extends Controller
                 'surface' => [
                     'eyebrow' => 'Rules / Cases / Approvals',
                     'title' => 'Quote release workspace',
-                    'summary' => 'A shared frame for rule review, case validation, and sign-off visibility.',
+                    'summary' => 'One release decision stays in focus while linked rules, scenario checks, and approval gates explain why the quote can or cannot ship.',
                     'metrics' => [
-                        ['label' => 'Linked cases', 'value' => '12'],
-                        ['label' => 'Variance watch', 'value' => '0.4%'],
-                        ['label' => 'Approval path', 'value' => '2 gates'],
+                        ['label' => 'Release state', 'value' => 'Blocked'],
+                        ['label' => 'Linked scenarios', 'value' => '3 checks'],
+                        ['label' => 'Margin floor', 'value' => '18%'],
                     ],
-                    'lanes' => [
-                        ['label' => 'Rule set', 'value' => 'Margin floor / tax district / renewal ladder', 'tone' => 'stable'],
-                        ['label' => 'Scenario queue', 'value' => 'Wholesale renewal / exception path / region cross-check', 'tone' => 'active'],
-                        ['label' => 'Release state', 'value' => 'Awaiting controller sign-off', 'tone' => 'muted'],
+                    'focus' => [
+                        'label' => 'Release decision',
+                        'title' => 'Wholesale renewal / 18 seats',
+                        'status' => 'Blocked at controller gate',
+                        'detail' => 'Renewal ladder 2026.3 matched the quote, margin held at 18.4%, and tax resolution kept the release on hold until controller sign-off clears the last exception.',
+                        'stats' => [
+                            ['label' => 'Margin after discount', 'value' => '18.4%'],
+                            ['label' => 'Rule coverage', 'value' => '3 linked cases'],
+                            ['label' => 'Gate owner', 'value' => 'Controller'],
+                        ],
                     ],
                     'rules' => [
                         [
@@ -177,6 +183,16 @@ class HomeController extends Controller
                         'label' => 'Controller approval trace',
                         'value' => 'Pricing lead -> Controller -> Quote release',
                         'detail' => 'Variance cleared. Tax district cross-check remains the only active hold.',
+                    ],
+                    'release' => [
+                        'label' => 'Release gates',
+                        'title' => 'Quote release remains blocked',
+                        'detail' => 'The workspace shows one pass, one controller gate, and one tax hold so the team can see exactly what still prevents shipment.',
+                        'checks' => [
+                            ['label' => 'Renewal ladder coverage', 'status' => 'Passed'],
+                            ['label' => 'Controller approval', 'status' => 'Pending'],
+                            ['label' => 'Tax district mapping', 'status' => 'Blocked'],
+                        ],
                     ],
                 ],
             ],
