@@ -29,3 +29,9 @@ Implemented PRD item #5
 - Expanded the homepage feature test to assert the pricing example\s visible copy and rationale.
 Next: Pick the next runnable homepage repositioning issue.
 ---
+## 2026-03-30
+Implemented PRD item #6
+- Sharpened the Northline Learning Ops band so the DDD example now calls out role-specific rules, shared domain language, and bounded-intent workflows.
+- Expanded the homepage feature test to assert the DDD example\s description, rationale, and architectural note.
+Next: Pick the next runnable homepage repositioning issue.
+---
