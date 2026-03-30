@@ -212,7 +212,7 @@ class HomeController extends Controller
                 'surface' => [
                     'eyebrow' => 'Students / Instructors / Operations',
                     'title' => 'Learning operations board',
-                    'summary' => 'One operational frame, split into role-shaped views around the same intervention case.',
+                    'summary' => 'One intervention thread stays pinned while student progress, teaching response, and operational compliance each render the same case at a different working density.',
                     'metrics' => [
                         ['label' => 'Active interventions', 'value' => '08'],
                         ['label' => 'Role views', 'value' => '3 zones'],
@@ -221,16 +221,35 @@ class HomeController extends Controller
                     'case' => [
                         'label' => 'Shared intervention case',
                         'value' => 'Case #184 / Maya Chen / Attendance recovery',
-                        'detail' => 'The same case moves through progress review, teaching adjustments, and operational follow-up without changing names or intent.',
+                        'detail' => 'Attendance risk, workshop regrouping, guardian outreach, and closure readiness stay named the same way across every role surface.',
+                    ],
+                    'thread' => [
+                        'label' => 'Shared intervention thread',
+                        'title' => 'Attendance recovery plan remains active across all roles',
+                        'detail' => 'Every zone tracks the same intervention language, but each role gets the amount of detail needed to act without inheriting another team\'s noise.',
+                        'stages' => [
+                            ['label' => 'Attendance risk', 'status' => 'Recovered to 91%'],
+                            ['label' => 'Instruction response', 'status' => 'Workshop regrouping queued'],
+                            ['label' => 'Guardian outreach', 'status' => 'Logged at 09:12'],
+                            ['label' => 'Case closure', 'status' => 'Pending next sync'],
+                        ],
                     ],
                     'zones' => [
                         [
                             'label' => 'Student progress',
                             'tone' => 'stable',
+                            'density' => 'calm',
                             'headline' => 'Support milestone / Week 3',
                             'case_label' => 'Case #184',
                             'status' => 'Attendance recovered to 91%',
                             'detail' => 'Student-facing risk tracking keeps the intervention legible as progress, not as internal escalation language.',
+                            'snapshot_label' => 'Progress view',
+                            'snapshot_value' => 'Week 3 support plan is holding',
+                            'stats' => [
+                                ['label' => 'Attendance', 'value' => '91%'],
+                                ['label' => 'Confidence trend', 'value' => '+12%'],
+                                ['label' => 'Next milestone', 'value' => 'Reading lab Friday'],
+                            ],
                             'items' => [
                                 'Reading lab check-in complete',
                                 'Family update scheduled for Thursday',
@@ -240,10 +259,18 @@ class HomeController extends Controller
                         [
                             'label' => 'Instructor planning',
                             'tone' => 'active',
+                            'density' => 'active',
                             'headline' => 'Plan adjustment / Cohort B',
                             'case_label' => 'Instruction response',
                             'status' => 'Workshop regrouping requested',
                             'detail' => 'Instructors see the same case as a teaching intervention with pacing changes, rubric follow-up, and session planning responsibilities.',
+                            'snapshot_label' => 'Teaching move',
+                            'snapshot_value' => 'Regroup Friday workshop before unit close',
+                            'stats' => [
+                                ['label' => 'Session risk', 'value' => 'Friday seminar'],
+                                ['label' => 'Rubric checkpoint', 'value' => 'Add before close'],
+                                ['label' => 'Mentor note', 'value' => 'Review pre-session'],
+                            ],
                             'items' => [
                                 'Shift seminar pairings for Friday',
                                 'Add rubric checkpoint before unit close',
@@ -253,10 +280,18 @@ class HomeController extends Controller
                         [
                             'label' => 'Operations desk',
                             'tone' => 'muted',
+                            'density' => 'compressed',
                             'headline' => 'Escalation owner / Student support',
                             'case_label' => 'Operations handoff',
                             'status' => 'Outreach logged and compliant',
                             'detail' => 'Operations keeps the case grounded in outreach, owner assignment, and compliance history so the intervention can move across teams cleanly.',
+                            'snapshot_label' => 'Closure rail',
+                            'snapshot_value' => 'Case stays open until next attendance sync lands',
+                            'stats' => [
+                                ['label' => 'Owner', 'value' => 'Student support'],
+                                ['label' => 'Guardian outreach', 'value' => '09:12 logged'],
+                                ['label' => 'Closure gate', 'value' => 'Next sync'],
+                            ],
                             'items' => [
                                 'Guardian outreach logged at 09:12',
                                 'Transportation exception resolved',

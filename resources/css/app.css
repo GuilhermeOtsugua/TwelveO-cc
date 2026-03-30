@@ -406,9 +406,19 @@
         backdrop-filter: blur(8px);
     }
 
+    .project-surface__thread {
+        backdrop-filter: blur(8px);
+    }
+
     .project-surface__zone {
         position: relative;
         min-height: 17.5rem;
+        backdrop-filter: blur(10px);
+        transition:
+            transform 220ms ease,
+            border-color 220ms ease,
+            box-shadow 220ms ease,
+            background-color 220ms ease;
     }
 
     .project-surface__zone::before {
@@ -419,6 +429,24 @@
         height: 1px;
         background: linear-gradient(90deg, rgba(244, 239, 230, 0.34), rgba(244, 239, 230, 0));
         opacity: 0.9;
+    }
+
+    .project-surface__zone:hover,
+    .project-surface__zone:focus-within {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 50px rgba(10, 25, 19, 0.16);
+    }
+
+    .project-surface__zone--calm {
+        min-height: 20rem;
+    }
+
+    .project-surface__zone--active {
+        min-height: 21rem;
+    }
+
+    .project-surface__zone--compressed {
+        min-height: 18rem;
     }
 
     .project-surface__zone-dot {
@@ -543,6 +571,7 @@
 
     .project-sequence__step,
     .project-note-trigger,
+    .project-surface__zone,
     .project-surface__impact-card,
     .project-surface__feedback,
     .project-surface__delivery {

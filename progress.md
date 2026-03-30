@@ -83,3 +83,9 @@ Implemented PRD item 17
 - Updated the homepage feature test to assert the new Harbor Ledger release state and gate language instead of the prior balanced scaffold.
 Next: Pick the next runnable Phase 2 capability-band issue.
 ---
+## 2026-03-30
+Implemented PRD item #18
+- Sharpened Northline Learning Ops into a multi-role intervention console with a pinned shared intervention thread, visibly different role-zone density, and role-specific snapshots that keep the same case language intact across student, instructor, and operations views.
+- Updated the homepage feature test to cover the new thread and zone states that make the DDD slice read like one coordinated workflow instead of parallel scaffolding.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---

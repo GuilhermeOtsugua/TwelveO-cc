@@ -399,11 +399,45 @@
                                                                 {{ $project['surface']['case']['detail'] }}
                                                             </p>
                                                         </div>
+
+                                                        <div class="project-surface__thread mt-4 grid gap-3 rounded-[1.05rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.06)] p-3.5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+                                                            <div>
+                                                                <p class="text-[0.56rem] font-semibold uppercase tracking-[0.26em] text-[color:rgba(244,239,230,0.48)]">
+                                                                    {{ $project['surface']['thread']['label'] }}
+                                                                </p>
+                                                                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.94)]">
+                                                                    {{ $project['surface']['thread']['title'] }}
+                                                                </p>
+                                                                <p class="mt-3 max-w-xl text-sm leading-7 text-[color:rgba(244,239,230,0.74)]">
+                                                                    {{ $project['surface']['thread']['detail'] }}
+                                                                </p>
+                                                            </div>
+
+                                                            <div class="grid gap-2 sm:grid-cols-2">
+                                                                @foreach ($project['surface']['thread']['stages'] as $stage)
+                                                                    <div class="rounded-[0.95rem] border border-[rgba(244,239,230,0.08)] bg-[rgba(8,21,16,0.2)] px-3 py-2.5">
+                                                                        <p class="text-[0.52rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.5)]">
+                                                                            {{ $stage['label'] }}
+                                                                        </p>
+                                                                        <p class="mt-2 text-sm leading-6 text-[color:rgba(244,239,230,0.82)]">
+                                                                            {{ $stage['status'] }}
+                                                                        </p>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
                                                     </section>
 
-                                                    <div class="mt-4 grid gap-3 lg:grid-cols-3">
+                                                    <div class="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1.04fr)_minmax(0,1fr)_minmax(16rem,0.84fr)]">
                                                         @foreach ($project['surface']['zones'] as $zone)
-                                                            <section class="project-surface__zone rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4">
+                                                            <section
+                                                                @class([
+                                                                    'project-surface__zone rounded-[1.25rem] border p-4',
+                                                                    'project-surface__zone--calm border-[rgba(191,229,197,0.18)] bg-[linear-gradient(180deg,rgba(159,209,167,0.12),rgba(244,239,230,0.08))]' => $zone['density'] === 'calm',
+                                                                    'project-surface__zone--active border-[rgba(242,207,140,0.24)] bg-[linear-gradient(180deg,rgba(242,207,140,0.16),rgba(244,239,230,0.08))]' => $zone['density'] === 'active',
+                                                                    'project-surface__zone--compressed border-[rgba(244,239,230,0.1)] bg-[rgba(8,21,16,0.3)]' => $zone['density'] === 'compressed',
+                                                                ])
+                                                            >
                                                                 <div class="flex items-start justify-between gap-3">
                                                                     <div>
                                                                         <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
@@ -423,18 +457,44 @@
                                                                     ></span>
                                                                 </div>
 
-                                                                <div class="mt-4 flex items-center justify-between gap-3 rounded-[1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.2)] px-3 py-3">
+                                                                <div class="mt-4 rounded-[1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.2)] px-3 py-3">
+                                                                    <div class="flex items-center justify-between gap-3">
+                                                                        <div>
+                                                                            <p class="text-[0.56rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.5)]">
+                                                                                {{ $zone['case_label'] }}
+                                                                            </p>
+                                                                            <p class="mt-2 text-sm font-semibold text-[color:rgba(244,239,230,0.94)]">
+                                                                                {{ $zone['status'] }}
+                                                                            </p>
+                                                                        </div>
+                                                                        <span class="rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-3 py-1 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.68)]">
+                                                                            Case #184
+                                                                        </span>
+                                                                    </div>
+
+                                                                    <div class="mt-4 grid gap-2 sm:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
+                                                                        @foreach ($zone['stats'] as $stat)
+                                                                            <div class="rounded-[0.95rem] border border-[rgba(244,239,230,0.08)] bg-[rgba(244,239,230,0.05)] px-3 py-2.5">
+                                                                                <p class="text-[0.5rem] font-semibold uppercase tracking-[0.2em] text-[color:rgba(244,239,230,0.5)]">
+                                                                                    {{ $stat['label'] }}
+                                                                                </p>
+                                                                                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.12em] text-[color:rgba(244,239,230,0.9)]">
+                                                                                    {{ $stat['value'] }}
+                                                                                </p>
+                                                                            </div>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="mt-4 rounded-[1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.05)] px-3 py-3">
                                                                     <div>
                                                                         <p class="text-[0.56rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.5)]">
-                                                                            {{ $zone['case_label'] }}
+                                                                            {{ $zone['snapshot_label'] }}
                                                                         </p>
                                                                         <p class="mt-2 text-sm font-semibold text-[color:rgba(244,239,230,0.94)]">
-                                                                            {{ $zone['status'] }}
+                                                                            {{ $zone['snapshot_value'] }}
                                                                         </p>
                                                                     </div>
-                                                                    <span class="rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-3 py-1 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.68)]">
-                                                                        Case #184
-                                                                    </span>
                                                                 </div>
 
                                                                 <p class="mt-4 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
