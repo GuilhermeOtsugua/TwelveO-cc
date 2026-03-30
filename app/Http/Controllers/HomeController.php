@@ -105,34 +105,7 @@ class HomeController extends Controller
     }
 
     /**
-     * @return array<int, array{
-     *     index: string,
-     *     principle: string,
-     *     sequence: string,
-     *     category: string,
-     *     title: string,
-     *     description: string,
-     *     tags: array<int, string>,
-     *     note: array{
-     *         trigger: string,
-     *         body: string,
-     *         citation: string
-     *     },
-     *     surface: array{
-     *         eyebrow: string,
-     *         title: string,
-     *         summary: string,
-     *         metrics: array<int, array{
-     *             label: string,
-     *             value: string
-     *         }>,
-     *         lanes: array<int, array{
-     *             label: string,
-     *             value: string,
-     *             tone: string
-     *         }>
-     *     }
-     * }>
+     * @return array<int, array<string, mixed>>
      */
     private function featuredProjects(): array
     {
@@ -163,6 +136,47 @@ class HomeController extends Controller
                         ['label' => 'Rule set', 'value' => 'Margin floor / tax district / renewal ladder', 'tone' => 'stable'],
                         ['label' => 'Scenario queue', 'value' => 'Wholesale renewal / exception path / region cross-check', 'tone' => 'active'],
                         ['label' => 'Release state', 'value' => 'Awaiting controller sign-off', 'tone' => 'muted'],
+                    ],
+                    'rules' => [
+                        [
+                            'label' => 'Selected rule',
+                            'title' => 'Renewal ladder 2026.3',
+                            'detail' => 'Enterprise renewals above 12 seats require controller review whenever the post-discount margin lands below 18%.',
+                            'status' => 'Linked to 3 scenario cases',
+                            'active' => true,
+                        ],
+                        [
+                            'label' => 'Guardrail',
+                            'title' => 'Regional tax district cross-check',
+                            'detail' => 'Quotes that mix destination states must lock tax resolution before release.',
+                            'status' => 'Waiting on district match',
+                            'active' => false,
+                        ],
+                    ],
+                    'cases' => [
+                        [
+                            'name' => 'Wholesale renewal / 18 seats',
+                            'detail' => 'Margin floor held at 18.4% and approval path escalated.',
+                            'result' => 'Pass',
+                            'tone' => 'pass',
+                        ],
+                        [
+                            'name' => 'Exception quote / cross-region tax',
+                            'detail' => 'Tax district mismatch blocked release until mapping is resolved.',
+                            'result' => 'Review',
+                            'tone' => 'review',
+                        ],
+                        [
+                            'name' => 'Renewal rescue / 9 seats',
+                            'detail' => 'Scenario stayed below escalation threshold and skipped controller review.',
+                            'result' => 'Pass',
+                            'tone' => 'pass',
+                        ],
+                    ],
+                    'approval' => [
+                        'label' => 'Controller approval trace',
+                        'value' => 'Pricing lead -> Controller -> Quote release',
+                        'detail' => 'Variance cleared. Tax district cross-check remains the only active hold.',
                     ],
                 ],
             ],

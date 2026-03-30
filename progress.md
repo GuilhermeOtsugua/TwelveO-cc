@@ -53,3 +53,9 @@ Implemented PRD item #11
 - Added accessible note toggles that float as contextual annotations on desktop, stack inline on mobile, and expanded the homepage feature test to cover the new visible framework hooks.
 Next: Pick the next runnable Phase 2 capability-band issue.
 ---
+## 2026-03-30
+Implemented PRD item #12
+- Deepened the Harbor Ledger TDD band into a rule-and-scenario workspace with linked case coverage, a controller approval trace, and restrained audit-style motion.
+- Expanded the homepage feature test to cover the new rule, case, and approval content that makes the TDD slice read like a pricing workspace.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---

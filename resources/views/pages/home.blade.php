@@ -148,7 +148,13 @@
                                                 </p>
                                             </div>
 
-                                            <section class="project-surface rounded-[1.7rem] border border-[color:rgba(16,40,31,0.1)] bg-[linear-gradient(160deg,rgba(16,40,31,0.93),rgba(25,53,42,0.86)_48%,rgba(95,126,105,0.74))] p-4 text-[color:var(--bg)] shadow-[0_26px_60px_rgba(16,40,31,0.16)] sm:p-5">
+                                            <section
+                                                @class([
+                                                    'project-surface rounded-[1.7rem] border border-[color:rgba(16,40,31,0.1)] p-4 text-[color:var(--bg)] shadow-[0_26px_60px_rgba(16,40,31,0.16)] sm:p-5',
+                                                    'project-surface--tdd bg-[linear-gradient(180deg,rgba(11,28,21,0.98),rgba(16,40,31,0.94)_48%,rgba(24,54,42,0.92))]' => $project['principle'] === 'TDD',
+                                                    'bg-[linear-gradient(160deg,rgba(16,40,31,0.93),rgba(25,53,42,0.86)_48%,rgba(95,126,105,0.74))]' => $project['principle'] !== 'TDD',
+                                                ])
+                                            >
                                                 <div class="flex flex-wrap items-start justify-between gap-4">
                                                     <div>
                                                         <p class="text-[0.62rem] font-semibold uppercase tracking-[0.32em] text-[color:rgba(244,239,230,0.62)]">
@@ -190,28 +196,112 @@
                                                     @endforeach
                                                 </div>
 
-                                                <div class="mt-5 grid gap-3 lg:grid-cols-3">
-                                                    @foreach ($project['surface']['lanes'] as $lane)
-                                                        <section class="rounded-[1.2rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4">
-                                                            <div class="flex items-center justify-between gap-3">
-                                                                <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
-                                                                    {{ $lane['label'] }}
-                                                                </p>
-                                                                <span
+                                                @if ($project['principle'] === 'TDD')
+                                                    <div class="mt-5 grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_auto_minmax(0,1.08fr)] xl:items-center">
+                                                        <div class="space-y-3">
+                                                            @foreach ($project['surface']['rules'] as $rule)
+                                                                <section
                                                                     @class([
-                                                                        'h-2.5 w-2.5 rounded-full',
-                                                                        'bg-[color:#9fd1a7]' => $lane['tone'] === 'stable',
-                                                                        'bg-[color:#f2cf8c] shadow-[0_0_0_4px_rgba(242,207,140,0.16)]' => $lane['tone'] === 'active',
-                                                                        'bg-[color:rgba(244,239,230,0.48)]' => $lane['tone'] === 'muted',
+                                                                        'rounded-[1.2rem] border p-4 transition-transform duration-300',
+                                                                        'border-[rgba(242,207,140,0.24)] bg-[rgba(242,207,140,0.1)] shadow-[0_18px_40px_rgba(0,0,0,0.16)]' => $rule['active'],
+                                                                        'border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.06)]' => ! $rule['active'],
                                                                     ])
-                                                                ></span>
+                                                                >
+                                                                    <div class="flex items-center justify-between gap-3">
+                                                                        <div>
+                                                                            <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.52)]">
+                                                                                {{ $rule['label'] }}
+                                                                            </p>
+                                                                            <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-[color:rgba(244,239,230,0.92)]">
+                                                                                {{ $rule['title'] }}
+                                                                            </p>
+                                                                        </div>
+                                                                        <span class="rounded-full border border-[rgba(244,239,230,0.14)] bg-[rgba(11,28,21,0.34)] px-3 py-1 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.72)]">
+                                                                            {{ $rule['status'] }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <p class="mt-4 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                        {{ $rule['detail'] }}
+                                                                    </p>
+                                                                </section>
+                                                            @endforeach
+                                                        </div>
+
+                                                        <div class="project-surface__trace hidden xl:flex" aria-hidden="true">
+                                                            <span class="project-surface__trace-dot"></span>
+                                                            <span class="project-surface__trace-line"></span>
+                                                            <span class="project-surface__trace-dot"></span>
+                                                        </div>
+
+                                                        <div class="space-y-3">
+                                                            @foreach ($project['surface']['cases'] as $case)
+                                                                <section class="rounded-[1.2rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4">
+                                                                    <div class="flex items-center justify-between gap-3">
+                                                                        <div>
+                                                                            <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.52)]">
+                                                                                Scenario case
+                                                                            </p>
+                                                                            <p class="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.92)]">
+                                                                                {{ $case['name'] }}
+                                                                            </p>
+                                                                        </div>
+                                                                        <span
+                                                                            @class([
+                                                                                'rounded-full px-3 py-1 text-[0.58rem] font-semibold uppercase tracking-[0.22em]',
+                                                                                'bg-[rgba(159,209,167,0.14)] text-[color:#bfe5c5]' => $case['tone'] === 'pass',
+                                                                                'bg-[rgba(242,207,140,0.14)] text-[color:#f2cf8c]' => $case['tone'] === 'review',
+                                                                            ])
+                                                                        >
+                                                                            {{ $case['result'] }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <p class="mt-4 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                        {{ $case['detail'] }}
+                                                                    </p>
+                                                                </section>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+
+                                                    <section class="mt-4 rounded-[1.2rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.44)] px-4 py-3">
+                                                        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                                                            <div>
+                                                                <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.5)]">
+                                                                    {{ $project['surface']['approval']['label'] }}
+                                                                </p>
+                                                                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.9)]">
+                                                                    {{ $project['surface']['approval']['value'] }}
+                                                                </p>
                                                             </div>
-                                                            <p class="mt-4 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
-                                                                {{ $lane['value'] }}
+                                                            <p class="max-w-xl text-sm leading-7 text-[color:rgba(244,239,230,0.76)]">
+                                                                {{ $project['surface']['approval']['detail'] }}
                                                             </p>
-                                                        </section>
-                                                    @endforeach
-                                                </div>
+                                                        </div>
+                                                    </section>
+                                                @else
+                                                    <div class="mt-5 grid gap-3 lg:grid-cols-3">
+                                                        @foreach ($project['surface']['lanes'] as $lane)
+                                                            <section class="rounded-[1.2rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4">
+                                                                <div class="flex items-center justify-between gap-3">
+                                                                    <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
+                                                                        {{ $lane['label'] }}
+                                                                    </p>
+                                                                    <span
+                                                                        @class([
+                                                                            'h-2.5 w-2.5 rounded-full',
+                                                                            'bg-[color:#9fd1a7]' => $lane['tone'] === 'stable',
+                                                                            'bg-[color:#f2cf8c] shadow-[0_0_0_4px_rgba(242,207,140,0.16)]' => $lane['tone'] === 'active',
+                                                                            'bg-[color:rgba(244,239,230,0.48)]' => $lane['tone'] === 'muted',
+                                                                        ])
+                                                                    ></span>
+                                                                </div>
+                                                                <p class="mt-4 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                    {{ $lane['value'] }}
+                                                                </p>
+                                                            </section>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
                                             </section>
                                         </div>
 
