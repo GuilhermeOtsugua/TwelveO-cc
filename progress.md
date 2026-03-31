@@ -101,3 +101,9 @@ Implemented PRD item #20
 - Reduced the section framing to one short instruction and updated the homepage feature test to assert the new hooks alongside the critical finished-surface states.
 Next: All PRD-derived capability-band work is complete; close parent PRD #16 if no follow-up issues remain.
 ---
+## 2026-03-30
+Implemented PRD item #23
+- Reduced Harbor Ledger to one dominant quote-release focal region by removing the duplicated metric row and keeping rules, approvals, and gate ownership anchored to the main decision panel.
+- Updated the homepage feature test to assert the explicit Harbor Ledger focus, evidence, and release-region structure in DOM order instead of relying on copy alone.
+Next: Pick the next runnable child issue for parent PRD #22.
+---

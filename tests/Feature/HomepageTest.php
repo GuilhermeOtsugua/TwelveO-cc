@@ -12,6 +12,7 @@ class HomepageTest extends TestCase
     public function test_homepage_is_rendered(): void
     {
         $response = $this->get(route('home'));
+        $content = $response->getContent();
 
         $response
             ->assertOk()
@@ -36,7 +37,12 @@ class HomepageTest extends TestCase
             ->assertSeeText('Harbor Ledger')
             ->assertSeeText('TDD')
             ->assertSee('data-project-band-principle="TDD"', false)
+            ->assertSee('data-tdd-decision-flow', false)
             ->assertSee('data-tdd-focus', false)
+            ->assertSee('data-tdd-support-stack', false)
+            ->assertSee('data-tdd-region="focus"', false)
+            ->assertSee('data-tdd-region="evidence"', false)
+            ->assertSee('data-tdd-region="release"', false)
             ->assertSee('data-tdd-scenario-queue', false)
             ->assertSee('data-tdd-release-gates', false)
             ->assertSeeText('Quiet verification')
@@ -152,5 +158,16 @@ class HomepageTest extends TestCase
             ->assertSee('https://www.linkedin.com/in/guilherme-augusto')
             ->assertSeeText('GitHub')
             ->assertSee('https://github.com/otsugua');
+
+        $focusRegionPosition = strpos($content, 'data-tdd-region="focus"');
+        $evidenceRegionPosition = strpos($content, 'data-tdd-region="evidence"');
+        $releaseRegionPosition = strpos($content, 'data-tdd-region="release"');
+
+        self::assertNotFalse($focusRegionPosition);
+        self::assertNotFalse($evidenceRegionPosition);
+        self::assertNotFalse($releaseRegionPosition);
+        self::assertSame(3, substr_count($content, 'data-tdd-region='));
+        self::assertTrue($focusRegionPosition < $evidenceRegionPosition);
+        self::assertTrue($evidenceRegionPosition < $releaseRegionPosition);
     }
 }

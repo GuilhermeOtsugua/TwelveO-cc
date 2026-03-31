@@ -221,22 +221,24 @@
                                                     {{ $project['surface']['summary'] }}
                                                 </p>
 
-                                                <div class="mt-5 grid gap-3 sm:grid-cols-3">
-                                                    @foreach ($project['surface']['metrics'] as $metric)
-                                                        <div class="rounded-[1.1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-4 py-3">
-                                                            <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.54)]">
-                                                                {{ $metric['label'] }}
-                                                            </p>
-                                                            <p class="mt-2 text-base font-semibold text-[color:rgba(244,239,230,0.94)]">
-                                                                {{ $metric['value'] }}
-                                                            </p>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
+                                                @if ($project['principle'] !== 'TDD')
+                                                    <div class="mt-5 grid gap-3 sm:grid-cols-3">
+                                                        @foreach ($project['surface']['metrics'] as $metric)
+                                                            <div class="rounded-[1.1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-4 py-3">
+                                                                <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.54)]">
+                                                                    {{ $metric['label'] }}
+                                                                </p>
+                                                                <p class="mt-2 text-base font-semibold text-[color:rgba(244,239,230,0.94)]">
+                                                                    {{ $metric['value'] }}
+                                                                </p>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
 
                                                 @if ($project['principle'] === 'TDD')
-                                                    <div class="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(18rem,0.82fr)]">
-                                                        <section class="rounded-[1.35rem] border border-[rgba(242,207,140,0.26)] bg-[linear-gradient(180deg,rgba(242,207,140,0.16),rgba(242,207,140,0.07))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]" data-tdd-focus>
+                                                    <div class="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.24fr)_minmax(17rem,0.76fr)]" data-tdd-decision-flow>
+                                                        <section class="rounded-[1.35rem] border border-[rgba(242,207,140,0.26)] bg-[linear-gradient(180deg,rgba(242,207,140,0.16),rgba(242,207,140,0.07))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)]" data-tdd-focus data-tdd-region="focus">
                                                             <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                                                                 <div>
                                                                     <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
@@ -320,8 +322,8 @@
                                                             </div>
                                                         </section>
 
-                                                        <div class="space-y-4">
-                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4" data-tdd-scenario-queue>
+                                                        <div class="space-y-4" data-tdd-support-stack>
+                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-4" data-tdd-scenario-queue data-tdd-region="evidence">
                                                                 <div class="flex items-center justify-between gap-3">
                                                                     <div>
                                                                         <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.52)]">
@@ -361,7 +363,7 @@
                                                                 </div>
                                                             </section>
 
-                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.32)] p-4" data-tdd-release-gates>
+                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.32)] p-4" data-tdd-release-gates data-tdd-region="release">
                                                                 <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.5)]">
                                                                     {{ $project['surface']['release']['label'] }}
                                                                 </p>
