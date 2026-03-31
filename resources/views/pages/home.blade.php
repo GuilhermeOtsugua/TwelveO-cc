@@ -94,9 +94,6 @@
                                 Here’s How I Shape Products
                             </h2>
                         </div>
-                        <p class="max-w-xl text-sm leading-7 text-[color:rgba(16,40,31,0.72)]" data-capability-framing>
-                            Three finished product surfaces. Scan the interface first; the notes only clarify the decisions.
-                        </p>
                     </div>
 
                     <div class="mt-8 space-y-8">
@@ -189,30 +186,26 @@
                                                 @if ($project['principle'] === 'TDD')
                                                     @include('pages.partials.harbor-ledger', ['project' => $project])
                                                 @elseif ($project['principle'] === 'DDD')
-                                                    <section class="project-surface__case mt-5 rounded-[1.25rem] border border-[rgba(244,239,230,0.14)] bg-[rgba(8,21,16,0.28)] px-4 py-4" data-ddd-shared-case>
-                                                        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                                                            <div>
+                                                    <section class="project-surface__case mt-5 rounded-[1.25rem] border border-[rgba(244,239,230,0.14)] bg-[rgba(8,21,16,0.28)] px-4 py-4" data-ddd-shared-case data-ddd-shared-thread>
+                                                        <div class="grid gap-4 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start">
+                                                            <div class="max-w-xl">
                                                                 <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.52)]">
                                                                     {{ $project['surface']['case']['label'] }}
                                                                 </p>
                                                                 <p class="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.92)]">
                                                                     {{ $project['surface']['case']['value'] }}
                                                                 </p>
-                                                            </div>
-                                                            <p class="max-w-2xl text-sm leading-7 text-[color:rgba(244,239,230,0.78)]">
-                                                                {{ $project['surface']['case']['detail'] }}
-                                                            </p>
-                                                        </div>
+                                                                <p class="mt-3 text-sm leading-7 text-[color:rgba(244,239,230,0.78)]">
+                                                                    {{ $project['surface']['case']['detail'] }}
+                                                                </p>
 
-                                                        <div class="project-surface__thread mt-4 grid gap-3 rounded-[1.05rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.06)] p-3.5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]" data-ddd-shared-thread>
-                                                            <div>
-                                                                <p class="text-[0.56rem] font-semibold uppercase tracking-[0.26em] text-[color:rgba(244,239,230,0.48)]">
+                                                                <p class="mt-5 text-[0.56rem] font-semibold uppercase tracking-[0.26em] text-[color:rgba(244,239,230,0.48)]">
                                                                     {{ $project['surface']['thread']['label'] }}
                                                                 </p>
                                                                 <p class="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.94)]">
                                                                     {{ $project['surface']['thread']['title'] }}
                                                                 </p>
-                                                                <p class="mt-3 max-w-xl text-sm leading-7 text-[color:rgba(244,239,230,0.74)]">
+                                                                <p class="mt-3 text-sm leading-7 text-[color:rgba(244,239,230,0.74)]">
                                                                     {{ $project['surface']['thread']['detail'] }}
                                                                 </p>
                                                             </div>
@@ -244,12 +237,15 @@
                                                                 data-ddd-role-zone="{{ $zone['density'] }}"
                                                             >
                                                                 <div class="flex items-start justify-between gap-3">
-                                                                    <div>
+                                                                    <div class="min-h-[5.4rem]">
                                                                         <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
                                                                             {{ $zone['label'] }}
                                                                         </p>
                                                                         <p class="mt-3 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.92)]">
                                                                             {{ $zone['headline'] }}
+                                                                        </p>
+                                                                        <p class="mt-3 text-[0.56rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.5)]">
+                                                                            {{ $zone['case_label'] }}
                                                                         </p>
                                                                     </div>
                                                                     <span
@@ -262,19 +258,13 @@
                                                                     ></span>
                                                                 </div>
 
-                                                                <div class="mt-4 rounded-[1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.2)] px-3 py-3">
-                                                                    <div class="flex items-center justify-between gap-3">
-                                                                        <div>
-                                                                            <p class="text-[0.56rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.5)]">
-                                                                                {{ $zone['case_label'] }}
-                                                                            </p>
-                                                                            <p class="mt-2 text-sm font-semibold text-[color:rgba(244,239,230,0.94)]">
-                                                                                {{ $zone['status'] }}
-                                                                            </p>
-                                                                        </div>
-                                                                    <span class="whitespace-nowrap rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-3 py-1 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.68)]">
-                                                                        Case #184
-                                                                    </span>
+                                                                <div class="mt-4 min-h-[6.6rem] rounded-[1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.16)] px-3 py-3">
+                                                                    <p class="text-sm font-semibold text-[color:rgba(244,239,230,0.94)]">
+                                                                        {{ $zone['status'] }}
+                                                                    </p>
+                                                                    <p class="mt-3 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                        {{ $zone['detail'] }}
+                                                                    </p>
                                                                 </div>
 
                                                                 <div class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
@@ -288,23 +278,7 @@
                                                                             </p>
                                                                         </div>
                                                                     @endforeach
-                                                                    </div>
                                                                 </div>
-
-                                                                <div class="mt-4 rounded-[1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.05)] px-3 py-3">
-                                                                    <div>
-                                                                        <p class="text-[0.56rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.5)]">
-                                                                            {{ $zone['snapshot_label'] }}
-                                                                        </p>
-                                                                        <p class="mt-2 text-sm font-semibold text-[color:rgba(244,239,230,0.94)]">
-                                                                            {{ $zone['snapshot_value'] }}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-
-                                                                <p class="mt-4 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
-                                                                    {{ $zone['detail'] }}
-                                                                </p>
 
                                                                 <div class="mt-4 space-y-2">
                                                                     @foreach ($zone['items'] as $item)
@@ -355,7 +329,7 @@
                                                                     </span>
                                                                 </div>
 
-                                                                <div class="mt-4 space-y-2">
+                                                                <div class="mt-4 grid gap-2 lg:grid-cols-3">
                                                                     @foreach ($project['surface']['reviewFlow'] as $step)
                                                                         <div class="flex items-center justify-between gap-3 rounded-[1rem] border border-[rgba(244,239,230,0.1)] bg-[rgba(244,239,230,0.06)] px-3 py-2.5">
                                                                             <p class="text-sm leading-6 text-[color:rgba(244,239,230,0.78)]">
@@ -370,7 +344,7 @@
                                                             </section>
                                                         </div>
 
-                                                        <div class="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(17rem,0.82fr)]">
+                                                        <div class="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(18.5rem,0.92fr)]">
                                                             <section class="project-surface__feedback rounded-[1.35rem] border border-[rgba(218,163,122,0.42)] bg-[linear-gradient(180deg,rgba(235,168,119,0.18),rgba(244,239,230,0.08)_38%,rgba(8,21,16,0.26))] p-3.5 shadow-[0_30px_65px_rgba(10,25,19,0.2)]" data-impact-approval>
                                                                 <div class="flex items-start justify-between gap-3">
                                                                     <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
@@ -417,17 +391,13 @@
                                                                         @endforeach
                                                                     </div>
 
-                                                                    <div class="mt-4 flex flex-wrap gap-2">
-                                                                        @foreach ($project['surface']['feedback']['badges'] as $badge)
-                                                                            <span class="project-surface__feedback-chip whitespace-nowrap rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.24)] px-3 py-1.5 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.7)]">
-                                                                                {{ $badge }}
-                                                                            </span>
-                                                                        @endforeach
-                                                                    </div>
+                                                                    <p class="mt-4 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.62)]">
+                                                                        {{ implode(' / ', $project['surface']['feedback']['badges']) }}
+                                                                    </p>
                                                                 </div>
                                                             </section>
 
-                                                            <section class="project-surface__delivery rounded-[1.25rem] border border-[rgba(159,209,167,0.18)] bg-[linear-gradient(180deg,rgba(8,21,16,0.32),rgba(8,21,16,0.16))] px-4 py-3.5 xl:self-start" data-impact-delivery>
+                                                            <section class="project-surface__delivery h-full rounded-[1.25rem] border border-[rgba(159,209,167,0.18)] bg-[linear-gradient(180deg,rgba(8,21,16,0.32),rgba(8,21,16,0.16))] px-4 py-3.5 shadow-[0_26px_56px_rgba(10,25,19,0.16)]" data-impact-delivery>
                                                                 <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                                                     <div class="max-w-xl">
                                                                         <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
@@ -451,7 +421,7 @@
                                                                     </div>
                                                                 </div>
 
-                                                                <div class="mt-4 grid gap-2 lg:max-w-3xl lg:grid-cols-3">
+                                                                <div class="mt-4 grid gap-2 lg:max-w-3xl lg:grid-cols-2">
                                                                     @foreach ($project['surface']['delivery']['items'] as $item)
                                                                         <div class="rounded-[1rem] border border-[rgba(244,239,230,0.1)] bg-[rgba(244,239,230,0.06)] px-3 py-2.5 text-sm leading-6 text-[color:rgba(244,239,230,0.76)]">
                                                                             {{ $item }}
@@ -568,6 +538,7 @@
                     </div>
                 </section>
             </main>
+
         </div>
     </body>
 </html>

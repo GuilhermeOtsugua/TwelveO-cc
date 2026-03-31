@@ -549,7 +549,7 @@
 
     .project-surface__zone {
         position: relative;
-        min-height: 17.5rem;
+        min-height: 15.5rem;
         backdrop-filter: blur(10px);
         transition:
             transform 220ms ease,
@@ -560,7 +560,7 @@
 
     .project-surface__zone-metric {
         display: flex;
-        min-height: 5rem;
+        min-height: 4.35rem;
         flex-direction: column;
         justify-content: space-between;
         gap: 0.4rem;
@@ -583,15 +583,15 @@
     }
 
     .project-surface__zone--calm {
-        min-height: 20rem;
+        min-height: 18rem;
     }
 
     .project-surface__zone--active {
-        min-height: 21rem;
+        min-height: 18.5rem;
     }
 
     .project-surface__zone--compressed {
-        min-height: 18rem;
+        min-height: 17.25rem;
     }
 
     .project-surface__zone-dot {
@@ -655,6 +655,11 @@
         overflow: hidden;
     }
 
+    .project-surface__delivery {
+        position: relative;
+        overflow: hidden;
+    }
+
     .project-surface__feedback::after {
         content: '';
         position: absolute;
@@ -663,6 +668,17 @@
         height: 4.5rem;
         border-radius: 999px;
         background: radial-gradient(circle, rgba(242, 207, 140, 0.18), transparent 72%);
+        pointer-events: none;
+    }
+
+    .project-surface__delivery::before {
+        content: '';
+        position: absolute;
+        inset: auto -2rem -2rem auto;
+        width: 9rem;
+        height: 9rem;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(191, 229, 197, 0.18), transparent 74%);
         pointer-events: none;
     }
 

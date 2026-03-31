@@ -51,7 +51,10 @@
         gap: 1rem;
     }
 
-    .project-surface__harbor-owner-card {
+    .project-surface__harbor-lock-card {
+        justify-self: end;
+        align-self: start;
+        width: min(100%, 14.5rem);
         border-radius: 1.15rem;
         border: 1px solid rgba(16, 40, 31, 0.1);
         background:
@@ -70,6 +73,7 @@
     .project-surface__harbor-packet-tab,
     .project-surface__harbor-packet-status,
     .project-surface__harbor-owner-pill {
+        flex: 0 0 auto;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
@@ -78,6 +82,7 @@
         font-weight: 600;
         letter-spacing: 0.18em;
         text-transform: uppercase;
+        white-space: nowrap;
     }
 
     .project-surface__harbor-state-pill {
@@ -112,6 +117,7 @@
 
     .project-surface__harbor-console-grid {
         display: grid;
+        align-items: start;
         gap: 1rem;
     }
 
@@ -156,10 +162,14 @@
     .project-surface__harbor-kpi-grid {
         display: grid;
         gap: 0.85rem;
-        grid-template-columns: repeat(auto-fit, minmax(9.4rem, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
     }
 
     .project-surface__harbor-kpi-card {
+        display: flex;
+        min-height: 6rem;
+        flex-direction: column;
+        justify-content: space-between;
         border-radius: 1rem;
         border: 1px solid rgba(244, 239, 230, 0.1);
         background:
@@ -187,15 +197,20 @@
 
     .project-surface__harbor-stage-row {
         display: grid;
-        gap: 0.8rem;
+        gap: 0.7rem;
     }
 
     .project-surface__harbor-stage {
         position: relative;
+        display: grid;
+        justify-items: center;
+        align-content: start;
+        text-align: center;
+        gap: 0.35rem;
         border-radius: 1rem;
         border: 1px solid rgba(244, 239, 230, 0.08);
         background: rgba(244, 239, 230, 0.04);
-        padding: 0.95rem 1rem;
+        padding: 0.85rem 0.9rem;
     }
 
     .project-surface__harbor-stage.is-pass {
@@ -254,6 +269,9 @@
 
     .project-surface__harbor-action-lock {
         position: relative;
+        justify-self: start;
+        align-self: start;
+        width: min(100%, 20rem);
         overflow: hidden;
         border-radius: 1.25rem;
         border: 1px solid rgba(242, 207, 140, 0.18);
@@ -291,15 +309,19 @@
     .project-surface__harbor-lock-state {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         border-radius: 999px;
         border: 1px solid rgba(242, 207, 140, 0.16);
         background: rgba(242, 207, 140, 0.08);
         color: #f4d79a;
-        padding: 0.45rem 0.8rem;
+        padding: 0.6rem 1rem;
         font-size: 0.7rem;
         font-weight: 600;
         letter-spacing: 0.16em;
         text-transform: uppercase;
+        line-height: 1.45;
+        max-width: 100%;
+        text-align: center;
     }
 
     .project-surface__harbor-blocker-list,
@@ -408,7 +430,7 @@
         border-radius: 1.15rem;
         border: 1px solid rgba(16, 40, 31, 0.08);
         background: rgba(255, 255, 255, 0.44);
-        padding: 1rem 1rem 1rem 1.1rem;
+        padding: 0.95rem 0.95rem 0.95rem 1.05rem;
         box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.55),
             0 14px 32px rgba(16, 40, 31, 0.08);
@@ -498,9 +520,9 @@
     }
 
     .project-surface__harbor-gate {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
         gap: 1rem;
         border-radius: 1rem;
         border: 1px solid rgba(244, 239, 230, 0.08);
@@ -531,7 +553,7 @@
 
     @media (min-width: 1024px) {
         .project-surface__harbor-console-topline {
-            grid-template-columns: minmax(0, 1fr) 15.5rem;
+            grid-template-columns: minmax(0, 1fr) 14.5rem;
             align-items: start;
         }
 
@@ -541,16 +563,32 @@
     }
 
     @media (max-width: 767px) {
+        .project-surface__harbor-lock-card,
+        .project-surface__harbor-action-lock {
+            justify-self: stretch;
+            width: 100%;
+        }
+
         .project-surface__harbor-state-pill,
         .project-surface__harbor-owner-pill,
         .project-surface__harbor-rail-badge {
             max-width: none;
+            white-space: normal;
         }
 
         .project-surface__harbor-activity,
         .project-surface__harbor-gate {
             align-items: flex-start;
             flex-direction: column;
+        }
+
+        .project-surface__harbor-packet-tab,
+        .project-surface__harbor-packet-status {
+            white-space: normal;
+        }
+
+        .project-surface__harbor-gate {
+            grid-template-columns: minmax(0, 1fr);
         }
     }
 }
