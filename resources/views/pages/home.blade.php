@@ -291,10 +291,10 @@
                                                         @endforeach
                                                     </div>
                                                 @else
-                                                    <div class="mt-4 grid gap-4">
+                                                    <div class="mt-4 grid gap-3">
                                                         <div class="grid gap-3 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
                                                             @foreach ($project['surface']['workstreams'] as $workstream)
-                                                                <section class="project-surface__impact-card rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-3.5">
+                                                                <section class="project-surface__impact-card rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-3">
                                                                     <div class="flex items-start justify-between gap-3">
                                                                         <div>
                                                                             <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
@@ -314,7 +314,7 @@
                                                                 </section>
                                                             @endforeach
 
-                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.22)] p-3.5" data-impact-review-flow>
+                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.22)] p-3" data-impact-review-flow>
                                                                 <div class="flex items-center justify-between gap-3">
                                                                     <div>
                                                                         <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
@@ -344,8 +344,8 @@
                                                             </section>
                                                         </div>
 
-                                                        <div class="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(18.5rem,0.92fr)]">
-                                                            <section class="project-surface__feedback rounded-[1.35rem] border border-[rgba(218,163,122,0.42)] bg-[linear-gradient(180deg,rgba(235,168,119,0.18),rgba(244,239,230,0.08)_38%,rgba(8,21,16,0.26))] p-3.5 shadow-[0_30px_65px_rgba(10,25,19,0.2)]" data-impact-approval>
+                                                        <div class="grid gap-3 xl:grid-cols-[minmax(0,1.04fr)_minmax(17.5rem,0.88fr)]">
+                                                            <section class="project-surface__feedback rounded-[1.35rem] border border-[rgba(218,163,122,0.42)] bg-[linear-gradient(180deg,rgba(235,168,119,0.18),rgba(244,239,230,0.08)_38%,rgba(8,21,16,0.26))] p-3 shadow-[0_30px_65px_rgba(10,25,19,0.2)]" data-impact-approval>
                                                                 <div class="flex items-start justify-between gap-3">
                                                                     <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
                                                                         {{ $project['surface']['feedback']['label'] }}
@@ -355,7 +355,7 @@
                                                                     </span>
                                                                 </div>
 
-                                                                <div class="mt-4 rounded-[1.15rem] border border-[rgba(244,239,230,0.18)] bg-[rgba(8,21,16,0.3)] p-3.5 shadow-[0_22px_50px_rgba(10,25,19,0.18)]">
+                                                                <div class="mt-3 rounded-[1.15rem] border border-[rgba(244,239,230,0.18)] bg-[rgba(8,21,16,0.3)] p-3 shadow-[0_22px_50px_rgba(10,25,19,0.18)]">
                                                                     <div class="flex items-start justify-between gap-3">
                                                                         <div>
                                                                             <p class="text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.94)]">
@@ -370,20 +370,20 @@
                                                                         </span>
                                                                     </div>
 
-                                                                    <p class="mt-4 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                    <p class="mt-3 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
                                                                         {{ $project['surface']['feedback']['detail'] }}
                                                                     </p>
 
-                                                                    <div class="mt-4 rounded-[1rem] border border-[rgba(235,168,119,0.2)] bg-[rgba(235,168,119,0.1)] px-4 py-4">
+                                                                    <div class="mt-3 rounded-[1rem] border border-[rgba(235,168,119,0.2)] bg-[rgba(235,168,119,0.1)] px-3.5 py-3">
                                                                         <p class="text-[0.56rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.54)]">
                                                                             Pinned client note
                                                                         </p>
-                                                                        <p class="mt-3 font-display text-[1.4rem] leading-tight tracking-[-0.03em] text-[color:rgba(244,239,230,0.96)]">
+                                                                        <p class="mt-3 font-display text-[1.24rem] leading-tight tracking-[-0.03em] text-[color:rgba(244,239,230,0.96)] sm:text-[1.32rem]">
                                                                             {{ $project['surface']['feedback']['comment'] }}
                                                                         </p>
                                                                     </div>
 
-                                                                    <div class="mt-4 flex flex-wrap gap-2">
+                                                                    <div class="mt-3 flex flex-wrap gap-2">
                                                                         @foreach ($project['surface']['feedback']['actions'] as $action)
                                                                             <span class="whitespace-nowrap rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-3 py-1.5 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.78)]">
                                                                                 {{ $action }}
@@ -391,13 +391,13 @@
                                                                         @endforeach
                                                                     </div>
 
-                                                                    <p class="mt-4 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.62)]">
+                                                                    <p class="mt-3 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.62)]">
                                                                         {{ implode(' / ', $project['surface']['feedback']['badges']) }}
                                                                     </p>
                                                                 </div>
                                                             </section>
 
-                                                            <section class="project-surface__delivery h-full rounded-[1.25rem] border border-[rgba(159,209,167,0.18)] bg-[linear-gradient(180deg,rgba(8,21,16,0.32),rgba(8,21,16,0.16))] px-4 py-3.5 shadow-[0_26px_56px_rgba(10,25,19,0.16)]" data-impact-delivery>
+                                                            <section class="project-surface__delivery h-full rounded-[1.25rem] border border-[rgba(159,209,167,0.18)] bg-[linear-gradient(180deg,rgba(8,21,16,0.32),rgba(8,21,16,0.16))] p-3.5 shadow-[0_26px_56px_rgba(10,25,19,0.16)]" data-impact-delivery>
                                                                 <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                                                     <div class="max-w-xl">
                                                                         <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
@@ -406,7 +406,7 @@
                                                                         <p class="mt-3 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.94)]">
                                                                             {{ $project['surface']['delivery']['value'] }}
                                                                         </p>
-                                                                        <p class="mt-4 font-display text-[1.45rem] leading-tight tracking-[-0.03em] text-[color:rgba(244,239,230,0.92)]">
+                                                                        <p class="mt-3 font-display text-[1.24rem] leading-tight tracking-[-0.03em] text-[color:rgba(244,239,230,0.92)] sm:text-[1.34rem]">
                                                                             {{ $project['surface']['delivery']['title'] }}
                                                                         </p>
                                                                     </div>

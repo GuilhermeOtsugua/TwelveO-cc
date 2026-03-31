@@ -157,4 +157,19 @@ test.describe('Homepage visuals', () => {
 
         expect(failures).toEqual([]);
     });
+
+    test('Studio Current desktop band stays no taller than Northline Learning Ops', async ({ page, browserName }, testInfo) => {
+        test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
+
+        const heights = await page.$$eval('[data-project-band]', (bands) => {
+            return Object.fromEntries(
+                bands.map((band) => [
+                    band.getAttribute('data-project-band-principle'),
+                    Math.round(band.getBoundingClientRect().height),
+                ]),
+            );
+        });
+
+        expect(heights['Design for impact']).toBeLessThanOrEqual(heights.DDD);
+    });
 });

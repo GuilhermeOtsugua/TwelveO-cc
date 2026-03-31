@@ -107,3 +107,9 @@ Implemented PRD item #23
 - Updated the homepage feature test to assert the explicit Harbor Ledger focus, evidence, and release-region structure in DOM order instead of relying on copy alone.
 Next: Pick the next runnable child issue for parent PRD #22.
 ---
+## 2026-03-31
+Implemented PRD item #25
+- Tightened the Studio Current approval and delivery surfaces so the band reads closer to the Northline scale instead of expanding into a heavier third-row block.
+- Added a desktop Playwright guard that keeps the Studio Current band no taller than the Northline Learning Ops band, and refreshed the affected Studio snapshots after a desktop/mobile visual pass.
+Next: Pick the next runnable child issue for parent PRD #24.
+---
