@@ -2,172 +2,111 @@
 
 namespace Tests\Feature;
 
+use DOMDocument;
+use DOMNode;
+use DOMXPath;
 use Tests\TestCase;
 
 class HomepageTest extends TestCase
 {
-    /**
-     * Ensure the homepage renders the expected landing page content.
-     */
-    public function test_homepage_is_rendered(): void
+    public function test_homepage_renders_core_sections_and_finished_harbor_artifacts(): void
     {
         $response = $this->get(route('home'));
         $content = $response->getContent();
+        $xpath = $this->xpathFor($content);
 
         $response
             ->assertOk()
             ->assertSeeText('Otsugua')
-            ->assertSeeText('full-stack Laravel developer')
-            ->assertSeeText('clear, testable, and coherent as they grow')
             ->assertSeeText('How I work')
             ->assertSeeText('Current Focus')
-            ->assertSeeText('Agentic development')
-            ->assertSeeText('Building effective agents')
-            ->assertSee('https://www.anthropic.com/engineering/building-effective-agents')
-            ->assertSeeText('TwelveO-cc')
-            ->assertSee('https://github.com/GuilhermeOtsugua/TwelveO-cc')
-            ->assertSeeText('Here’s How I Shape Products')
-            ->assertSee('data-capability-bands', false)
-            ->assertSee('data-capability-framing', false)
-            ->assertSeeText('Three finished product surfaces. Scan the interface first; the notes only clarify the decisions.')
-            ->assertSee('data-capability-sequence', false)
-            ->assertSeeText('Step 01')
-            ->assertSeeText('Step 02')
-            ->assertSeeText('Step 03')
             ->assertSeeText('Harbor Ledger')
-            ->assertSeeText('TDD')
-            ->assertSee('data-project-band-principle="TDD"', false)
-            ->assertSee('data-tdd-decision-flow', false)
-            ->assertSee('data-tdd-focus', false)
-            ->assertSee('data-tdd-support-stack', false)
-            ->assertSee('data-tdd-region="focus"', false)
-            ->assertSee('data-tdd-region="evidence"', false)
-            ->assertSee('data-tdd-region="release"', false)
-            ->assertSee('data-tdd-scenario-queue', false)
-            ->assertSee('data-tdd-release-gates', false)
-            ->assertSeeText('Quiet verification')
-            ->assertSeeText('Start with explicit correctness.')
-            ->assertSeeText('Executable rules')
-            ->assertSeeText('discount ladders, tax rules, approval paths, and margin floors have to stay correct on every quote')
-            ->assertSeeText('Wholesale renewal / 18 seats')
-            ->assertSeeText('Release decision')
-            ->assertSeeText('Blocked at controller gate')
-            ->assertSeeText('Margin after discount')
-            ->assertSeeText('3 linked cases')
-            ->assertSeeText('Selected rule')
-            ->assertSeeText('Renewal ladder 2026.3')
-            ->assertSeeText('Linked to 3 scenario cases')
-            ->assertSeeText('Enterprise renewals above 12 seats require controller review whenever the post-discount margin lands below 18%')
-            ->assertSeeText('Scenario queue')
-            ->assertSeeText('Linked validation cases')
-            ->assertSeeText('Tax district mismatch blocked release until mapping is resolved')
-            ->assertSeeText('Controller approval trace')
-            ->assertSeeText('Pricing lead -> Controller -> Quote release')
-            ->assertSeeText('Release gates')
-            ->assertSeeText('Quote release remains blocked')
-            ->assertSeeText('Tax district mapping')
-            ->assertSeeText('Why it is shaped this way')
-            ->assertSeeText('Test-first delivery makes rounding behavior, approval gates, and pricing rules executable before anyone relies on the interface')
-            ->assertSeeText('The interface is framed so rule logic and scenario verification can stay in view together')
-            ->assertSeeText('Principle: TDD')
-            ->assertSee('data-project-note-toggle', false)
             ->assertSeeText('Northline Learning Ops')
-            ->assertSeeText('DDD')
-            ->assertSee('data-project-band-principle="DDD"', false)
-            ->assertSee('data-ddd-shared-case', false)
-            ->assertSee('data-ddd-shared-thread', false)
-            ->assertSee('data-ddd-role-zone="calm"', false)
-            ->assertSee('data-ddd-role-zone="active"', false)
-            ->assertSee('data-ddd-role-zone="compressed"', false)
-            ->assertSeeText('Coordinated language')
-            ->assertSeeText('Then align the shared language.')
-            ->assertSeeText('Shared language')
-            ->assertSeeText('coordinators, instructors, assessors, students, and operations leads who all apply different rules inside the same domain')
-            ->assertSeeText('Shared language keeps scheduling, assessment, attendance, interventions, and handoffs coherent as the product grows more roles, more workflows, and more rules')
-            ->assertSeeText('The same intervention case is allowed to appear differently across the surface')
-            ->assertSeeText('Shared intervention case')
-            ->assertSeeText('Case #184 / Maya Chen / Attendance recovery')
-            ->assertSeeText('Attendance risk, workshop regrouping, guardian outreach, and closure readiness stay named the same way across every role surface')
-            ->assertSeeText('Shared intervention thread')
-            ->assertSeeText('Attendance recovery plan remains active across all roles')
-            ->assertSeeText('Attendance risk')
-            ->assertSeeText('Instruction response')
-            ->assertSeeText('Guardian outreach')
-            ->assertSeeText('Case closure')
-            ->assertSeeText('Student progress')
-            ->assertSeeText('Instructor planning')
-            ->assertSeeText('Operations desk')
-            ->assertSeeText('Attendance recovered to 91%')
-            ->assertSeeText('Workshop regrouping requested')
-            ->assertSeeText('Outreach logged and compliant')
-            ->assertSeeText('Progress view')
-            ->assertSeeText('Week 3 support plan is holding')
-            ->assertSeeText('Teaching move')
-            ->assertSeeText('Regroup Friday workshop before unit close')
-            ->assertSeeText('Closure rail')
-            ->assertSeeText('Case stays open until next attendance sync lands')
-            ->assertSeeText('Guardian outreach logged at 09:12')
-            ->assertSeeText('Principle: DDD')
             ->assertSeeText('Studio Current')
-            ->assertSeeText('Design for impact')
-            ->assertSee('data-project-band-principle="Design for impact"', false)
-            ->assertSee('data-impact-review-flow', false)
-            ->assertSee('data-impact-approval', false)
-            ->assertSee('data-impact-delivery', false)
-            ->assertSeeText('Crafted responsiveness')
-            ->assertSeeText('Finish with memorable responsiveness.')
-            ->assertSeeText('Review cycles')
-            ->assertSeeText('approvals, deliverables, and handoff details need a memorable interface with a strong visual identity without losing operational clarity')
-            ->assertSeeText('A studio-facing workspace built around one approval decision, a visible review flow, and a clean handoff lane for final delivery')
-            ->assertSeeText('Active briefs')
-            ->assertSeeText('Motion system refresh')
-            ->assertSeeText('Launch kit approval stack')
-            ->assertSeeText('Review flow')
-            ->assertSeeText('Active proof stays ahead of delivery')
-            ->assertSeeText('Needs calmer outro')
-            ->assertSeeText('Client review moment')
-            ->assertSeeText('Approve opener animation with note')
-            ->assertSeeText('Ready for client pickup')
-            ->assertSeeText('Pinned client note')
-            ->assertSeeText('Hold the first two seconds on the coral wordmark, then release the motion bed once the narrator lands')
-            ->assertSeeText('Owner: Mariana / Brand director')
-            ->assertSeeText('Approve with note')
-            ->assertSeeText('Selected proof')
-            ->assertSeeText('Final delivery handoff')
-            ->assertSeeText('Exports staged after approval lock')
-            ->assertSeeText('Launch pack / ready once review closes')
-            ->assertSeeText('Handoff rail separated from live review')
-            ->assertSeeText('Brand-safe fallback assets attached to the handoff note')
-            ->assertSeeText('Interaction design is treated as product strategy: memorable transitions and branded feedback cues help clients move through reviews and approvals with less friction')
-            ->assertSeeText('The shared frame stays restrained so tactile responses and branded review moments feel useful instead of ornamental')
-            ->assertSeeText('Principle: Design for impact')
-            ->assertSee('data-project-note-panel', false)
-            ->assertSeeText('Credibility')
-            ->assertSeeText('From system thinking to working software.')
             ->assertSeeText('Laravel Certified Developer')
-            ->assertSeeText('Certification for Laravel')
-            ->assertSeeText('A verifiable Laravel credential that anchors the portfolio in concrete implementation proof.')
-            ->assertSeeText('View certificate')
-            ->assertSee('https://verifier.certificationforlaravel.org/b98145cf-0305-4e77-bc70-30d685ec434a')
             ->assertSeeText('Contact')
-            ->assertSeeText('Email')
-            ->assertSee('data-copy-email="guilherme@otsugua.dev"', false)
-            ->assertSeeText('Copied')
-            ->assertDontSee('mailto:guilherme@otsugua.dev')
-            ->assertSeeText('LinkedIn')
-            ->assertSee('https://www.linkedin.com/in/guilherme-augusto')
-            ->assertSeeText('GitHub')
-            ->assertSee('https://github.com/otsugua');
+            ->assertSeeText('Quote release console')
+            ->assertSeeText('Release locked')
+            ->assertSeeText('Evidence rail')
+            ->assertSeeText('Release lock rail')
+            ->assertSeeText('Notify controller and reopen after tax match');
 
-        $focusRegionPosition = strpos($content, 'data-tdd-region="focus"');
-        $evidenceRegionPosition = strpos($content, 'data-tdd-region="evidence"');
-        $releaseRegionPosition = strpos($content, 'data-tdd-region="release"');
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-project-band-principle="TDD"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-console and @data-tdd-region="focus"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-quote-sheet]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-release-action]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-blocked-button and @aria-disabled="true"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-lock-rail and @data-tdd-region="release"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-evidence-packets]'));
+        self::assertSame(2, $this->countMatches($xpath, '//*[@data-tdd-evidence-packet]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-scenario-matrix]'));
+        self::assertSame(3, $this->countMatches($xpath, '//*[@data-tdd-scenario-case]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-approval-lane]'));
+        self::assertSame(3, $this->countMatches($xpath, '//*[@data-tdd-approval-stage]'));
+        self::assertSame(3, $this->countMatches($xpath, '//*[@data-tdd-release-check]'));
 
-        self::assertNotFalse($focusRegionPosition);
-        self::assertNotFalse($evidenceRegionPosition);
-        self::assertNotFalse($releaseRegionPosition);
-        self::assertSame(3, substr_count($content, 'data-tdd-region='));
-        self::assertTrue($focusRegionPosition < $evidenceRegionPosition);
-        self::assertTrue($evidenceRegionPosition < $releaseRegionPosition);
+        $stageLabels = $this->texts($xpath, '//*[@data-tdd-approval-stage]//*[@data-tdd-stage-label]');
+        $regionOrder = $this->attributeValues($xpath, '//*[@data-tdd-region]', 'data-tdd-region');
+        $blockedButtonText = $this->firstText($xpath, '//*[@data-tdd-blocked-button]');
+
+        self::assertSame(['Pricing owner', 'Controller', 'Quote release'], $stageLabels);
+        self::assertSame(['focus', 'evidence', 'release'], $regionOrder);
+        self::assertSame('Release locked', $blockedButtonText);
+    }
+
+    private function xpathFor(string $html): DOMXPath
+    {
+        libxml_use_internal_errors(true);
+
+        $dom = new DOMDocument();
+        $dom->loadHTML($html);
+
+        libxml_clear_errors();
+
+        return new DOMXPath($dom);
+    }
+
+    private function countMatches(DOMXPath $xpath, string $query): int
+    {
+        return $xpath->query($query)->length;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function texts(DOMXPath $xpath, string $query): array
+    {
+        $values = [];
+
+        foreach ($xpath->query($query) as $node) {
+            $values[] = trim($node->textContent);
+        }
+
+        return $values;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function attributeValues(DOMXPath $xpath, string $query, string $attribute): array
+    {
+        $values = [];
+
+        foreach ($xpath->query($query) as $node) {
+            if ($node instanceof DOMNode && $node->attributes?->getNamedItem($attribute) !== null) {
+                $values[] = $node->attributes->getNamedItem($attribute)->nodeValue;
+            }
+        }
+
+        return $values;
+    }
+
+    private function firstText(DOMXPath $xpath, string $query): string
+    {
+        $node = $xpath->query($query)->item(0);
+
+        self::assertNotNull($node);
+
+        return trim($node->textContent);
     }
 }

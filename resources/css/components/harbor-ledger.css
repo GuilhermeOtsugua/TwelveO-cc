@@ -1,0 +1,556 @@
+@layer components {
+    .project-surface--tdd {
+        background:
+            radial-gradient(circle at 88% 12%, rgba(242, 207, 140, 0.16), transparent 18%),
+            radial-gradient(circle at 14% 16%, rgba(244, 239, 230, 0.08), transparent 20%),
+            linear-gradient(180deg, #0c1f18 0%, #123126 42%, #1c4636 100%);
+    }
+
+    .project-surface__harbor-console,
+    .project-surface__harbor-evidence,
+    .project-surface__harbor-release {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .project-surface__harbor-console {
+        background:
+            linear-gradient(180deg, rgba(242, 207, 140, 0.1), rgba(242, 207, 140, 0) 20%),
+            linear-gradient(145deg, rgba(6, 17, 13, 0.8), rgba(10, 25, 19, 0.5));
+        box-shadow: inset 0 1px 0 rgba(244, 239, 230, 0.06);
+    }
+
+    .project-surface__harbor-console::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, rgba(244, 239, 230, 0.05) 0, rgba(244, 239, 230, 0.05) 1px, transparent 1px, transparent 100%),
+            linear-gradient(180deg, rgba(244, 239, 230, 0.04) 0, rgba(244, 239, 230, 0.04) 1px, transparent 1px, transparent 100%);
+        background-size: 5.4rem 5.4rem;
+        opacity: 0.2;
+        pointer-events: none;
+    }
+
+    .project-surface__harbor-console-shell {
+        position: relative;
+        z-index: 1;
+        border-radius: 1.3rem;
+        border: 1px solid rgba(244, 239, 230, 0.08);
+        background:
+            linear-gradient(180deg, rgba(244, 239, 230, 0.03), transparent 26%),
+            linear-gradient(180deg, rgba(5, 15, 12, 0.6), rgba(11, 25, 19, 0.28));
+        padding: 1.1rem;
+        box-shadow:
+            inset 0 1px 0 rgba(244, 239, 230, 0.05),
+            0 24px 50px rgba(0, 0, 0, 0.18);
+    }
+
+    .project-surface__harbor-console-topline {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .project-surface__harbor-owner-card {
+        border-radius: 1.15rem;
+        border: 1px solid rgba(16, 40, 31, 0.1);
+        background:
+            linear-gradient(180deg, rgba(244, 239, 230, 0.95), rgba(232, 222, 206, 0.9));
+        padding: 1rem;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.62),
+            0 18px 36px rgba(0, 0, 0, 0.14);
+    }
+
+    .project-surface__harbor-state-pill,
+    .project-surface__harbor-meta-chip,
+    .project-surface__harbor-banner-chip,
+    .project-surface__harbor-flow-badge,
+    .project-surface__harbor-rail-badge,
+    .project-surface__harbor-packet-tab,
+    .project-surface__harbor-packet-status,
+    .project-surface__harbor-owner-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 999px;
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .project-surface__harbor-state-pill {
+        border: 1px solid rgba(242, 207, 140, 0.18);
+        background: rgba(5, 15, 12, 0.72);
+        padding: 0.5rem 0.9rem;
+        color: #f4e4be;
+        box-shadow: inset 0 1px 0 rgba(244, 239, 230, 0.06);
+    }
+
+    .project-surface__harbor-state-dot,
+    .project-surface__harbor-stage-dot,
+    .project-surface__harbor-activity-dot,
+    .project-surface__harbor-gate-dot {
+        width: 0.62rem;
+        height: 0.62rem;
+        flex: 0 0 auto;
+        border-radius: 999px;
+    }
+
+    .project-surface__harbor-state-dot {
+        background: #f2cf8c;
+        box-shadow: 0 0 0 4px rgba(242, 207, 140, 0.12);
+    }
+
+    .project-surface__harbor-meta-chip {
+        border: 1px solid rgba(244, 239, 230, 0.12);
+        background: rgba(244, 239, 230, 0.08);
+        color: rgba(244, 239, 230, 0.74);
+        padding: 0.45rem 0.85rem;
+    }
+
+    .project-surface__harbor-console-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .project-surface__harbor-sheet {
+        display: grid;
+        gap: 0;
+        align-content: start;
+    }
+
+    .project-surface__harbor-hold-strip {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.25rem;
+        border: 1px solid rgba(242, 207, 140, 0.28);
+        background:
+            radial-gradient(circle at 100% 0, rgba(242, 207, 140, 0.26), transparent 34%),
+            linear-gradient(135deg, rgba(244, 239, 230, 0.96), rgba(227, 212, 184, 0.9));
+        padding: 1.15rem 1.2rem;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.55),
+            0 18px 42px rgba(0, 0, 0, 0.16);
+    }
+
+    .project-surface__harbor-hold-strip::after {
+        content: '';
+        position: absolute;
+        inset: auto 1rem 1rem auto;
+        width: 5.5rem;
+        height: 5.5rem;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(223, 120, 101, 0.2), transparent 68%);
+        pointer-events: none;
+    }
+
+    .project-surface__harbor-banner-chip {
+        border: 1px solid rgba(16, 40, 31, 0.12);
+        background: rgba(16, 40, 31, 0.08);
+        color: rgba(16, 40, 31, 0.72);
+        padding: 0.45rem 0.8rem;
+    }
+
+    .project-surface__harbor-kpi-grid {
+        display: grid;
+        gap: 0.85rem;
+        grid-template-columns: repeat(auto-fit, minmax(9.4rem, 1fr));
+    }
+
+    .project-surface__harbor-kpi-card {
+        border-radius: 1rem;
+        border: 1px solid rgba(244, 239, 230, 0.1);
+        background:
+            linear-gradient(180deg, rgba(244, 239, 230, 0.05), rgba(244, 239, 230, 0)),
+            linear-gradient(180deg, rgba(8, 21, 16, 0.62), rgba(12, 29, 22, 0.42));
+        padding: 0.95rem 1rem;
+        box-shadow: inset 0 1px 0 rgba(244, 239, 230, 0.04);
+    }
+
+    .project-surface__harbor-approval {
+        border-radius: 1.25rem;
+        border: 1px solid rgba(244, 239, 230, 0.1);
+        background:
+            linear-gradient(180deg, rgba(244, 239, 230, 0.05), transparent 22%),
+            linear-gradient(180deg, rgba(7, 19, 15, 0.78), rgba(14, 32, 25, 0.58));
+        padding: 1.15rem;
+    }
+
+    .project-surface__harbor-flow-badge {
+        border: 1px solid rgba(244, 239, 230, 0.12);
+        background: rgba(244, 239, 230, 0.08);
+        color: rgba(244, 239, 230, 0.72);
+        padding: 0.45rem 0.8rem;
+    }
+
+    .project-surface__harbor-stage-row {
+        display: grid;
+        gap: 0.8rem;
+    }
+
+    .project-surface__harbor-stage {
+        position: relative;
+        border-radius: 1rem;
+        border: 1px solid rgba(244, 239, 230, 0.08);
+        background: rgba(244, 239, 230, 0.04);
+        padding: 0.95rem 1rem;
+    }
+
+    .project-surface__harbor-stage.is-pass {
+        border-color: rgba(159, 209, 167, 0.18);
+        background: rgba(159, 209, 167, 0.08);
+    }
+
+    .project-surface__harbor-stage.is-pending {
+        border-color: rgba(242, 207, 140, 0.18);
+        background: rgba(242, 207, 140, 0.08);
+    }
+
+    .project-surface__harbor-stage.is-blocked {
+        border-color: rgba(223, 120, 101, 0.18);
+        background: rgba(223, 120, 101, 0.08);
+    }
+
+    .project-surface__harbor-stage.is-pass .project-surface__harbor-stage-dot,
+    .project-surface__harbor-gate.is-pass .project-surface__harbor-gate-dot {
+        background: #9fd1a7;
+        box-shadow: 0 0 0 4px rgba(159, 209, 167, 0.12);
+    }
+
+    .project-surface__harbor-stage.is-pending .project-surface__harbor-stage-dot,
+    .project-surface__harbor-gate.is-pending .project-surface__harbor-gate-dot {
+        background: #f2cf8c;
+        box-shadow: 0 0 0 4px rgba(242, 207, 140, 0.12);
+    }
+
+    .project-surface__harbor-stage.is-blocked .project-surface__harbor-stage-dot,
+    .project-surface__harbor-gate.is-blocked .project-surface__harbor-gate-dot {
+        background: #df7865;
+        box-shadow: 0 0 0 4px rgba(223, 120, 101, 0.12);
+    }
+
+    .project-surface__harbor-activity-list {
+        display: grid;
+        gap: 0.65rem;
+    }
+
+    .project-surface__harbor-activity {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(244, 239, 230, 0.08);
+        background: rgba(244, 239, 230, 0.04);
+        padding: 0.85rem 0.95rem;
+    }
+
+    .project-surface__harbor-activity-dot {
+        background: rgba(244, 239, 230, 0.72);
+        box-shadow: 0 0 0 4px rgba(244, 239, 230, 0.06);
+    }
+
+    .project-surface__harbor-action-lock {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.25rem;
+        border: 1px solid rgba(242, 207, 140, 0.18);
+        background:
+            linear-gradient(180deg, rgba(242, 207, 140, 0.1), transparent 22%),
+            linear-gradient(180deg, rgba(17, 12, 8, 0.92), rgba(38, 27, 17, 0.94));
+        padding: 1.15rem;
+        box-shadow:
+            inset 0 1px 0 rgba(244, 239, 230, 0.04),
+            0 20px 44px rgba(0, 0, 0, 0.18);
+    }
+
+    .project-surface__harbor-action-lock::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(135deg, rgba(242, 207, 140, 0.08), transparent 28%),
+            repeating-linear-gradient(
+                -45deg,
+                rgba(244, 239, 230, 0.04) 0,
+                rgba(244, 239, 230, 0.04) 10px,
+                transparent 10px,
+                transparent 22px
+            );
+        opacity: 0.55;
+        pointer-events: none;
+    }
+
+    .project-surface__harbor-action-lock > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .project-surface__harbor-lock-state {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        border: 1px solid rgba(242, 207, 140, 0.16);
+        background: rgba(242, 207, 140, 0.08);
+        color: #f4d79a;
+        padding: 0.45rem 0.8rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    .project-surface__harbor-blocker-list,
+    .project-surface__harbor-packet-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .project-surface__harbor-blocker-list {
+        display: grid;
+        gap: 0.7rem;
+    }
+
+    .project-surface__harbor-blocker-list li,
+    .project-surface__harbor-packet-list li {
+        position: relative;
+        padding-left: 1.1rem;
+        font-size: 0.92rem;
+        line-height: 1.6;
+    }
+
+    .project-surface__harbor-blocker-list li {
+        color: rgba(244, 239, 230, 0.76);
+    }
+
+    .project-surface__harbor-packet-list {
+        display: grid;
+        gap: 0.55rem;
+    }
+
+    .project-surface__harbor-packet-list li {
+        color: rgba(16, 40, 31, 0.68);
+    }
+
+    .project-surface__harbor-blocker-list li::before,
+    .project-surface__harbor-packet-list li::before {
+        content: '';
+        position: absolute;
+        top: 0.72rem;
+        left: 0;
+        width: 0.42rem;
+        height: 0.42rem;
+        border-radius: 999px;
+    }
+
+    .project-surface__harbor-blocker-list li::before {
+        background: #f2cf8c;
+        box-shadow: 0 0 0 4px rgba(242, 207, 140, 0.08);
+    }
+
+    .project-surface__harbor-packet-list li::before {
+        background: rgba(16, 40, 31, 0.48);
+    }
+
+    .project-surface__harbor-disabled {
+        border: 1px solid rgba(242, 207, 140, 0.16);
+        background: linear-gradient(180deg, rgba(242, 207, 140, 0.24), rgba(223, 120, 101, 0.18));
+        color: rgba(244, 239, 230, 0.92);
+        cursor: not-allowed;
+        box-shadow:
+            inset 0 1px 0 rgba(244, 239, 230, 0.12),
+            0 18px 40px rgba(0, 0, 0, 0.14);
+    }
+
+    .project-surface__harbor-evidence {
+        background:
+            linear-gradient(180deg, rgba(244, 239, 230, 0.97), rgba(229, 220, 204, 0.92));
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.66),
+            0 20px 48px rgba(6, 17, 13, 0.18);
+    }
+
+    .project-surface__harbor-evidence::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, rgba(16, 40, 31, 0.04) 0, rgba(16, 40, 31, 0.04) 1px, transparent 1px, transparent 100%);
+        background-size: 100% 100%;
+        opacity: 0.28;
+        pointer-events: none;
+    }
+
+    .project-surface__harbor-evidence > *,
+    .project-surface__harbor-release > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .project-surface__harbor-rail-badge {
+        border: 1px solid rgba(16, 40, 31, 0.12);
+        background: rgba(16, 40, 31, 0.08);
+        color: rgba(16, 40, 31, 0.72);
+        padding: 0.45rem 0.8rem;
+    }
+
+    .project-surface__harbor-packet-stack {
+        display: grid;
+        gap: 0.9rem;
+    }
+
+    .project-surface__harbor-packet {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.15rem;
+        border: 1px solid rgba(16, 40, 31, 0.08);
+        background: rgba(255, 255, 255, 0.44);
+        padding: 1rem 1rem 1rem 1.1rem;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.55),
+            0 14px 32px rgba(16, 40, 31, 0.08);
+    }
+
+    .project-surface__harbor-packet::before {
+        content: '';
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 0.35rem;
+        border-radius: 1rem 0 0 1rem;
+        background: rgba(16, 40, 31, 0.2);
+    }
+
+    .project-surface__harbor-packet.is-active::before {
+        background: linear-gradient(180deg, #9fd1a7, #4c8a60);
+    }
+
+    .project-surface__harbor-packet.is-blocked::before {
+        background: linear-gradient(180deg, #df7865, #9b4135);
+    }
+
+    .project-surface__harbor-packet-tab {
+        border: 1px solid rgba(16, 40, 31, 0.12);
+        background: rgba(16, 40, 31, 0.06);
+        color: rgba(16, 40, 31, 0.74);
+        padding: 0.4rem 0.72rem;
+    }
+
+    .project-surface__harbor-packet-status {
+        border: 1px solid rgba(16, 40, 31, 0.1);
+        background: rgba(255, 255, 255, 0.58);
+        color: rgba(16, 40, 31, 0.62);
+        padding: 0.4rem 0.72rem;
+    }
+
+    .project-surface__harbor-scenarios {
+        border-top: 1px solid rgba(16, 40, 31, 0.1);
+        padding-top: 1rem;
+    }
+
+    .project-surface__harbor-scenario {
+        border-radius: 1rem;
+        border: 1px solid rgba(16, 40, 31, 0.08);
+        background: rgba(16, 40, 31, 0.04);
+        padding: 0.95rem 1rem;
+    }
+
+    .project-surface__harbor-release {
+        background:
+            radial-gradient(circle at 100% 0, rgba(242, 207, 140, 0.16), transparent 30%),
+            linear-gradient(180deg, rgba(9, 22, 17, 0.86), rgba(13, 31, 24, 0.94));
+        box-shadow:
+            inset 0 1px 0 rgba(244, 239, 230, 0.04),
+            0 20px 48px rgba(0, 0, 0, 0.2);
+    }
+
+    .project-surface__harbor-release::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(180deg, rgba(242, 207, 140, 0.06), transparent 24%),
+            linear-gradient(90deg, rgba(244, 239, 230, 0.04) 0, rgba(244, 239, 230, 0.04) 1px, transparent 1px, transparent 100%);
+        background-size: auto, 4.6rem 100%;
+        opacity: 0.24;
+        pointer-events: none;
+    }
+
+    .project-surface__harbor-owner-pill {
+        max-width: 12rem;
+        justify-content: center;
+        text-align: center;
+        border: 1px solid rgba(244, 239, 230, 0.12);
+        background: rgba(244, 239, 230, 0.08);
+        color: rgba(244, 239, 230, 0.72);
+        padding: 0.45rem 0.8rem;
+        line-height: 1.5;
+    }
+
+    .project-surface__harbor-lock-summary,
+    .project-surface__harbor-next-step {
+        border-radius: 1.1rem;
+        border: 1px solid rgba(242, 207, 140, 0.14);
+        background: linear-gradient(180deg, rgba(242, 207, 140, 0.1), rgba(242, 207, 140, 0.04));
+        padding: 1rem;
+    }
+
+    .project-surface__harbor-gate {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(244, 239, 230, 0.08);
+        background: rgba(244, 239, 230, 0.04);
+        padding: 0.9rem 1rem;
+    }
+
+    .project-surface__harbor-gate.is-pass {
+        border-color: rgba(159, 209, 167, 0.18);
+        background: rgba(159, 209, 167, 0.08);
+    }
+
+    .project-surface__harbor-gate.is-pending {
+        border-color: rgba(242, 207, 140, 0.18);
+        background: rgba(242, 207, 140, 0.08);
+    }
+
+    .project-surface__harbor-gate.is-blocked {
+        border-color: rgba(223, 120, 101, 0.18);
+        background: rgba(223, 120, 101, 0.08);
+    }
+
+    @media (min-width: 768px) {
+        .project-surface__harbor-stage-row {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .project-surface__harbor-console-topline {
+            grid-template-columns: minmax(0, 1fr) 15.5rem;
+            align-items: start;
+        }
+
+        .project-surface__harbor-console-grid {
+            grid-template-columns: minmax(0, 1.08fr) minmax(17rem, 0.72fr);
+        }
+    }
+
+    @media (max-width: 767px) {
+        .project-surface__harbor-state-pill,
+        .project-surface__harbor-owner-pill,
+        .project-surface__harbor-rail-badge {
+            max-width: none;
+        }
+
+        .project-surface__harbor-activity,
+        .project-surface__harbor-gate {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+}
