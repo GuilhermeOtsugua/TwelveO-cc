@@ -72,6 +72,18 @@ Before calling a pass complete, check:
 - Visual snapshots updated only after review.
 - A note about what still looks wrong if the pass is intentionally partial.
 
+## Recent Debugging Lessons
+
+Use these when a frontend issue looks visual but may actually be structural.
+
+- Verify DOM ancestry before changing CSS. If a region suddenly renders full width, confirm whether malformed markup caused the browser to re-parent the element.
+- Compare the rendered element tree against the intended container tree. A layout bug caused by an extra closing tag should be fixed in markup, not hidden with width utilities.
+- Measure the focal region and its ancestors. A section that is wider than its intended container is usually escaping the flow rather than merely looking wide.
+- Treat Playwright visual diffs as symptom confirmation, not root-cause proof.
+- When a fix changes the actual structure or tree shape, refresh snapshots only after the DOM nesting is back inside the expected wrapper.
+- Add a focused feature-test guard for the structural contract that failed, such as asserting the focal bands stay under the intended container.
+- If a lower section suddenly occupies the whole page, inspect the HTML immediately above it. Browser parser recovery often moves the failure boundary earlier than the visible symptom.
+
 ## Pass modes
 
 ### Conservative pass

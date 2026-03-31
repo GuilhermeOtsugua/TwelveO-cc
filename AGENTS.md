@@ -46,6 +46,31 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
 
+## Frontend Visual Debugging
+
+Treat each featured surface as a product slice, not a decorated content block. The goal is believable product behavior and hierarchy, not just a screenshot that fits.
+
+When a frontend change causes overflow, width drift, broken hierarchy, or unexpected section expansion:
+
+- Verify DOM ancestry before changing CSS. A visual regression may be caused by malformed markup or browser parser recovery, not styling.
+- Compare the rendered element tree against the intended container tree before assuming the layout rules are wrong.
+- Measure the focal region and its ancestors. If a section is larger than its wrapper, it is probably escaping the flow.
+- Treat screenshots and Playwright diffs as symptom checks, not root-cause proof.
+- If a fix changes structure or nesting, rerun the targeted visual check and refresh snapshots only after the DOM is correct.
+- Add a focused feature-test guard for the structural contract that failed.
+- When a lower section suddenly fills the page or loses its expected width, inspect the HTML immediately above it first.
+
+When reviewing the result:
+
+- Prefer stronger hierarchy over more components.
+- Prefer shorter labels over wider cards.
+- Do not hide a hierarchy problem with more decorative styling.
+- Do not accept "technically fits" as good enough if the result still looks cramped or awkward.
+- On mobile, preserve order and importance, not just presence.
+- Use visual tests to guard the whole section and each major surface on desktop and mobile.
+- Update snapshots only after comparing the render and confirming the change is an improvement.
+- A passing snapshot is not proof of quality by itself. Manual review is still required.
+
 ## Documentation Files
 
 - You must only create documentation files if explicitly requested by the user.

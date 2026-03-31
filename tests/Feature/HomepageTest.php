@@ -28,6 +28,7 @@ class HomepageTest extends TestCase
         $response->assertDontSeeText('Three finished product surfaces. Scan the interface first; the notes only clarify the decisions.');
 
         self::assertSame(1, $this->countMatches($xpath, '//*[@data-capability-bands]'));
+        self::assertSame(3, $this->countMatches($xpath, '//*[@id="projects"]//*[@data-project-band]'));
         self::assertSame(3, $this->countMatches($xpath, '//*[@data-project-band]'));
         self::assertSame(3, $this->countMatches($xpath, '//*[@data-project-surface]'));
         self::assertSame(3, $this->countMatches($xpath, '//*[@data-project-note-toggle]'));

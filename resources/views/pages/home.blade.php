@@ -451,8 +451,7 @@
                                             </p>
                                         </aside>
                                     </div>
-                                </div>
-                            </article>
+                                </article>
                         @endforeach
                     </div>
                 </section>
