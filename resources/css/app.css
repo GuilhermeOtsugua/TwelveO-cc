@@ -558,6 +558,14 @@
             background-color 220ms ease;
     }
 
+    .project-surface__zone-metric {
+        display: flex;
+        min-height: 5rem;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 0.4rem;
+    }
+
     .project-surface__zone::before {
         content: '';
         position: absolute;
