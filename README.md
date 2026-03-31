@@ -21,6 +21,26 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## About This Site
+
+Otsugua is a portfolio site for Guilherme Augusto, built as a polished Laravel frontend with a strong product-surface focus.
+
+The homepage is structured around three fictional but plausible project slices:
+
+- Harbor Ledger: a TDD-oriented pricing and release workspace
+- Northline Learning Ops: a DDD-oriented learning operations surface
+- Studio Current: a design-for-impact client portal
+
+Each section is treated as a real interface slice, not a decorative case study. The goal is to show product judgment, visual hierarchy, and implementation clarity through the page itself.
+
+## Development Notes
+
+- The site uses Laravel, Blade, Tailwind CSS v4, Vite, PHPUnit, and Playwright.
+- Run `npm run dev` for local frontend iteration.
+- Run `npm run build` to refresh the production asset bundle.
+- Run `php artisan test --compact` or the targeted feature tests for backend and structural checks.
+- Run the visual suite when changing the homepage layout or the three project surfaces.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.

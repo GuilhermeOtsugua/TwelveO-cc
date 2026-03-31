@@ -28,7 +28,7 @@
                 <section class="grid gap-8 lg:grid-cols-[minmax(0,1.02fr)_minmax(18rem,0.78fr)] lg:items-end">
                     <div>
                         <p class="mb-6 text-xs font-semibold uppercase tracking-[0.38em] text-[color:rgba(16,40,31,0.62)]">
-                            Portfolio / Laravel / Full-stack
+                            Laravel / Product engineering / Full-stack
                         </p>
 
                         <h1 class="hero-mark font-display-hero max-w-4xl text-6xl leading-[0.88] tracking-[-0.06em] text-[color:var(--green-900)] sm:text-7xl lg:text-[7.5rem]">
@@ -36,7 +36,7 @@
                         </h1>
 
                         <p class="mt-6 max-w-2xl text-lg leading-relaxed text-[color:rgba(16,40,31,0.8)] sm:text-xl">
-                            Hi! My name is Guilherme Augusto. I'm a software developer mainly focused on full-stack Laravel.
+                            I am Guilherme Augusto, a full-stack Laravel developer who designs software around principles that keep products clear, testable, and coherent as they grow.
                         </p>
 
                         <div class="mt-10 flex flex-wrap items-center gap-3">
@@ -44,7 +44,7 @@
                                 href="#projects"
                                 class="cta-button rounded-full bg-[color:var(--green-900)] px-6 py-3 text-sm font-semibold text-[color:var(--bg)] shadow-[0_18px_40px_rgba(16,40,31,0.18)]"
                             >
-                                View Projects
+                                How I work
                             </a>
                             <a
                                 href="#contact"
@@ -58,47 +58,400 @@
                     <aside class="hero-panel rounded-[2rem] border border-[color:var(--line)] p-6 text-[color:var(--green-900)] shadow-[0_22px_70px_rgba(16,40,31,0.08)]">
                         <div class="flex items-center justify-between text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-[color:rgba(16,40,31,0.58)]">
                             <span>Current Focus</span>
-                            <span>Laravel / UX / Systems</span>
+                            <span>Thinking / Building</span>
                         </div>
 
                         <div class="mt-10 space-y-4">
                             <p class="font-display text-3xl leading-tight tracking-[-0.04em]">
-                                Three projects, each carrying a technical idea behind the surface.
+                                {{ $currentFocus['topic'] }}
                             </p>
                             <p class="max-w-md text-sm leading-7 text-[color:rgba(16,40,31,0.74)]">
-                                The homepage is built as a quiet introduction first, then a set of curated works with hover notes that explain the thinking.
+                                {{ $currentFocus['summary'] }}
                             </p>
                         </div>
 
-                        <div class="mt-10 grid grid-cols-2 gap-3 text-sm">
-                            <div class="rounded-2xl border border-[color:var(--line)] bg-[rgba(244,239,230,0.7)] p-4">
-                                <p class="text-xs uppercase tracking-[0.24em] text-[color:rgba(16,40,31,0.54)]">Style</p>
-                                <p class="mt-2 font-medium">Editorial, technical, warm.</p>
-                            </div>
-                            <div class="rounded-2xl border border-[color:var(--line)] bg-[rgba(244,239,230,0.7)] p-4">
-                                <p class="text-xs uppercase tracking-[0.24em] text-[color:rgba(16,40,31,0.54)]">Motion</p>
-                                <p class="mt-2 font-medium">Soft, precise, minimal.</p>
-                            </div>
+                        <div class="mt-10 grid gap-3 text-sm">
+                            @foreach ($currentFocus['links'] as $link)
+                                <a
+                                    href="{{ $link['href'] }}"
+                                    class="rounded-2xl border border-[color:var(--line)] bg-[rgba(244,239,230,0.7)] p-4 transition-transform duration-200 hover:-translate-y-0.5"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <p class="text-xs uppercase tracking-[0.24em] text-[color:rgba(16,40,31,0.54)]">{{ $link['label'] }}</p>
+                                    <p class="mt-2 font-medium">{{ $link['title'] }}</p>
+                                </a>
+                            @endforeach
                         </div>
                     </aside>
                 </section>
 
-                <section id="projects" class="mt-20">
+                <section id="projects" class="mt-20" data-capability-bands>
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.34em] text-[color:rgba(16,40,31,0.58)]">Selected Projects</p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.34em] text-[color:rgba(16,40,31,0.58)]">Capability demonstrations</p>
                             <h2 class="mt-3 font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)] sm:text-4xl">
-                                Three featured works
+                                Here’s How I Shape Products
                             </h2>
                         </div>
-                        <p class="max-w-xl text-sm leading-7 text-[color:rgba(16,40,31,0.72)]">
-                            Each card reads cleanly on its own, then reveals a small offset note that explains the architecture or front-end principle behind it.
-                        </p>
                     </div>
 
-                    <div class="relative z-0 mt-8 grid gap-6 lg:grid-cols-3">
+                    <div class="mt-8 space-y-8">
                         @foreach ($projects as $project)
-                            <x-home.project-card :project="$project" />
+                            <article
+                                class="project-band rounded-[2.2rem] border border-[color:var(--line)] bg-[linear-gradient(180deg,rgba(244,239,230,0.84),rgba(238,230,216,0.7))] p-5 shadow-[0_24px_80px_rgba(16,40,31,0.08)] lg:p-7"
+                                data-project-band
+                                data-project-band-index="{{ $project['index'] }}"
+                                data-project-band-principle="{{ $project['principle'] }}"
+                                style="--band-delay: {{ $loop->index * 120 }}ms;"
+                            >
+                                <div class="grid gap-6 lg:gap-7">
+                                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                        <div class="max-w-3xl">
+                                            <p class="text-xs font-semibold uppercase tracking-[0.32em] text-[color:rgba(16,40,31,0.52)]">
+                                                {{ $project['category'] }}
+                                            </p>
+                                            <h3 class="mt-3 font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)] sm:text-[2.2rem]">
+                                                {{ $project['title'] }}
+                                            </h3>
+                                            <p class="mt-4 max-w-2xl text-base leading-8 text-[color:rgba(16,40,31,0.78)]">
+                                                {{ $project['description'] }}
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            class="project-note-trigger inline-flex items-center gap-2 rounded-full border border-[rgba(16,40,31,0.12)] bg-[rgba(244,239,230,0.6)] px-4 py-2 text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(16,40,31,0.84)]"
+                                            data-project-note-toggle
+                                            data-project-note-label-open="Hide note"
+                                            data-project-note-label-closed="{{ $project['note']['trigger'] }}"
+                                            data-project-note-desktop-anchor
+                                            aria-controls="project-note-{{ $loop->index }}"
+                                            aria-expanded="false"
+                                        >
+                                            <span>{{ $project['note']['trigger'] }}</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach ($project['tags'] as $tag)
+                                            <span class="rounded-full border border-[color:rgba(16,40,31,0.1)] bg-[rgba(244,239,230,0.74)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(16,40,31,0.6)]">
+                                                {{ $tag }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+
+                                    <div class="project-band__body">
+                                        <section
+                                            @class([
+                                                'project-surface rounded-[1.7rem] border border-[color:rgba(16,40,31,0.1)] p-4 text-[color:var(--bg)] shadow-[0_26px_60px_rgba(16,40,31,0.16)] sm:p-5',
+                                                'project-surface--tdd' => $project['principle'] === 'TDD',
+                                                'project-surface--ddd bg-[linear-gradient(160deg,rgba(12,31,24,0.98),rgba(20,48,39,0.94)_42%,rgba(55,84,71,0.9)_76%,rgba(116,149,127,0.76))]' => $project['principle'] === 'DDD',
+                                                'project-surface--impact bg-[linear-gradient(160deg,rgba(16,40,31,0.92),rgba(36,69,56,0.82)_48%,rgba(143,117,90,0.42)_100%)]' => $project['principle'] === 'Design for impact',
+                                                'bg-[linear-gradient(160deg,rgba(16,40,31,0.93),rgba(25,53,42,0.86)_48%,rgba(95,126,105,0.74))]' => $project['principle'] !== 'TDD',
+                                            ])
+                                            data-project-surface
+                                        >
+                                                <div class="flex flex-wrap items-start justify-between gap-4">
+                                                    <div>
+                                                        <p class="text-[0.62rem] font-semibold uppercase tracking-[0.32em] text-[color:rgba(244,239,230,0.62)]">
+                                                            {{ $project['surface']['eyebrow'] }}
+                                                        </p>
+                                                        <p class="mt-3 font-display text-[1.75rem] leading-none tracking-[-0.04em] text-[color:rgba(244,239,230,0.94)]">
+                                                            {{ $project['surface']['title'] }}
+                                                        </p>
+                                                    </div>
+
+                                                </div>
+
+                                                <p class="mt-4 max-w-2xl text-sm leading-7 text-[color:rgba(244,239,230,0.78)]">
+                                                    {{ $project['surface']['summary'] }}
+                                                </p>
+
+                                                @if ($project['principle'] !== 'TDD')
+                                                    <div class="mt-5 grid gap-3 sm:grid-cols-3">
+                                                        @foreach ($project['surface']['metrics'] as $metric)
+                                                            <div class="rounded-[1.1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-4 py-3">
+                                                                <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.54)]">
+                                                                    {{ $metric['label'] }}
+                                                                </p>
+                                                                <p class="mt-2 text-base font-semibold text-[color:rgba(244,239,230,0.94)]">
+                                                                    {{ $metric['value'] }}
+                                                                </p>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+
+                                                @if ($project['principle'] === 'TDD')
+                                                    @include('pages.partials.harbor-ledger', ['project' => $project])
+                                                @elseif ($project['principle'] === 'DDD')
+                                                    <section class="project-surface__case mt-5 rounded-[1.25rem] border border-[rgba(244,239,230,0.14)] bg-[rgba(8,21,16,0.28)] px-4 py-4" data-ddd-shared-case data-ddd-shared-thread>
+                                                        <div class="grid gap-4 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start">
+                                                            <div class="max-w-xl">
+                                                                <p class="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.52)]">
+                                                                    {{ $project['surface']['case']['label'] }}
+                                                                </p>
+                                                                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.92)]">
+                                                                    {{ $project['surface']['case']['value'] }}
+                                                                </p>
+                                                                <p class="mt-3 text-sm leading-7 text-[color:rgba(244,239,230,0.78)]">
+                                                                    {{ $project['surface']['case']['detail'] }}
+                                                                </p>
+
+                                                                <p class="mt-5 text-[0.56rem] font-semibold uppercase tracking-[0.26em] text-[color:rgba(244,239,230,0.48)]">
+                                                                    {{ $project['surface']['thread']['label'] }}
+                                                                </p>
+                                                                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.94)]">
+                                                                    {{ $project['surface']['thread']['title'] }}
+                                                                </p>
+                                                                <p class="mt-3 text-sm leading-7 text-[color:rgba(244,239,230,0.74)]">
+                                                                    {{ $project['surface']['thread']['detail'] }}
+                                                                </p>
+                                                            </div>
+
+                                                            <div class="grid gap-2 sm:grid-cols-2">
+                                                                @foreach ($project['surface']['thread']['stages'] as $stage)
+                                                                    <div class="rounded-[0.95rem] border border-[rgba(244,239,230,0.08)] bg-[rgba(8,21,16,0.2)] px-3 py-2.5">
+                                                                        <p class="text-[0.52rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.5)]">
+                                                                            {{ $stage['label'] }}
+                                                                        </p>
+                                                                        <p class="mt-2 text-sm leading-6 text-[color:rgba(244,239,230,0.82)]">
+                                                                            {{ $stage['status'] }}
+                                                                        </p>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </section>
+
+                                                    <div class="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1.04fr)_minmax(0,1fr)_minmax(16rem,0.84fr)]">
+                                                        @foreach ($project['surface']['zones'] as $zone)
+                                                            <section
+                                                                @class([
+                                                                    'project-surface__zone rounded-[1.25rem] border p-4',
+                                                                    'project-surface__zone--calm border-[rgba(191,229,197,0.18)] bg-[linear-gradient(180deg,rgba(159,209,167,0.12),rgba(244,239,230,0.08))]' => $zone['density'] === 'calm',
+                                                                    'project-surface__zone--active border-[rgba(242,207,140,0.24)] bg-[linear-gradient(180deg,rgba(242,207,140,0.16),rgba(244,239,230,0.08))]' => $zone['density'] === 'active',
+                                                                    'project-surface__zone--compressed border-[rgba(244,239,230,0.1)] bg-[rgba(8,21,16,0.3)]' => $zone['density'] === 'compressed',
+                                                                ])
+                                                                data-ddd-role-zone="{{ $zone['density'] }}"
+                                                            >
+                                                                <div class="flex items-start justify-between gap-3">
+                                                                    <div class="min-h-[5.4rem]">
+                                                                        <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
+                                                                            {{ $zone['label'] }}
+                                                                        </p>
+                                                                        <p class="mt-3 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.92)]">
+                                                                            {{ $zone['headline'] }}
+                                                                        </p>
+                                                                        <p class="mt-3 text-[0.56rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.5)]">
+                                                                            {{ $zone['case_label'] }}
+                                                                        </p>
+                                                                    </div>
+                                                                    <span
+                                                                        @class([
+                                                                            'project-surface__zone-dot mt-1 h-2.5 w-2.5 rounded-full',
+                                                                            'bg-[color:#9fd1a7]' => $zone['tone'] === 'stable',
+                                                                            'bg-[color:#f2cf8c] shadow-[0_0_0_4px_rgba(242,207,140,0.16)]' => $zone['tone'] === 'active',
+                                                                            'bg-[color:rgba(244,239,230,0.48)]' => $zone['tone'] === 'muted',
+                                                                        ])
+                                                                    ></span>
+                                                                </div>
+
+                                                                <div class="mt-4 min-h-[6.6rem] rounded-[1rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.16)] px-3 py-3">
+                                                                    <p class="text-sm font-semibold text-[color:rgba(244,239,230,0.94)]">
+                                                                        {{ $zone['status'] }}
+                                                                    </p>
+                                                                    <p class="mt-3 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                        {{ $zone['detail'] }}
+                                                                    </p>
+                                                                </div>
+
+                                                                <div class="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                                                                    @foreach ($zone['stats'] as $stat)
+                                                                        <div class="project-surface__zone-metric rounded-[0.95rem] border border-[rgba(244,239,230,0.08)] bg-[rgba(244,239,230,0.05)] px-3 py-2.5">
+                                                                            <p class="text-[0.5rem] font-semibold uppercase tracking-[0.2em] text-[color:rgba(244,239,230,0.5)]">
+                                                                                {{ $stat['label'] }}
+                                                                            </p>
+                                                                            <p class="project-surface__zone-metric-value mt-2 text-sm font-semibold leading-5 text-[color:rgba(244,239,230,0.9)]">
+                                                                                {{ $stat['value'] }}
+                                                                            </p>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+
+                                                                <div class="mt-4 space-y-2">
+                                                                    @foreach ($zone['items'] as $item)
+                                                                        <div class="rounded-[0.95rem] border border-[rgba(244,239,230,0.08)] bg-[rgba(244,239,230,0.05)] px-3 py-2.5 text-sm leading-6 text-[color:rgba(244,239,230,0.74)]">
+                                                                            {{ $item }}
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </section>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <div class="mt-4 grid gap-3">
+                                                        <div class="grid gap-3 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+                                                            @foreach ($project['surface']['workstreams'] as $workstream)
+                                                                <section class="project-surface__impact-card rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] p-3">
+                                                                    <div class="flex items-start justify-between gap-3">
+                                                                        <div>
+                                                                            <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
+                                                                                {{ $workstream['label'] }}
+                                                                            </p>
+                                                                            <p class="mt-3 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.94)]">
+                                                                                {{ $workstream['title'] }}
+                                                                            </p>
+                                                                        </div>
+                                                                        <span class="whitespace-nowrap rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.26)] px-3 py-1 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.68)]">
+                                                                            {{ $workstream['status'] }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <p class="mt-4 max-w-xl text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                        {{ $workstream['detail'] }}
+                                                                    </p>
+                                                                </section>
+                                                            @endforeach
+
+                                                            <section class="rounded-[1.25rem] border border-[rgba(244,239,230,0.12)] bg-[rgba(8,21,16,0.22)] p-3" data-impact-review-flow>
+                                                                <div class="flex items-center justify-between gap-3">
+                                                                    <div>
+                                                                        <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
+                                                                            Review flow
+                                                                        </p>
+                                                                        <p class="mt-3 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.94)]">
+                                                                            Active proof stays ahead of delivery
+                                                                        </p>
+                                                                    </div>
+                                                                    <span class="whitespace-nowrap rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-3 py-1 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.7)]">
+                                                                        Round 3
+                                                                    </span>
+                                                                </div>
+
+                                                                <div class="mt-4 grid gap-2 lg:grid-cols-3">
+                                                                    @foreach ($project['surface']['reviewFlow'] as $step)
+                                                                        <div class="flex items-center justify-between gap-3 rounded-[1rem] border border-[rgba(244,239,230,0.1)] bg-[rgba(244,239,230,0.06)] px-3 py-2.5">
+                                                                            <p class="text-sm leading-6 text-[color:rgba(244,239,230,0.78)]">
+                                                                                {{ $step['label'] }}
+                                                                            </p>
+                                                                            <span class="text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.68)]">
+                                                                                {{ $step['status'] }}
+                                                                            </span>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </section>
+                                                        </div>
+
+                                                        <div class="grid gap-3 xl:grid-cols-[minmax(0,1.04fr)_minmax(17.5rem,0.88fr)]">
+                                                            <section class="project-surface__feedback rounded-[1.35rem] border border-[rgba(218,163,122,0.42)] bg-[linear-gradient(180deg,rgba(235,168,119,0.18),rgba(244,239,230,0.08)_38%,rgba(8,21,16,0.26))] p-3 shadow-[0_30px_65px_rgba(10,25,19,0.2)]" data-impact-approval>
+                                                                <div class="flex items-start justify-between gap-3">
+                                                                    <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
+                                                                        {{ $project['surface']['feedback']['label'] }}
+                                                                    </p>
+                                                                    <span class="whitespace-nowrap rounded-full bg-[rgba(235,168,119,0.18)] px-3 py-1 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:#f6c69d]">
+                                                                        {{ $project['surface']['feedback']['signal'] }}
+                                                                    </span>
+                                                                </div>
+
+                                                                <div class="mt-3 rounded-[1.15rem] border border-[rgba(244,239,230,0.18)] bg-[rgba(8,21,16,0.3)] p-3 shadow-[0_22px_50px_rgba(10,25,19,0.18)]">
+                                                                    <div class="flex items-start justify-between gap-3">
+                                                                        <div>
+                                                                            <p class="text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.94)]">
+                                                                                {{ $project['surface']['feedback']['title'] }}
+                                                                            </p>
+                                                                            <p class="mt-3 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.58)]">
+                                                                                {{ $project['surface']['feedback']['owner'] }}
+                                                                            </p>
+                                                                        </div>
+                                                                        <span class="whitespace-nowrap rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-3 py-1 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.72)]">
+                                                                            Selected proof
+                                                                        </span>
+                                                                    </div>
+
+                                                                    <p class="mt-3 text-sm leading-7 text-[color:rgba(244,239,230,0.82)]">
+                                                                        {{ $project['surface']['feedback']['detail'] }}
+                                                                    </p>
+
+                                                                    <div class="mt-3 rounded-[1rem] border border-[rgba(235,168,119,0.2)] bg-[rgba(235,168,119,0.1)] px-3.5 py-3">
+                                                                        <p class="text-[0.56rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(244,239,230,0.54)]">
+                                                                            Pinned client note
+                                                                        </p>
+                                                                        <p class="mt-3 font-display text-[1.24rem] leading-tight tracking-[-0.03em] text-[color:rgba(244,239,230,0.96)] sm:text-[1.32rem]">
+                                                                            {{ $project['surface']['feedback']['comment'] }}
+                                                                        </p>
+                                                                    </div>
+
+                                                                    <div class="mt-3 flex flex-wrap gap-2">
+                                                                        @foreach ($project['surface']['feedback']['actions'] as $action)
+                                                                            <span class="whitespace-nowrap rounded-full border border-[rgba(244,239,230,0.12)] bg-[rgba(244,239,230,0.08)] px-3 py-1.5 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.78)]">
+                                                                                {{ $action }}
+                                                                            </span>
+                                                                        @endforeach
+                                                                    </div>
+
+                                                                    <p class="mt-3 text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.62)]">
+                                                                        {{ implode(' / ', $project['surface']['feedback']['badges']) }}
+                                                                    </p>
+                                                                </div>
+                                                            </section>
+
+                                                            <section class="project-surface__delivery h-full rounded-[1.25rem] border border-[rgba(159,209,167,0.18)] bg-[linear-gradient(180deg,rgba(8,21,16,0.32),rgba(8,21,16,0.16))] p-3.5 shadow-[0_26px_56px_rgba(10,25,19,0.16)]" data-impact-delivery>
+                                                                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                                                    <div class="max-w-xl">
+                                                                        <p class="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-[color:rgba(244,239,230,0.58)]">
+                                                                            {{ $project['surface']['delivery']['label'] }}
+                                                                        </p>
+                                                                        <p class="mt-3 text-sm font-semibold uppercase tracking-[0.14em] text-[color:rgba(244,239,230,0.94)]">
+                                                                            {{ $project['surface']['delivery']['value'] }}
+                                                                        </p>
+                                                                        <p class="mt-3 font-display text-[1.24rem] leading-tight tracking-[-0.03em] text-[color:rgba(244,239,230,0.92)] sm:text-[1.34rem]">
+                                                                            {{ $project['surface']['delivery']['title'] }}
+                                                                        </p>
+                                                                    </div>
+
+                                                                    <div class="rounded-[1rem] border border-[rgba(159,209,167,0.16)] bg-[rgba(159,209,167,0.08)] px-4 py-3">
+                                                                        <p class="text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[color:rgba(244,239,230,0.54)]">
+                                                                            Delivery state
+                                                                        </p>
+                                                                        <p class="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-[color:#bfe5c5]">
+                                                                            {{ $project['surface']['delivery']['status'] }}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="mt-4 grid gap-2 lg:max-w-3xl lg:grid-cols-2">
+                                                                    @foreach ($project['surface']['delivery']['items'] as $item)
+                                                                        <div class="rounded-[1rem] border border-[rgba(244,239,230,0.1)] bg-[rgba(244,239,230,0.06)] px-3 py-2.5 text-sm leading-6 text-[color:rgba(244,239,230,0.76)]">
+                                                                            {{ $item }}
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </section>
+                                                        </div>
+                                                @endif
+                                            </section>
+                                        </div>
+
+                                        <aside
+                                            id="project-note-{{ $loop->index }}"
+                                            class="project-note hidden rounded-[1.45rem] border border-[color:rgba(16,40,31,0.12)] bg-[linear-gradient(180deg,rgba(244,239,230,0.96),rgba(238,230,216,0.92))] p-5 text-[color:var(--green-900)] shadow-[0_24px_70px_rgba(16,40,31,0.14)]"
+                                            data-project-note-panel
+                                            data-project-note-inline-label="{{ $project['note']['trigger'] }}"
+                                        >
+                                            <p class="text-[0.64rem] font-semibold uppercase tracking-[0.3em] text-[color:rgba(16,40,31,0.54)]">
+                                                {{ $project['note']['trigger'] }}
+                                            </p>
+                                            <p class="mt-3 text-sm leading-7 text-[color:rgba(16,40,31,0.76)]">
+                                                {{ $project['note']['body'] }}
+                                            </p>
+                                            <p class="mt-4 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[color:rgba(16,40,31,0.46)]">
+                                                {{ $project['note']['citation'] }}
+                                            </p>
+                                        </aside>
+                                    </div>
+                                </article>
                         @endforeach
                     </div>
                 </section>
@@ -106,19 +459,35 @@
                 <section class="mt-20 grid gap-6 rounded-[2rem] border border-[color:var(--line)] bg-[linear-gradient(180deg,rgba(244,239,230,0.74),rgba(238,230,216,0.54))] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.34em] text-[color:rgba(16,40,31,0.58)]">
-                            Credibility
+                            {{ $credential['eyebrow'] }}
                         </p>
-                        <h2 class="mt-3 font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)]">
-                            Calm delivery, clear structure.
+                        <p class="mt-3 text-sm font-semibold uppercase tracking-[0.28em] text-[color:rgba(16,40,31,0.58)]">
+                            {{ $credential['bridge'] }}
+                        </p>
+                        <h2 class="mt-4 font-display text-3xl tracking-[-0.04em] text-[color:var(--green-900)]">
+                            {{ $credential['title'] }}
                         </h2>
                     </div>
 
-                    <div class="flex flex-wrap gap-3">
-                        <span class="credibility-chip rounded-full border border-[color:var(--line)] px-4 py-2 text-sm text-[color:rgba(16,40,31,0.78)]">Laravel</span>
-                        <span class="credibility-chip rounded-full border border-[color:var(--line)] px-4 py-2 text-sm text-[color:rgba(16,40,31,0.78)]">Architecture</span>
-                        <span class="credibility-chip rounded-full border border-[color:var(--line)] px-4 py-2 text-sm text-[color:rgba(16,40,31,0.78)]">Front-end</span>
-                        <span class="credibility-chip rounded-full border border-[color:var(--line)] px-4 py-2 text-sm text-[color:rgba(16,40,31,0.78)]">Product thinking</span>
-                    </div>
+                    <article class="grid gap-4 rounded-[1.5rem] border border-[color:rgba(16,40,31,0.12)] bg-[rgba(244,239,230,0.76)] p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[color:rgba(16,40,31,0.54)]">
+                                {{ $credential['issuer'] }}
+                            </p>
+                            <p class="mt-3 max-w-xl text-sm leading-7 text-[color:rgba(16,40,31,0.74)]">
+                                {{ $credential['description'] }}
+                            </p>
+                        </div>
+
+                        <a
+                            href="{{ $credential['action']['href'] }}"
+                            class="inline-flex items-center justify-center rounded-full border border-[color:var(--line)] bg-[color:var(--green-900)] px-5 py-3 text-sm font-semibold text-[color:var(--bg)] shadow-[0_18px_40px_rgba(16,40,31,0.16)]"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            {{ $credential['action']['label'] }}
+                        </a>
+                    </article>
                 </section>
 
                 <section id="contact" class="mt-10">
@@ -135,19 +504,40 @@
                         </div>
 
                         <div class="mt-6 flex flex-wrap gap-3">
-                            <a href="mailto:guilherme@otsugua.dev" class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium">
+                            <button
+                                type="button"
+                                class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium"
+                                data-copy-email="{{ $contactLinks['email'] }}"
+                                aria-describedby="contact-copy-feedback"
+                            >
                                 Email
-                            </a>
-                            <a href="https://www.linkedin.com/in/guilherme-augusto" class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium">
-                                LinkedIn
-                            </a>
-                            <a href="https://github.com/otsugua" class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium">
-                                GitHub
-                            </a>
+                            </button>
+
+                            @foreach ($contactLinks['profiles'] as $profile)
+                                <a
+                                    href="{{ $profile['href'] }}"
+                                    class="social-link rounded-full border border-[rgba(244,239,230,0.18)] bg-[rgba(244,239,230,0.06)] px-5 py-3 text-sm font-medium"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {{ $profile['label'] }}
+                                </a>
+                            @endforeach
                         </div>
+
+                        <p
+                            id="contact-copy-feedback"
+                            class="mt-4 text-sm text-[color:rgba(244,239,230,0.72)]"
+                            data-copy-email-feedback
+                            aria-live="polite"
+                            hidden
+                        >
+                            Copied
+                        </p>
                     </div>
                 </section>
             </main>
+
         </div>
     </body>
 </html>

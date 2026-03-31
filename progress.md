@@ -1,0 +1,115 @@
+# Progress Log
+## 2026-03-30
+Implemented PRD item #2
+- Updated the homepage hero copy to pair Laravel implementation grounding with the principle-led positioning required by issue #2.
+- Replaced the primary hero CTA with How I work and expanded the homepage feature test to cover the new visible hero message.
+Next: Pick the next runnable homepage repositioning issue.
+---
+## 2026-03-30
+Implemented PRD item #3
+- Replaced the placeholder Current Focus copy with an agentic development panel sourced from controller data.
+- Added one theory link and one repository link, then expanded the homepage feature test to cover the new visible content.
+Next: Pick the next runnable homepage repositioning issue.
+---
+## 2026-03-30
+Implemented PRD item #9
+- Replaced the contact mailto link with a copy-first email control backed by a small clipboard hook and lightweight Copied feedback.
+- Moved homepage contact destinations into controller data and expanded the homepage feature test to cover the new visible affordances.
+Next: Pick the next runnable homepage repositioning issue.
+---
+## 2026-03-30
+Implemented PRD item #4
+- Replaced the compact project cards with three full-width principle-led capability bands driven by homepage controller data.
+- Added explicit fictional-demo framing and expanded the homepage feature test to cover the new section heading, framing copy, and visible band content.
+Next: Pick the next runnable homepage repositioning issue.
+---
+## 2026-03-30
+Implemented PRD item #5
+- Refined the Harbor Ledger capability band so the TDD example now spells out discount ladders, tax rules, approval gates, and a trust-oriented review flow.
+- Expanded the homepage feature test to assert the pricing example\s visible copy and rationale.
+Next: Pick the next runnable homepage repositioning issue.
+---
+## 2026-03-30
+Implemented PRD item #6
+- Sharpened the Northline Learning Ops band so the DDD example now calls out role-specific rules, shared domain language, and bounded-intent workflows.
+- Expanded the homepage feature test to assert the DDD example\s description, rationale, and architectural note.
+Next: Pick the next runnable homepage repositioning issue.
+---
+## 2026-03-30
+Implemented PRD item #7
+- Sharpened the Studio Current capability band so the designing-for-impact example now makes strong visual identity, branded feedback cues, and operational clarity explicit.
+- Expanded the homepage feature test to assert the third example visible description, rationale, and architectural note.
+Next: Pick the next runnable homepage repositioning issue.
+---
+## 2026-03-30
+Implemented PRD item #8
+- Replaced the generic credibility chips with a credential-first section backed by controller data and the required bridge line.
+- Centered the Laravel certification in a verifiable credential block with a direct certificate action and expanded the homepage feature test to cover the visible credibility content.
+Next: Pick the next runnable homepage repositioning issue.
+---
+## 2026-03-30
+Implemented PRD item #11
+- Rebuilt the homepage capability rows into a shared Phase 2 band framework with sequence cues, tags, staged product-surface scaffolding, and one integrated note trigger per band.
+- Added accessible note toggles that float as contextual annotations on desktop, stack inline on mobile, and expanded the homepage feature test to cover the new visible framework hooks.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
+## 2026-03-30
+Implemented PRD item #12
+- Deepened the Harbor Ledger TDD band into a rule-and-scenario workspace with linked case coverage, a controller approval trace, and restrained audit-style motion.
+- Expanded the homepage feature test to cover the new rule, case, and approval content that makes the TDD slice read like a pricing workspace.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
+## 2026-03-30
+Implemented PRD item #13
+- Deepened the Northline Learning Ops DDD band into a three-zone learning operations workspace with one shared intervention case rendered across student, instructor, and operations views.
+- Expanded the homepage feature test to cover the new intervention case framing and role-specific operational states that make the DDD slice read as a coordinated product surface.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
+## 2026-03-30
+Implemented PRD item #14
+- Deepened the Studio Current design-for-impact band into a creative review workspace with active work, a branded feedback moment, and a dedicated asset delivery handoff surface.
+- Expanded the homepage feature test to cover the new review, delivery, and tactile feedback content that makes the band read like a believable client portal.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
+## 2026-03-30
+Implemented PRD item #15
+- Added a compact sequence staging panel and per-band progression cues so the three capability bands read as one deliberate argument instead of isolated rows.
+- Layered a small settle animation with reduced-motion handling and extended the homepage feature test to cover the new sequencing copy.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
+## 2026-03-30
+Implemented PRD item 17
+- Sharpened Harbor Ledger into a pricing-release workspace with one dominant release-decision focal panel, explicit controller and tax gates, and a linked scenario queue that reads like executable review work.
+- Updated the homepage feature test to assert the new Harbor Ledger release state and gate language instead of the prior balanced scaffold.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
+## 2026-03-30
+Implemented PRD item #18
+- Sharpened Northline Learning Ops into a multi-role intervention console with a pinned shared intervention thread, visibly different role-zone density, and role-specific snapshots that keep the same case language intact across student, instructor, and operations views.
+- Updated the homepage feature test to cover the new thread and zone states that make the DDD slice read like one coordinated workflow instead of parallel scaffolding.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
+## 2026-03-30
+Implemented PRD item #19
+- Reworked Studio Current into a clearer review-and-handoff workspace with a dedicated review-flow rail, one dominant approval moment, and a separate final delivery handoff state.
+- Updated the homepage feature test to cover the new approval focal point and delivery-state language that define the completed Studio Current slice.
+Next: Pick the next runnable Phase 2 capability-band issue.
+---
+## 2026-03-30
+Implemented PRD item #20
+- Hardened the homepage capability bands with explicit structural hooks for the completed TDD, DDD, and design-for-impact surfaces so verification now targets product regions and stateful UI slices instead of broad narrative copy.
+- Reduced the section framing to one short instruction and updated the homepage feature test to assert the new hooks alongside the critical finished-surface states.
+Next: All PRD-derived capability-band work is complete; close parent PRD #16 if no follow-up issues remain.
+---
+## 2026-03-30
+Implemented PRD item #23
+- Reduced Harbor Ledger to one dominant quote-release focal region by removing the duplicated metric row and keeping rules, approvals, and gate ownership anchored to the main decision panel.
+- Updated the homepage feature test to assert the explicit Harbor Ledger focus, evidence, and release-region structure in DOM order instead of relying on copy alone.
+Next: Pick the next runnable child issue for parent PRD #22.
+---
+## 2026-03-31
+Implemented PRD item #25
+- Tightened the Studio Current approval and delivery surfaces so the band reads closer to the Northline scale instead of expanding into a heavier third-row block.
+- Added a desktop Playwright guard that keeps the Studio Current band no taller than the Northline Learning Ops band, and refreshed the affected Studio snapshots after a desktop/mobile visual pass.
+Next: Pick the next runnable child issue for parent PRD #24.
+---
