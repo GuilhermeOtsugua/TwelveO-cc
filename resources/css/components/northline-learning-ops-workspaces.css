@@ -1,0 +1,1357 @@
+@layer components {
+    .northline-class-picker {
+        position: relative;
+    }
+
+    .northline-class-menu {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        left: 0;
+        z-index: 30;
+        display: grid;
+        min-width: 16.5rem;
+        gap: 0.45rem;
+        border: 1px solid rgba(113, 120, 122, 0.22);
+        border-radius: 1.15rem;
+        background: rgba(255, 255, 255, 0.98);
+        padding: 0.6rem;
+        box-shadow: 0 20px 40px rgba(82, 104, 117, 0.12);
+    }
+
+    .northline-class-option {
+        display: grid;
+        gap: 0.18rem;
+        border-radius: 0.95rem;
+        padding: 0.72rem 0.82rem;
+        text-align: left;
+        transition: background-color 180ms ease, transform 180ms ease;
+    }
+
+    .northline-class-option span,
+    .northline-context-chip__label,
+    .northline-workspace-item__eyebrow {
+        font-family: 'Roboto Condensed', var(--font-sans);
+        font-size: 0.54rem;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    .northline-class-option strong {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: #293032;
+    }
+
+    .northline-class-option:hover,
+    .northline-class-option.is-active {
+        background: rgba(255, 75, 92, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .northline-context-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        min-width: 0;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.74);
+        padding: 0.36rem 0.72rem;
+        box-shadow: inset 0 0 0 1px rgba(41, 48, 50, 0.08);
+        color: #475058;
+    }
+
+    .northline-context-chip__dot {
+        width: 0.42rem;
+        height: 0.42rem;
+        flex-shrink: 0;
+        border-radius: 999px;
+        background: #ff5c67;
+        box-shadow: 0 0 0 4px rgba(255, 92, 103, 0.12);
+    }
+
+    .northline-context-chip__name {
+        min-width: 0;
+        font-size: 0.72rem;
+        font-weight: 600;
+        white-space: nowrap;
+        color: #293032;
+    }
+
+    .northline-workspace-header {
+        min-height: 7rem;
+    }
+
+    .northline-view-stack,
+    .northline-view-panel {
+        min-height: 0;
+        height: 100%;
+    }
+
+    .northline-dashboard-column {
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .northline-status-panel {
+        padding: 0.7rem 0.85rem;
+    }
+
+    .northline-status-grid {
+        gap: 0.65rem;
+    }
+
+    .northline-overdue-card {
+        gap: 0.65rem;
+        padding: 0.7rem 0.85rem;
+    }
+
+    .northline-overdue-card__summary {
+        gap: 0.65rem;
+    }
+
+    .northline-overdue-card__icon {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .northline-overdue-card .northline-display {
+        font-size: 1.42rem;
+    }
+
+    .northline-workflow-grid {
+        gap: 0.7rem;
+    }
+
+    .northline-action-card {
+        min-height: 4.2rem;
+        gap: 0.5rem;
+        padding: 0.65rem;
+    }
+
+    .northline-action-icon {
+        width: 2.35rem;
+        height: 2.35rem;
+    }
+
+    .northline-action-label {
+        font-size: 0.62rem;
+        line-height: 1.15;
+    }
+
+    .northline-actionable-section {
+        padding-top: 0.5rem;
+    }
+
+    .northline-actionable-header {
+        margin-bottom: 0.5rem;
+    }
+
+    .northline-actionable-grid {
+        align-items: stretch;
+        grid-auto-rows: minmax(0, 1fr);
+    }
+
+    .northline-list-panel--dashboard {
+        height: 100%;
+        padding: 0.6rem 0.68rem 0.65rem;
+    }
+
+    .northline-list-panel__top {
+        margin-bottom: 0.35rem;
+    }
+
+    .northline-actionable-list {
+        gap: 0.42rem;
+    }
+
+    .northline-list-panel--dashboard .northline-list-item {
+        min-height: 2.75rem;
+        gap: 0.5rem;
+        padding: 0.42rem 0.56rem;
+    }
+
+    .northline-list-panel--dashboard .northline-list-item__icon {
+        width: 1.65rem;
+        height: 1.65rem;
+    }
+
+    .northline-list-panel--dashboard .northline-item-title {
+        font-size: 0.68rem;
+    }
+
+    .northline-list-panel--dashboard .northline-list-badge--standard {
+        height: 1.5rem;
+        padding-inline: 0.68rem;
+        font-size: 0.6rem;
+    }
+
+    .northline-status-metric {
+        display: grid;
+        cursor: pointer;
+        gap: 0.46rem;
+        border-radius: 1rem;
+        padding: 0.45rem;
+        text-align: left;
+        transition: background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .northline-status-metric:hover,
+    .northline-status-metric:focus-visible {
+        background: rgba(11, 123, 119, 0.08);
+        transform: translateY(-1px);
+        box-shadow: inset 0 0 0 1px rgba(11, 123, 119, 0.12);
+        outline: none;
+    }
+
+    .northline-status-metric--coral:hover,
+    .northline-status-metric--coral:focus-visible {
+        background: rgba(255, 75, 92, 0.08);
+        box-shadow: inset 0 0 0 1px rgba(255, 75, 92, 0.12);
+    }
+
+    .northline-workspace-grid {
+        display: grid;
+        height: 100%;
+        min-height: 0;
+        gap: 1rem;
+    }
+
+    .northline-workspace-grid--documents {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    }
+
+    .northline-workspace-grid--students {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    }
+
+    .northline-list-panel--workspace,
+    .northline-workspace-detail {
+        min-height: 0;
+        padding: 1rem;
+    }
+
+    .northline-workspace-detail {
+        display: grid;
+        gap: 1.1rem;
+        align-content: start;
+    }
+
+    .northline-workspace-detail--documents,
+    .northline-workspace-detail--exams,
+    .northline-workspace-detail--students {
+        align-content: start;
+    }
+
+    .northline-workspace-panel__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .northline-workspace-grid--students .northline-workspace-panel__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .northline-workspace-panel__top .northline-link-label,
+    .northline-workspace-panel__top .northline-list-meta,
+    .northline-workspace-panel__top .northline-list-chip,
+    .northline-workspace-panel__top .northline-status-chip,
+    .northline-workspace-panel__top .northline-timestamp-chip {
+        white-space: nowrap;
+    }
+
+    .northline-workspace-list {
+        display: grid;
+        gap: 0.55rem;
+        margin-top: 1rem;
+    }
+
+    .northline-workspace-item {
+        display: grid;
+        gap: 0.2rem;
+        border-radius: 1rem;
+        background: #f6f9fb;
+        padding: 0.78rem 0.85rem;
+        text-align: left;
+        transition: background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .northline-workspace-item strong {
+        font-size: 0.88rem;
+        color: #293032;
+    }
+
+    .northline-workspace-item span:last-child,
+    .northline-workspace-summary {
+        font-size: 0.83rem;
+        line-height: 1.65;
+        color: #5b6770;
+    }
+
+    .northline-workspace-item:hover,
+    .northline-workspace-item.is-active {
+        background: rgba(255, 75, 92, 0.08);
+        transform: translateY(-1px);
+        box-shadow: inset 0 0 0 1px rgba(255, 75, 92, 0.12);
+    }
+
+    .northline-workspace-card {
+        display: grid;
+        gap: 0.45rem;
+        border-radius: 1rem;
+        background: #f6f9fb;
+        padding: 0.95rem 1rem;
+    }
+
+    .northline-workspace-card--stacked {
+        gap: 0.7rem;
+    }
+
+    .northline-workspace-hero {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.95rem;
+        border-radius: 1.3rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 249, 251, 0.96));
+        padding: 1rem 1.05rem;
+        box-shadow:
+            inset 0 0 0 1px rgba(113, 120, 122, 0.1),
+            0 10px 20px rgba(82, 104, 117, 0.04);
+    }
+
+    .northline-workspace-hero__icon,
+    .northline-workspace-hero__avatar {
+        display: flex;
+        width: 3.1rem;
+        height: 3.1rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        flex-shrink: 0;
+    }
+
+    .northline-workspace-hero__icon--teal {
+        background: rgba(11, 123, 119, 0.12);
+        color: #0b7b77;
+    }
+
+    .northline-workspace-hero__icon--coral {
+        background: rgba(255, 75, 92, 0.12);
+        color: #ff4b5c;
+    }
+
+    .northline-workspace-hero__avatar {
+        background: linear-gradient(180deg, rgba(255, 75, 92, 0.18), rgba(255, 75, 92, 0.08));
+        font-family: 'Roboto Condensed', var(--font-sans);
+        font-size: 1.1rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        color: #922534;
+    }
+
+    .northline-workspace-hero__meta {
+        display: grid;
+        justify-items: end;
+        gap: 0.35rem;
+    }
+
+    .northline-workspace-stat-grid {
+        display: grid;
+        gap: 0.72rem;
+    }
+
+    .northline-workspace-stat-grid--documents,
+    .northline-workspace-stat-grid--exams {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .northline-workspace-stat-grid--students {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .northline-workspace-stat-card {
+        display: grid;
+        gap: 0.32rem;
+        min-height: 7.25rem;
+        align-content: start;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.92);
+        padding: 0.8rem 0.88rem;
+        box-shadow: inset 0 0 0 1px rgba(113, 120, 122, 0.1);
+    }
+
+    .northline-workspace-stat-value,
+    .northline-workspace-stat-copy {
+        font-size: 0.83rem;
+        line-height: 1.5;
+        color: #293032;
+    }
+
+    .northline-workspace-stat-value {
+        font-weight: 700;
+    }
+
+    .northline-filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        justify-content: flex-end;
+    }
+
+    .northline-filter-chip {
+        display: grid;
+        gap: 0.08rem;
+        justify-items: start;
+        border: 1px solid rgba(113, 120, 122, 0.18);
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.92);
+        padding: 0.58rem 0.78rem;
+        text-align: left;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.82),
+            0 8px 18px rgba(82, 104, 117, 0.05);
+    }
+
+    .northline-filter-chip.is-active {
+        background: rgba(255, 75, 92, 0.08);
+        border-color: rgba(255, 75, 92, 0.16);
+        color: #922534;
+    }
+
+    .northline-filter-chip--cycle {
+        width: min(11.25rem, 100%);
+        max-width: 100%;
+        padding: 0.52rem 0.66rem;
+    }
+
+    .northline-filter-chip--inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        border-radius: 999px;
+        padding: 0.42rem 0.72rem;
+    }
+
+    .northline-filter-chip--inline .northline-filter-chip__eyebrow {
+        font-size: 0.46rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: inherit;
+        opacity: 0.72;
+    }
+
+    .northline-filter-chip--inline .northline-filter-chip__value {
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #293032;
+    }
+
+    .northline-workspace-grid--students .northline-filter-row {
+        margin-left: auto;
+    }
+
+    .northline-filter-chip--cycle .northline-filter-chip__eyebrow,
+    .northline-filter-chip--cycle .northline-filter-chip__hint {
+        font-size: 0.46rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: inherit;
+        opacity: 0.72;
+    }
+
+    .northline-filter-chip--cycle .northline-filter-chip__value {
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #293032;
+    }
+
+    .northline-list-chip,
+    .northline-status-chip,
+    .northline-secondary-chip,
+    .northline-timestamp-chip {
+        white-space: nowrap;
+    }
+
+    .northline-status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.32rem;
+        border: 1px solid transparent;
+        border-radius: 0.9rem;
+        padding: 0.34rem 0.72rem;
+        font-family: 'Roboto Condensed', var(--font-sans);
+        font-size: 0.57rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        line-height: 1.1;
+        text-transform: uppercase;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+        transition:
+            background-color 180ms ease,
+            border-color 180ms ease,
+            color 180ms ease,
+            box-shadow 180ms ease,
+            transform 180ms ease;
+    }
+
+    .northline-status-chip::before {
+        width: 0.4rem;
+        height: 0.4rem;
+        flex-shrink: 0;
+        border-radius: 999px;
+        background: currentColor;
+        content: '';
+        opacity: 0.85;
+    }
+
+    .northline-status-chip--teal {
+        background: rgba(11, 123, 119, 0.12);
+        color: #0b7b77;
+    }
+
+    .northline-status-chip--coral {
+        background: rgba(255, 75, 92, 0.12);
+        color: #ff4b5c;
+    }
+
+    .northline-status-chip--sand {
+        background: rgba(155, 98, 0, 0.12);
+        color: #9b6200;
+    }
+
+    .northline-status-chip--slate {
+        background: rgba(41, 48, 50, 0.08);
+        color: #56606a;
+    }
+
+    button.northline-status-chip:hover,
+    button.northline-status-chip:focus-visible {
+        transform: translateY(-1px);
+        outline: none;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.45),
+            0 10px 20px rgba(82, 104, 117, 0.08);
+    }
+
+    .northline-timestamp-chip {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgba(11, 123, 119, 0.12);
+        border-radius: 0.8rem;
+        background: linear-gradient(180deg, rgba(11, 123, 119, 0.06), rgba(255, 255, 255, 0.94));
+        padding: 0.3rem 0.6rem;
+        font-family: 'Roboto Condensed', var(--font-sans);
+        font-size: 0.5rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        line-height: 1.1;
+        text-transform: uppercase;
+        color: #5a6970;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .northline-secondary-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        border: 1px solid rgba(11, 123, 119, 0.14);
+        border-radius: 0.95rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(236, 244, 247, 0.96));
+        cursor: pointer;
+        padding: 0.46rem 0.8rem;
+        font-family: 'Roboto Condensed', var(--font-sans);
+        font-size: 0.56rem;
+        font-weight: 900;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #0b6b67;
+        box-shadow: 0 8px 16px rgba(82, 104, 117, 0.04);
+        transition:
+            transform 180ms ease,
+            background-color 180ms ease,
+            border-color 180ms ease,
+            box-shadow 180ms ease,
+            color 180ms ease;
+    }
+
+    button.northline-filter-chip {
+        cursor: pointer;
+    }
+
+    button.northline-status-chip {
+        cursor: pointer;
+    }
+
+    .northline-secondary-chip:hover,
+    .northline-secondary-chip:focus-visible {
+        background: rgba(11, 123, 119, 0.12);
+        border-color: rgba(11, 123, 119, 0.2);
+        box-shadow: 0 12px 22px rgba(82, 104, 117, 0.08);
+        transform: translateY(-1px);
+        outline: none;
+    }
+
+    .northline-workspace-grid--students .northline-filter-chip {
+        justify-self: start;
+    }
+
+    .northline-overlay-layer {
+        background: rgba(237, 244, 248, 0.28);
+        backdrop-filter: blur(6px);
+    }
+
+    .northline-overlay-shell {
+        position: absolute;
+        inset: 0;
+    }
+
+    .northline-overlay-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(41, 48, 50, 0.18);
+    }
+
+    .northline-overlay {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 76%;
+        border-radius: 1.8rem;
+        background: rgba(255, 255, 255, 0.98);
+        padding: 1.55rem 1.55rem 1.45rem;
+        box-shadow: 0 28px 70px rgba(41, 48, 50, 0.22);
+    }
+
+    .northline-overlay--message {
+        width: 52%;
+    }
+
+    .northline-mobile-grading-sheet {
+        display: none;
+    }
+
+    .northline-overlay--grading .northline-context-chip {
+        background: rgba(255, 255, 255, 0.96);
+        color: #293032;
+        box-shadow:
+            inset 0 0 0 1px rgba(11, 123, 119, 0.12),
+            0 8px 18px rgba(41, 48, 50, 0.06);
+    }
+
+    .northline-overlay-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-right: 3.25rem;
+    }
+
+    .northline-overlay-header--compact {
+        margin-bottom: 1.2rem;
+    }
+
+    .northline-context-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .northline-overlay--message .northline-context-chip {
+        display: inline-flex;
+        width: fit-content;
+        max-width: 100%;
+        background: rgba(255, 255, 255, 0.74);
+        color: #475058;
+        box-shadow: inset 0 0 0 1px rgba(41, 48, 50, 0.08);
+    }
+
+    .northline-overlay-close {
+        position: absolute;
+        top: 0.85rem;
+        right: 0.85rem;
+        z-index: 2;
+        border-radius: 999px;
+        background: rgba(41, 48, 50, 0.08);
+        padding: 0.38rem 0.72rem;
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #56606a;
+        cursor: pointer;
+        transition:
+            background-color 0.18s ease,
+            color 0.18s ease,
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
+    }
+
+    .northline-overlay-close:hover,
+    .northline-overlay-close:focus-visible {
+        background: rgba(41, 48, 50, 0.14);
+        color: #293032;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(41, 48, 50, 0.12);
+        outline: none;
+    }
+
+    .northline-overlay-selectors {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .northline-field-label {
+        display: grid;
+        gap: 0.4rem;
+        min-width: 10rem;
+    }
+
+    .northline-field-label--stacked {
+        width: 100%;
+    }
+
+    .northline-field-label span {
+        font-family: 'Roboto Condensed', var(--font-sans);
+        font-size: 0.56rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #69737c;
+    }
+
+    .northline-field-label select,
+    .northline-field-label input,
+    .northline-field-label textarea {
+        width: 100%;
+        border: 1px solid rgba(113, 120, 122, 0.22);
+        border-radius: 0.95rem;
+        background: #f8fafb;
+        padding: 0.72rem 0.82rem;
+        font-size: 0.84rem;
+        color: #293032;
+        outline: none;
+    }
+
+    .northline-overlay-selectors .northline-field-label select {
+        appearance: none;
+        -webkit-appearance: none;
+        background-clip: padding-box;
+        cursor: pointer;
+        padding-right: 2.25rem;
+        background-image:
+            linear-gradient(45deg, transparent 50%, #56606a 50%),
+            linear-gradient(135deg, #56606a 50%, transparent 50%);
+        background-position:
+            calc(100% - 1rem) 53%,
+            calc(100% - 0.72rem) 53%;
+        background-size: 0.38rem 0.38rem;
+        background-repeat: no-repeat;
+        transition:
+            background-color 180ms ease,
+            border-color 180ms ease,
+            box-shadow 180ms ease,
+            transform 180ms ease;
+    }
+
+    .northline-overlay-selectors .northline-field-label select:hover,
+    .northline-overlay-selectors .northline-field-label select:focus-visible {
+        background-color: rgba(11, 123, 119, 0.045);
+        border-color: rgba(11, 123, 119, 0.28);
+        box-shadow:
+            inset 0 0 0 1px rgba(11, 123, 119, 0.14),
+            0 8px 18px rgba(41, 48, 50, 0.08);
+        transform: translateY(-1px);
+        outline: none;
+    }
+
+    .northline-overlay-selectors .northline-field-label select::-ms-expand {
+        display: none;
+    }
+
+    .northline-field-label textarea {
+        resize: none;
+    }
+
+    .northline-grading-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 18rem;
+        gap: 1rem;
+    }
+
+    .northline-grading-preview,
+    .northline-grading-sidebar {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .northline-grading-preview {
+        border-radius: 1.3rem;
+        background: #f6f9fb;
+        padding: 1.1rem 1.15rem;
+    }
+
+    .northline-grading-preview__paper {
+        margin-top: 1rem;
+        border-radius: 1.2rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem 1.05rem;
+        box-shadow: inset 0 0 0 1px rgba(113, 120, 122, 0.1);
+    }
+
+    .northline-grading-preview__meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .northline-grading-preview__meta .northline-status-chip {
+        flex-shrink: 0;
+    }
+
+    .northline-grade-options {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.5rem;
+    }
+
+    .northline-grade-option {
+        border-radius: 0.8rem;
+        background: rgba(41, 48, 50, 0.08);
+        padding: 0.68rem 0.2rem;
+        font-family: 'Roboto Condensed', var(--font-sans);
+        font-size: 0.75rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #56606a;
+        cursor: pointer;
+        transition: transform 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .northline-grade-option:hover,
+    .northline-grade-option:focus-visible {
+        background: rgba(11, 123, 119, 0.11);
+        color: #1f3941;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(16, 24, 40, 0.08);
+    }
+
+    .northline-grade-option.is-active {
+        background: rgba(11, 123, 119, 0.14);
+        color: #0b6b67;
+    }
+
+    @media (max-width: 64rem) {
+        .northline-workspace-grid--documents,
+        .northline-workspace-grid--students {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .northline-workspace-hero {
+            grid-template-columns: minmax(0, 1fr);
+            justify-items: start;
+        }
+
+        .northline-workspace-hero__meta {
+            justify-items: start;
+        }
+
+        .northline-workspace-detail--documents,
+        .northline-workspace-detail--exams,
+        .northline-workspace-detail--students {
+            align-content: start;
+        }
+
+        .northline-workspace-stat-grid--documents,
+        .northline-workspace-stat-grid--exams,
+        .northline-workspace-stat-grid--students {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .northline-workspace-stat-grid--students {
+            margin-top: 0;
+        }
+    }
+
+    @media (max-width: 1023px) {
+        .northline-class-menu {
+            min-width: min(100%, 14rem);
+            max-width: min(18rem, calc(100vw - 3rem));
+        }
+
+        .northline-view-stack,
+        .northline-view-panel,
+        .northline-workspace-grid,
+        .northline-list-panel--workspace,
+        .northline-workspace-detail {
+            height: auto;
+        }
+
+        .northline-workspace-grid,
+        .northline-workspace-grid--documents,
+        .northline-workspace-grid--students,
+        .northline-workspace-stat-grid--documents,
+        .northline-workspace-stat-grid--exams,
+        .northline-workspace-stat-grid--students,
+        .northline-grading-grid,
+        .northline-grade-options,
+        .northline-workspace-hero {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .northline-workspace-panel__top,
+        .northline-workspace-grid--students .northline-workspace-panel__top,
+        .northline-overlay-header,
+        .northline-overlay-selectors {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .northline-workspace-hero__meta {
+            justify-items: start;
+        }
+
+        .northline-filter-row,
+        .northline-workspace-grid--students .northline-filter-row {
+            justify-content: flex-start;
+        }
+
+        .northline-filter-chip--cycle,
+        .northline-field-label {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .northline-overlay {
+            width: calc(100% - 1.25rem);
+            max-height: calc(100% - 1.25rem);
+            overflow: auto;
+            padding: 1rem;
+        }
+
+        .northline-overlay--message {
+            width: calc(100% - 1.25rem);
+        }
+
+        .northline-overlay-header {
+            padding-right: 0;
+        }
+
+        .northline-grading-preview__meta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .northline-workspace-item strong,
+        .northline-workspace-summary,
+        .northline-workspace-stat-copy,
+        .northline-workspace-stat-value {
+            overflow-wrap: anywhere;
+        }
+    }
+
+    @media (max-width: 639px) {
+        .northline-workspace-header {
+            min-height: 3.55rem;
+        }
+
+        .northline-workspace-grid {
+            gap: 0.72rem;
+        }
+
+        .northline-overlay-layer {
+            background: rgba(41, 48, 50, 0.28);
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+        }
+
+        .northline-overlay-backdrop {
+            background:
+                radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.12), transparent 42%),
+                linear-gradient(180deg, rgba(41, 48, 50, 0.04), rgba(41, 48, 50, 0.22));
+        }
+
+        .northline-overlay {
+            inset: 0.54rem;
+            display: flex;
+            width: auto;
+            height: fit-content;
+            max-height: calc(100% - 1.08rem);
+            margin: auto;
+            flex-direction: column;
+            overflow: hidden;
+            transform: none;
+            border-radius: 1.35rem;
+            background: #fff;
+            padding: 0.82rem;
+            box-shadow: 0 24px 54px rgba(41, 48, 50, 0.28);
+        }
+
+        .northline-overlay--grading {
+            min-height: 0;
+        }
+
+        .northline-overlay--message {
+            width: auto;
+            min-height: min(23rem, calc(100% - 1.08rem));
+        }
+
+        .northline-overlay-desktop-content {
+            display: none;
+        }
+
+        .northline-mobile-grading-sheet {
+            display: flex;
+            min-height: 0;
+            flex-direction: column;
+            gap: 0.58rem;
+        }
+
+        .northline-overlay-close {
+            top: 0.62rem;
+            right: 0.62rem;
+            padding: 0.34rem 0.62rem;
+            font-size: 0.6rem;
+        }
+
+        .northline-overlay-header,
+        .northline-overlay-header--compact {
+            gap: 0.58rem;
+            margin-bottom: 0.62rem;
+            padding-right: 3.35rem;
+        }
+
+        .northline-overlay-header h5 {
+            margin-top: 0.22rem;
+            font-size: 1.08rem;
+            line-height: 0.94;
+            letter-spacing: -0.035em;
+        }
+
+        .northline-mobile-grading-sheet .northline-overlay-header h5 {
+            max-width: 10rem;
+            font-size: 1.22rem;
+            line-height: 0.9;
+        }
+
+        .northline-overlay-selectors {
+            display: grid;
+            width: 100%;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.48rem;
+        }
+
+        .northline-context-chip-row,
+        .northline-overlay-header .flex.flex-wrap {
+            display: none;
+            max-width: 100%;
+            padding-right: 0;
+        }
+
+        .northline-overlay .northline-context-chip {
+            max-width: 100%;
+            padding: 0.32rem 0.58rem;
+        }
+
+        .northline-overlay .northline-context-chip__label {
+            font-size: 0.46rem;
+        }
+
+        .northline-overlay .northline-context-chip__name {
+            overflow: hidden;
+            font-size: 0.62rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .northline-field-label {
+            gap: 0.26rem;
+            min-width: 0;
+        }
+
+        .northline-field-label span {
+            font-size: 0.48rem;
+        }
+
+        .northline-field-label select,
+        .northline-field-label input,
+        .northline-field-label textarea {
+            border-radius: 0.82rem;
+            padding: 0.58rem 0.68rem;
+            font-size: 0.72rem;
+        }
+
+        .northline-mobile-grading-sheet__selectors {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.48rem;
+        }
+
+        .northline-mobile-submission-card,
+        .northline-mobile-grade-card {
+            display: grid;
+            gap: 0.52rem;
+            border: 1px solid rgba(113, 120, 122, 0.14);
+            border-radius: 1rem;
+            background: #f7fafb;
+            padding: 0.68rem;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.78);
+        }
+
+        .northline-mobile-submission-card {
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: end;
+        }
+
+        .northline-mobile-submission-card h6 {
+            margin-top: 0.4rem;
+            font-size: 0.86rem;
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            color: #293032;
+        }
+
+        .northline-mobile-submission-card p {
+            display: -webkit-box;
+            overflow: hidden;
+            margin-top: 0.26rem;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            font-size: 0.68rem;
+            line-height: 1.35;
+            color: #65717b;
+        }
+
+        .northline-mobile-submission-card .northline-secondary-chip {
+            max-width: 7.4rem;
+            min-height: 2rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .northline-mobile-grade-card {
+            grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr);
+            align-items: end;
+        }
+
+        .northline-mobile-grade-card textarea {
+            min-height: 4.15rem;
+        }
+
+        .northline-mobile-sheet-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.48rem;
+        }
+
+        .northline-grading-grid {
+            display: flex;
+            min-height: 0;
+            flex: 1 1 auto;
+            flex-direction: column;
+            gap: 0.62rem;
+        }
+
+        .northline-grading-preview,
+        .northline-grading-sidebar {
+            gap: 0.62rem;
+        }
+
+        .northline-grading-preview {
+            padding: 0.72rem;
+        }
+
+        .northline-grading-preview__meta {
+            gap: 0.44rem;
+        }
+
+        .northline-grading-preview__paper {
+            margin-top: 0.62rem;
+            border-radius: 1rem;
+            padding: 0.72rem;
+        }
+
+        .northline-grading-preview__paper h6 {
+            margin-top: 0.48rem;
+            font-size: 0.86rem;
+            line-height: 1;
+        }
+
+        .northline-grading-preview__paper .space-y-3 {
+            display: -webkit-box;
+            overflow: hidden;
+            margin-top: 0.58rem;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+            font-size: 0.7rem;
+            line-height: 1.55;
+        }
+
+        .northline-grading-sidebar .northline-workspace-card {
+            border-radius: 1rem;
+            padding: 0.7rem;
+        }
+
+        .northline-grade-options {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.38rem;
+            margin-top: 0.58rem;
+        }
+
+        .northline-grade-option {
+            border-radius: 0.68rem;
+            padding: 0.52rem 0.1rem;
+            font-size: 0.64rem;
+        }
+
+        .northline-overlay .northline-primary-cta,
+        .northline-overlay .northline-secondary-chip {
+            justify-content: center;
+            min-height: 2.3rem;
+            padding-inline: 0.78rem;
+        }
+
+        .northline-overlay .flex.items-center.justify-end {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.48rem;
+        }
+
+        .northline-overlay--message .space-y-4 {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            gap: 0.58rem;
+        }
+
+        .northline-overlay--message textarea {
+            min-height: 8.7rem;
+        }
+
+        .northline-list-panel--workspace,
+        .northline-workspace-detail {
+            padding: 0.8rem;
+        }
+
+        [data-northline-critical-command] {
+            min-height: 13rem;
+        }
+
+        [data-northline-critical-command] .northline-checkin-card {
+            border-radius: 1.32rem;
+            box-shadow: 0 18px 40px rgba(255, 92, 103, 0.14);
+        }
+
+        [data-northline-critical-command] .northline-checkin-card:nth-child(n + 2) {
+            display: none !important;
+        }
+
+        [data-northline-reach-card] {
+            display: none;
+        }
+
+        [data-northline-critical-command] {
+            padding: 0.86rem 0.94rem 0.88rem;
+        }
+
+        [data-northline-critical-command] .northline-section-title {
+            padding-bottom: 0.52rem;
+        }
+
+        [data-northline-critical-command] .northline-checkin-rotator {
+            margin-top: 0.55rem;
+        }
+
+        [data-northline-critical-command] .northline-checkin-track {
+            min-height: 5.5rem;
+            padding-bottom: 0.28rem;
+        }
+
+        [data-northline-critical-command] .northline-checkin-item__copy {
+            min-height: 0;
+            gap: 0.1rem;
+        }
+
+        [data-northline-critical-command] .northline-checkin-item__title {
+            font-size: 0.74rem;
+        }
+
+        [data-northline-critical-command] .northline-checkin-item__body {
+            -webkit-line-clamp: 3;
+        }
+
+        [data-northline-critical-command] .northline-checkin-footer {
+            min-height: 1.9rem;
+            padding-top: 0.2rem;
+        }
+
+        .northline-reach-card {
+            min-height: 0;
+            max-height: none;
+            overflow: visible;
+            padding: 0.68rem 0.88rem 0.74rem;
+        }
+
+        .northline-reach-card > div:nth-child(2) {
+            margin-top: 0.7rem;
+        }
+
+        .northline-reach-summary {
+            display: -webkit-box;
+            overflow: hidden;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        .northline-reach-summary .northline-rolling-text {
+            mask-image: none;
+        }
+
+        .northline-reach-summary .northline-rolling-text__track {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            animation: none;
+            transform: none;
+        }
+
+        .northline-reach-summary .northline-rolling-text__copy {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+        }
+
+        .northline-reach-summary .northline-rolling-text__copy--clone {
+            display: none !important;
+        }
+
+        .northline-reach-card > div:last-child {
+            display: none;
+        }
+
+        .northline-reach-card > div:last-child > div:last-child {
+            display: none;
+        }
+
+        .northline-list-panel--dashboard:nth-child(n + 3) {
+            max-height: 8.7rem;
+            overflow: hidden;
+        }
+    }
+}

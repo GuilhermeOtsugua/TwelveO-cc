@@ -1,7 +1,407 @@
 import './bootstrap';
+import './northline-learning-ops';
+import './harbor-ledger';
+
+const themePreferenceStorageKey = 'otsugua.theme.preference';
+const themePreferences = ['system', 'dark', 'light'];
+const themeRoot = document.documentElement;
 
 const hideDelays = new WeakMap();
 const fadeDelays = new WeakMap();
+
+const homeHeader = document.querySelector('[data-home-header]');
+const mobileHeaderMediaQuery = window.matchMedia?.('(max-width: 639px)');
+
+function initializeMobileHeaderScroll() {
+    if (!homeHeader || !mobileHeaderMediaQuery) {
+        return;
+    }
+
+    const minimumScrollDelta = 4;
+    const transitionLockBuffer = 80;
+    const fallbackTransitionLockDuration = 320;
+    let lastScrollY = Math.max(window.scrollY, 0);
+    let ticking = false;
+    let hasSyncedInitialPosition = false;
+    let hasUserScrollIntent = false;
+    let isHeaderHidden = homeHeader.classList.contains('is-mobile-nav-hidden');
+    let accumulatedDistance = 0;
+    let lastScrollDirection = 0;
+    let transitionLockTimeoutId = null;
+    let isTransitionLocked = false;
+
+    const resetScrollTracking = (scrollY = Math.max(window.scrollY, 0)) => {
+        lastScrollY = scrollY;
+        accumulatedDistance = 0;
+        lastScrollDirection = 0;
+    };
+
+    const releaseTransitionLock = () => {
+        if (transitionLockTimeoutId !== null) {
+            window.clearTimeout(transitionLockTimeoutId);
+            transitionLockTimeoutId = null;
+        }
+
+        isTransitionLocked = false;
+    };
+
+    const parseTransitionTime = (value) => {
+        const normalizedValue = value.trim();
+
+        if (!normalizedValue) {
+            return 0;
+        }
+
+        if (normalizedValue.endsWith('ms')) {
+            const milliseconds = Number.parseFloat(normalizedValue);
+
+            return Number.isFinite(milliseconds) ? milliseconds : 0;
+        }
+
+        if (normalizedValue.endsWith('s')) {
+            const seconds = Number.parseFloat(normalizedValue);
+
+            return Number.isFinite(seconds) ? seconds * 1000 : 0;
+        }
+
+        return 0;
+    };
+
+    const getTransitionLockDuration = () => {
+        const computedStyle = window.getComputedStyle(homeHeader);
+        const transitionProperties = computedStyle.transitionProperty.split(',');
+        const transitionDurations = computedStyle.transitionDuration.split(',');
+        const transitionDelays = computedStyle.transitionDelay.split(',');
+
+        const maxTransitionDuration = transitionProperties.reduce((longestDuration, propertyName, index) => {
+            const normalizedPropertyName = propertyName.trim();
+            const duration = parseTransitionTime(
+                transitionDurations[index % transitionDurations.length] ?? '0s',
+            );
+            const delay = parseTransitionTime(transitionDelays[index % transitionDelays.length] ?? '0s');
+            const totalDuration = duration + delay;
+
+            if (
+                normalizedPropertyName === 'all'
+                || normalizedPropertyName === 'transform'
+            ) {
+                return Math.max(longestDuration, totalDuration);
+            }
+
+            return longestDuration;
+        }, 0);
+
+        return Math.max(
+            Math.round(maxTransitionDuration + transitionLockBuffer),
+            fallbackTransitionLockDuration,
+        );
+    };
+
+    const armTransitionLock = () => {
+        if (transitionLockTimeoutId !== null) {
+            window.clearTimeout(transitionLockTimeoutId);
+        }
+
+        isTransitionLocked = true;
+        transitionLockTimeoutId = window.setTimeout(releaseTransitionLock, getTransitionLockDuration());
+    };
+
+    const getHeaderHeight = () => {
+        return Math.max(1, Math.round(homeHeader.getBoundingClientRect().height));
+    };
+
+    const getViewportHeight = () => {
+        return Math.max(
+            Math.round(window.visualViewport?.height ?? 0),
+            Math.round(window.innerHeight),
+            Math.round(document.documentElement.clientHeight),
+        );
+    };
+
+    const getScrollThresholds = () => {
+        const headerHeight = getHeaderHeight();
+        const viewportHeight = getViewportHeight();
+
+        return {
+            hideDistance: Math.max(
+                Math.round(headerHeight * 1.25),
+                Math.round(viewportHeight * 0.075),
+            ),
+            showDistance: Math.max(
+                Math.round(headerHeight * 0.65),
+                Math.round(viewportHeight * 0.035),
+            ),
+            visibleTopOffset: Math.max(28, headerHeight),
+        };
+    };
+
+    const showHeader = () => {
+        if (!isHeaderHidden) {
+            return;
+        }
+
+        homeHeader.classList.remove('is-mobile-nav-hidden');
+        isHeaderHidden = false;
+        armTransitionLock();
+    };
+
+    const hideHeader = () => {
+        if (isHeaderHidden) {
+            return;
+        }
+
+        homeHeader.classList.add('is-mobile-nav-hidden');
+        isHeaderHidden = true;
+        armTransitionLock();
+    };
+
+    const syncHeaderVisibility = () => {
+        ticking = false;
+
+        if (!mobileHeaderMediaQuery.matches) {
+            showHeader();
+            resetScrollTracking();
+
+            return;
+        }
+
+        const currentScrollY = Math.max(window.scrollY, 0);
+        const scrollDelta = currentScrollY - lastScrollY;
+        const scrollThresholds = getScrollThresholds();
+
+        if (!hasSyncedInitialPosition || !hasUserScrollIntent) {
+            showHeader();
+            resetScrollTracking(currentScrollY);
+            hasSyncedInitialPosition = true;
+
+            return;
+        }
+
+        if (currentScrollY <= scrollThresholds.visibleTopOffset) {
+            showHeader();
+            resetScrollTracking(currentScrollY);
+
+            return;
+        }
+
+        lastScrollY = currentScrollY;
+
+        if (Math.abs(scrollDelta) < minimumScrollDelta) {
+            return;
+        }
+
+        const scrollDirection = scrollDelta > 0 ? 1 : -1;
+
+        if (scrollDirection !== lastScrollDirection) {
+            accumulatedDistance = 0;
+            lastScrollDirection = scrollDirection;
+        }
+
+        accumulatedDistance += Math.abs(scrollDelta);
+
+        if (isTransitionLocked) {
+            return;
+        }
+
+        if (scrollDirection > 0) {
+            if (isHeaderHidden) {
+                accumulatedDistance = 0;
+
+                return;
+            }
+
+            if (accumulatedDistance >= scrollThresholds.hideDistance) {
+                hideHeader();
+                accumulatedDistance = 0;
+            }
+        } else {
+            if (!isHeaderHidden) {
+                accumulatedDistance = 0;
+
+                return;
+            }
+
+            if (accumulatedDistance >= scrollThresholds.showDistance) {
+                showHeader();
+                accumulatedDistance = 0;
+            }
+        }
+    };
+
+    const requestHeaderVisibilitySync = () => {
+        if (ticking) {
+            return;
+        }
+
+        ticking = true;
+        window.requestAnimationFrame(syncHeaderVisibility);
+    };
+
+    const recordUserScrollIntent = () => {
+        hasUserScrollIntent = true;
+    };
+
+    window.addEventListener('wheel', recordUserScrollIntent, { passive: true });
+    window.addEventListener('touchmove', recordUserScrollIntent, { passive: true });
+    window.addEventListener('keydown', (event) => {
+        if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) {
+            recordUserScrollIntent();
+        }
+    });
+    window.addEventListener('scroll', requestHeaderVisibilitySync, { passive: true });
+    window.addEventListener('resize', requestHeaderVisibilitySync);
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', requestHeaderVisibilitySync);
+    }
+
+    homeHeader.addEventListener('transitionend', (event) => {
+        if (event.propertyName === 'transform') {
+            releaseTransitionLock();
+        }
+    });
+
+    if (typeof mobileHeaderMediaQuery.addEventListener === 'function') {
+        mobileHeaderMediaQuery.addEventListener('change', syncHeaderVisibility);
+    } else if (typeof mobileHeaderMediaQuery.addListener === 'function') {
+        mobileHeaderMediaQuery.addListener(syncHeaderVisibility);
+    }
+
+    syncHeaderVisibility();
+}
+
+function initializeStudioCurrentTopbarScroll() {
+    document.querySelectorAll('[data-studio-current-slice]').forEach((slice) => {
+        if (!(slice instanceof HTMLElement)) {
+            return;
+        }
+
+        const viewport = slice.querySelector('[data-studio-current-viewport]');
+        const topbar = slice.querySelector('[data-studio-current-topbar]');
+
+        if (!(viewport instanceof HTMLElement) || !(topbar instanceof HTMLElement)) {
+            return;
+        }
+
+        const scrolledClass = 'studio-current-topbar--scrolled';
+        let ticking = false;
+
+        const syncTopbarState = () => {
+            ticking = false;
+            topbar.classList.toggle(scrolledClass, viewport.scrollTop > 24);
+        };
+
+        const requestSync = () => {
+            if (ticking) {
+                return;
+            }
+
+            ticking = true;
+            window.requestAnimationFrame(syncTopbarState);
+        };
+
+        viewport.addEventListener('scroll', requestSync, { passive: true });
+        window.addEventListener('resize', requestSync);
+        syncTopbarState();
+    });
+}
+
+function isThemePreference(value) {
+    return themePreferences.includes(value);
+}
+
+function readStoredThemePreference() {
+    try {
+        const storedPreference = window.localStorage.getItem(themePreferenceStorageKey);
+
+        return isThemePreference(storedPreference) ? storedPreference : 'system';
+    } catch {
+        return 'system';
+    }
+}
+
+function getSystemThemePreference() {
+    return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light';
+}
+
+function resolveThemePreference(preference) {
+    if (preference === 'dark' || preference === 'light') {
+        return preference;
+    }
+
+    return getSystemThemePreference();
+}
+
+function writeStoredThemePreference(preference) {
+    try {
+        window.localStorage.setItem(themePreferenceStorageKey, preference);
+    } catch {
+        // Ignore storage failures and keep the in-memory state in sync.
+    }
+}
+
+function syncThemeToggleState(preference) {
+    document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+        toggle.querySelectorAll('[data-theme-option]').forEach((option) => {
+            const isActive = option.getAttribute('data-theme-option') === preference;
+
+            option.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+    });
+}
+
+function applyThemePreference(preference, shouldPersist = false) {
+    const normalizedPreference = isThemePreference(preference) ? preference : 'system';
+    const effectiveTheme = resolveThemePreference(normalizedPreference);
+
+    themeRoot.setAttribute('data-theme-root', '');
+    themeRoot.setAttribute('data-theme-preference', normalizedPreference);
+    themeRoot.setAttribute('data-theme-effective', effectiveTheme);
+
+    if (shouldPersist) {
+        writeStoredThemePreference(normalizedPreference);
+    }
+
+    syncThemeToggleState(normalizedPreference);
+}
+
+applyThemePreference(readStoredThemePreference());
+initializeMobileHeaderScroll();
+initializeStudioCurrentTopbarScroll();
+
+window.addEventListener('storage', (event) => {
+    if (event.key !== themePreferenceStorageKey) {
+        return;
+    }
+
+    applyThemePreference(isThemePreference(event.newValue) ? event.newValue : 'system');
+});
+
+const systemThemeMediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
+
+if (systemThemeMediaQuery instanceof MediaQueryList) {
+    const refreshSystemTheme = () => {
+        if (themeRoot.getAttribute('data-theme-preference') === 'system') {
+            applyThemePreference('system');
+        }
+    };
+
+    if (typeof systemThemeMediaQuery.addEventListener === 'function') {
+        systemThemeMediaQuery.addEventListener('change', refreshSystemTheme);
+    } else if (typeof systemThemeMediaQuery.addListener === 'function') {
+        systemThemeMediaQuery.addListener(refreshSystemTheme);
+    }
+}
+
+document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+    toggle.querySelectorAll('[data-theme-option]').forEach((option) => {
+        option.addEventListener('click', () => {
+            const preference = option.getAttribute('data-theme-option') ?? 'system';
+
+            applyThemePreference(preference, true);
+        });
+    });
+});
 
 function closeNote(details) {
     const timer = hideDelays.get(details);
@@ -69,6 +469,7 @@ document.querySelectorAll('details.project-card').forEach((details) => {
 document.querySelectorAll('[data-project-band]').forEach((band) => {
     const toggle = band.querySelector('[data-project-note-toggle]');
     const panel = band.querySelector('[data-project-note-panel]');
+    const noteAnchor = toggle?.closest('.project-note-anchor') ?? toggle ?? band;
 
     if (!toggle || !panel) {
         return;
@@ -81,6 +482,7 @@ document.querySelectorAll('[data-project-band]').forEach((band) => {
     const setOpenState = (isOpen) => {
         panel.classList.toggle('hidden', !isOpen);
         toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        panel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
 
         if (label) {
             label.textContent = isOpen ? openLabel : closedLabel;
@@ -94,37 +496,165 @@ document.querySelectorAll('[data-project-band]').forEach((band) => {
 
         setOpenState(!isOpen);
     });
+
+    document.addEventListener('click', (event) => {
+        if (toggle.getAttribute('aria-expanded') !== 'true') {
+            return;
+        }
+
+        if (!(event.target instanceof Node)) {
+            return;
+        }
+
+        if (noteAnchor.contains(event.target)) {
+            return;
+        }
+
+        setOpenState(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape' || toggle.getAttribute('aria-expanded') !== 'true') {
+            return;
+        }
+
+        setOpenState(false);
+        toggle.focus();
+    });
 });
+
+const desktopSliceBreakpoint = 1024;
+
+function sizeProjectInterfaceSlices() {
+    document.querySelectorAll('[data-project-interface-slice]').forEach((stage) => {
+        if (!(stage instanceof HTMLElement)) {
+            return;
+        }
+
+        if (window.innerWidth < desktopSliceBreakpoint) {
+            stage.style.removeProperty('height');
+
+            return;
+        }
+
+        const width = stage.getBoundingClientRect().width;
+        const height = width * (9 / 16);
+
+        stage.style.height = `${Math.round(height)}px`;
+    });
+}
+
+sizeProjectInterfaceSlices();
+window.addEventListener('resize', sizeProjectInterfaceSlices, { passive: true });
 
 const contactCopyFeedback = document.querySelector('[data-copy-email-feedback]');
 let copyFeedbackTimer = null;
+let copyFeedbackHideTimer = null;
+
+const copyTextWithSelectionFallback = (text) => {
+    const textarea = document.createElement('textarea');
+    const selection = document.getSelection();
+    const selectedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.inset = '0 auto auto 0';
+    textarea.style.opacity = '0';
+    textarea.style.pointerEvents = 'none';
+
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, text.length);
+
+    let didCopy = false;
+
+    try {
+        didCopy = document.execCommand('copy');
+    } catch {
+        didCopy = false;
+    }
+
+    textarea.remove();
+
+    if (selection) {
+        selection.removeAllRanges();
+
+        if (selectedRange) {
+            selection.addRange(selectedRange);
+        }
+    }
+
+    return didCopy;
+};
+
+const copyEmailToClipboard = async (email) => {
+    if (navigator.clipboard?.writeText) {
+        try {
+            await navigator.clipboard.writeText(email);
+
+            return true;
+        } catch {
+            // Fall through to the selection-based copy path for local HTTP contexts.
+        }
+    }
+
+    return copyTextWithSelectionFallback(email);
+};
+
+const hideContactCopyFeedback = () => {
+    if (!contactCopyFeedback) {
+        return;
+    }
+
+    contactCopyFeedback.classList.remove('is-visible');
+
+    if (copyFeedbackHideTimer) {
+        window.clearTimeout(copyFeedbackHideTimer);
+    }
+
+    copyFeedbackHideTimer = window.setTimeout(() => {
+        contactCopyFeedback.hidden = true;
+    }, 180);
+};
+
+const showContactCopyFeedback = () => {
+    if (!contactCopyFeedback) {
+        return;
+    }
+
+    if (copyFeedbackTimer) {
+        window.clearTimeout(copyFeedbackTimer);
+    }
+
+    if (copyFeedbackHideTimer) {
+        window.clearTimeout(copyFeedbackHideTimer);
+    }
+
+    contactCopyFeedback.hidden = false;
+    contactCopyFeedback.classList.remove('is-visible');
+
+    window.requestAnimationFrame(() => {
+        contactCopyFeedback.classList.add('is-visible');
+    });
+
+    copyFeedbackTimer = window.setTimeout(hideContactCopyFeedback, 1800);
+};
 
 document.querySelectorAll('[data-copy-email]').forEach((button) => {
     button.addEventListener('click', async () => {
         const email = button.dataset.copyEmail;
 
-        if (!email || !navigator.clipboard) {
+        if (!email) {
             return;
         }
 
-        try {
-            await navigator.clipboard.writeText(email);
-        } catch {
+        const didCopy = await copyEmailToClipboard(email);
+
+        if (!didCopy) {
             return;
         }
 
-        if (!contactCopyFeedback) {
-            return;
-        }
-
-        contactCopyFeedback.hidden = false;
-
-        if (copyFeedbackTimer) {
-            window.clearTimeout(copyFeedbackTimer);
-        }
-
-        copyFeedbackTimer = window.setTimeout(() => {
-            contactCopyFeedback.hidden = true;
-        }, 1800);
+        showContactCopyFeedback();
     });
 });

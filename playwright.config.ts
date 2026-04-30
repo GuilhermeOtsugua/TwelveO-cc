@@ -1,10 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://twelveo-cc.test';
+const isWindows = process.platform === 'win32';
 
 export default defineConfig({
-    testDir: './tests/Visual',
-    fullyParallel: true,
+    testDir: './tests',
+    fullyParallel: ! isWindows,
+    workers: isWindows ? 1 : undefined,
     reporter: 'list',
     snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}{ext}',
     use: {
