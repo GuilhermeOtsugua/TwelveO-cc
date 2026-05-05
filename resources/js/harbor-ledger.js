@@ -38,6 +38,7 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
     const queuePanel = slice.querySelector('[data-harbor-panel="queue"]');
     const summaryPanel = slice.querySelector('[data-harbor-panel="summary"]');
     const panelToggles = Array.from(slice.querySelectorAll('[data-harbor-panel-toggle]'));
+    const resetControl = slice.querySelector('[data-harbor-reset]');
 
     const escapeHtml = (value) => String(value)
         .replaceAll('&', '&amp;')
@@ -228,6 +229,17 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
 
         setPanelCollapsedState(panelName, !isCollapsed);
     };
+    const resetWorkspace = () => {
+        setActiveTransaction(transactions[0]?.id ?? '');
+        setPanelCollapsedState('queue', false);
+        setPanelCollapsedState('summary', true);
+        threadScroller?.scrollTo({ top: 0, behavior: 'smooth' });
+
+        slice.querySelectorAll('[data-harbor-system-trace-root]').forEach((root) => {
+            root.classList.remove('is-open');
+            root.querySelector('[data-harbor-system-trace-toggle]')?.setAttribute('aria-expanded', 'false');
+        });
+    };
 
     options.forEach((option) => {
         option.addEventListener('click', () => {
@@ -248,6 +260,8 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
             togglePanel(toggle.dataset.harborPanelTarget ?? '');
         });
     });
+
+    resetControl?.addEventListener('click', resetWorkspace);
 
     setPanelCollapsedState('queue', slice.dataset.harborQueueCollapsed === 'true');
     setPanelCollapsedState('summary', slice.dataset.harborSummaryCollapsed === 'true');

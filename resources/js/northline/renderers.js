@@ -106,6 +106,16 @@ export function renderNorthlineTemporalToken(label, tone = null) {
     return renderNorthlineBadge(label, 'status', tone);
 }
 
+export function formatNorthlineMobileTime(label) {
+    if (!label) {
+        return 'Pending';
+    }
+
+    return escapeNorthlineHtml(label)
+        .replace(/^Submitted\s+/i, '')
+        .replace(/^Pending\s+submission$/i, 'Pending');
+}
+
 
 
 export function renderNorthlineMetric(metric) {
@@ -682,12 +692,14 @@ export function renderNorthlineGradingOverlay(classroom, assignment, submission,
                     <label class="northline-field-label"><span>Student</span><select data-northline-grading-student>${studentOptions}</select></label>
                 </div>
                 <section class="northline-mobile-submission-card">
-                    <div>
-                        ${renderNorthlineTemporalToken(submission?.submittedAt ?? 'Pending submission')}
+                    <div class="northline-mobile-submission-card__copy">
                         <h6>${escapeNorthlineHtml(submission?.previewTitle ?? 'Submission preview')}</h6>
                         <p>${escapeNorthlineHtml(previewSummary)}</p>
                     </div>
-                    <button type="button" class="northline-secondary-chip">${escapeNorthlineHtml(submission?.fileName ?? 'Open document')}</button>
+                    <div class="northline-mobile-submission-card__actions">
+                        <span class="northline-mobile-submission-card__time"><span aria-hidden="true"></span>${formatNorthlineMobileTime(submission?.submittedAt ?? 'Pending submission')}</span>
+                        <button type="button" class="northline-secondary-chip">${escapeNorthlineHtml(submission?.fileName ?? 'Open document')}</button>
+                    </div>
                 </section>
                 <section class="northline-mobile-grade-card">
                     <label class="northline-field-label"><span>Grade</span><select data-northline-grade-select>${gradeOptions}</select></label>

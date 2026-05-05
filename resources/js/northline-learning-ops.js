@@ -259,6 +259,17 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         state.overlay = null;
         render();
     };
+    const resetWorkspace = () => {
+        pauseDemo();
+        state.view = 'dashboard';
+        state.overlay = null;
+        state.studentsFilter = null;
+        state.examsFilter = null;
+        resetSelections();
+        classMenu?.classList.add('hidden');
+        classTrigger?.setAttribute('aria-expanded', 'false');
+        render();
+    };
     const scheduleRollingTextRefresh = () => {
         if (rollingTextFrame !== null) {
             window.cancelAnimationFrame(rollingTextFrame);
@@ -410,9 +421,14 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
     });
 
     slice.addEventListener('click', (event) => {
-        const target = event.target instanceof Element ? event.target.closest('[data-northline-nav], [data-northline-class-trigger], [data-northline-class-option], [data-northline-trigger-alerts], [data-northline-workflow-action], [data-northline-open-grading], [data-northline-open-event], [data-northline-document-option], [data-northline-exam-option], [data-northline-student-option], [data-northline-clear-filter], [data-northline-overlay-close], [data-northline-grade-option], [data-northline-student-action], [data-northline-metric], [data-northline-cycle-students-filter]') : null;
+        const target = event.target instanceof Element ? event.target.closest('[data-northline-reset], [data-northline-nav], [data-northline-class-trigger], [data-northline-class-option], [data-northline-trigger-alerts], [data-northline-workflow-action], [data-northline-open-grading], [data-northline-open-event], [data-northline-document-option], [data-northline-exam-option], [data-northline-student-option], [data-northline-clear-filter], [data-northline-overlay-close], [data-northline-grade-option], [data-northline-student-action], [data-northline-metric], [data-northline-cycle-students-filter]') : null;
 
         if (!(target instanceof HTMLElement)) {
+            return;
+        }
+
+        if (target.hasAttribute('data-northline-reset')) {
+            resetWorkspace();
             return;
         }
 

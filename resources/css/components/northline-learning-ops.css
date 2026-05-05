@@ -70,6 +70,21 @@
         display: none;
     }
 
+    .northline-topbar__identity {
+        cursor: pointer;
+        border-radius: 999px;
+        transition:
+            box-shadow 180ms ease,
+            opacity 180ms ease;
+    }
+
+    .northline-topbar__identity:hover,
+    .northline-topbar__identity:focus-visible {
+        opacity: 0.86;
+        box-shadow: 0 0 0 0.32rem rgba(255, 92, 103, 0.08);
+        outline: none;
+    }
+
     .northline-mark {
         position: relative;
         width: 1.75rem;
