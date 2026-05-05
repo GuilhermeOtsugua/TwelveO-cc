@@ -34,6 +34,7 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
     const riskBar = slice.querySelector('[data-harbor-active-risk-bar]');
     const riskScore = slice.querySelector('[data-harbor-active-risk-score]');
     const thread = slice.querySelector('[data-harbor-commentary-thread]');
+    const threadScroller = slice.querySelector('[data-harbor-commentary-scroller]');
     const queuePanel = slice.querySelector('[data-harbor-panel="queue"]');
     const summaryPanel = slice.querySelector('[data-harbor-panel="summary"]');
     const panelToggles = Array.from(slice.querySelectorAll('[data-harbor-panel-toggle]'));
@@ -48,22 +49,22 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
     const renderComment = (comment) => {
         if (comment.type === 'system') {
             return `
-                <div class="relative z-10 ml-12 flex gap-4">
-                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white bg-slate-800">
+                <div class="harbor-comment-card harbor-comment-card--system relative z-10 ml-12 flex gap-4">
+                    <div class="harbor-comment-card__avatar flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white bg-slate-800">
                         <svg viewBox="0 0 16 16" fill="none" class="h-4 w-4 text-white" aria-hidden="true">
                             <rect x="3.2" y="4.5" width="9.6" height="7.2" rx="1.1" stroke="currentColor" stroke-width="1.4"/>
                             <path d="M5.2 3.5v1M10.8 3.5v1M6 11.7v1.1M10 11.7v1.1M5.4 7.8h5.2" stroke="currentColor" stroke-linecap="round" stroke-width="1.2"/>
                         </svg>
                     </div>
-                    <div class="flex-1 rounded-lg border border-slate-200 bg-slate-100 p-2.5">
-                        <p class="text-[11px] italic leading-[1.45] text-slate-600">${escapeHtml(comment.message)}</p>
+                    <div class="harbor-comment-card__body flex-1 rounded-lg border border-slate-200 bg-slate-100 p-2.5">
+                        <p class="harbor-comment-card__message text-[11px] italic leading-[1.45] text-slate-600">${escapeHtml(comment.message)}</p>
                     </div>
                 </div>
             `;
         }
 
         const tags = Array.isArray(comment.tags) && comment.tags.length > 0
-            ? `<div class="mt-2.5 flex gap-2">${comment.tags.map((tag) => `<span data-harbor-interactive class="cursor-pointer rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">${escapeHtml(tag)}</span>`).join('')}</div>`
+            ? `<div class="harbor-comment-card__tags mt-2.5 flex gap-2">${comment.tags.map((tag) => `<span data-harbor-interactive class="cursor-pointer rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">${escapeHtml(tag)}</span>`).join('')}</div>`
             : '';
 
         const nameMarkup = comment.nameInteractive
@@ -71,20 +72,48 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
             : `<span>${escapeHtml(comment.name)}</span>`;
 
         return `
-            <div class="relative z-10 flex gap-4">
-                <div data-harbor-interactive class="cursor-pointer flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-white shadow-sm ${escapeHtml(comment.avatarClasses)}">
+            <div class="harbor-comment-card relative z-10 flex gap-4">
+                <div data-harbor-interactive class="harbor-comment-card__avatar cursor-pointer flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-white shadow-sm ${escapeHtml(comment.avatarClasses)}">
                     <span class="text-[10px] font-bold">${escapeHtml(comment.initials)}</span>
                 </div>
-                <div class="flex-1 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-                    <div class="mb-1.5 flex items-center justify-between gap-2">
+                <div class="harbor-comment-card__body flex-1 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                    <div class="harbor-comment-card__header mb-1.5 flex items-center justify-between gap-2">
                         <span class="text-xs font-bold text-slate-900">${nameMarkup}<span class="ml-1 font-normal text-slate-400">${escapeHtml(comment.role)}</span></span>
                         <span class="text-[10px] text-slate-400">${escapeHtml(comment.time)}</span>
                     </div>
-                    <p class="text-[0.84rem] leading-[1.55] text-slate-700">${escapeHtml(comment.message)}</p>
+                    <p class="harbor-comment-card__message text-[0.84rem] leading-[1.55] text-slate-700">${escapeHtml(comment.message)}</p>
                     ${tags}
                 </div>
             </div>
         `;
+    };
+
+    const updateAuditThreadLine = () => {
+        if (!(threadScroller instanceof HTMLElement) || !(thread instanceof HTMLElement)) {
+            return;
+        }
+
+        const avatars = Array.from(thread.querySelectorAll('.harbor-comment-card__avatar'))
+            .filter((avatar) => avatar instanceof HTMLElement);
+        const lastAvatar = avatars.at(-1);
+
+        if (!(lastAvatar instanceof HTMLElement)) {
+            threadScroller.style.removeProperty('--harbor-thread-line-height');
+            return;
+        }
+
+        const scrollerRect = threadScroller.getBoundingClientRect();
+        const avatarRect = lastAvatar.getBoundingClientRect();
+        const lineTop = Number.parseFloat(window.getComputedStyle(threadScroller).fontSize) * 0.4;
+        const lastAvatarCenter = avatarRect.top - scrollerRect.top + threadScroller.scrollTop + (avatarRect.height / 2);
+        const lineHeight = Math.max(0, lastAvatarCenter - lineTop);
+
+        threadScroller.style.setProperty('--harbor-thread-line-height', `${lineHeight}px`);
+    };
+
+    const requestAuditThreadLineUpdate = () => {
+        window.requestAnimationFrame(updateAuditThreadLine);
+        window.setTimeout(updateAuditThreadLine, 160);
     };
 
     const setActiveTransaction = (transactionId) => {
@@ -152,6 +181,7 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
 
         if (thread instanceof HTMLElement) {
             thread.innerHTML = nextTransaction.comments.map(renderComment).join('');
+            requestAuditThreadLineUpdate();
         }
     };
 
@@ -183,6 +213,8 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
             toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
             toggle.setAttribute('aria-label', `${nextAction} ${regionLabel}`);
         });
+
+        requestAuditThreadLineUpdate();
     };
 
     const togglePanel = (panelName) => {
@@ -219,4 +251,11 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
 
     setPanelCollapsedState('queue', slice.dataset.harborQueueCollapsed === 'true');
     setPanelCollapsedState('summary', slice.dataset.harborSummaryCollapsed === 'true');
+    requestAuditThreadLineUpdate();
+    window.addEventListener('resize', requestAuditThreadLineUpdate);
+
+    if (window.ResizeObserver && thread instanceof HTMLElement) {
+        const threadResizeObserver = new ResizeObserver(requestAuditThreadLineUpdate);
+        threadResizeObserver.observe(thread);
+    }
 });

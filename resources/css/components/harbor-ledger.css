@@ -138,12 +138,29 @@
         min-width: 0;
     }
 
+    .harbor-ledger-metric-grid [data-harbor-active-asset-value],
+    .harbor-ledger-metric-grid [data-harbor-active-currency],
+    .harbor-ledger-metric-grid [data-harbor-active-counterparty] {
+        display: block;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .harbor-ledger-metric-grid [data-harbor-active-asset-value] {
+        font-size: clamp(0.78rem, 0.86vw, 0.98rem);
+        letter-spacing: -0.045em;
+        font-variant-numeric: tabular-nums;
+    }
+
     .harbor-audit-thread::before {
         content: '';
         position: absolute;
         left: 19px;
         top: 0.4rem;
-        bottom: 0;
+        height: var(--harbor-thread-line-height, calc(100% - 0.4rem));
         width: 2px;
         background: #e2e8f0;
         z-index: 0;
@@ -579,13 +596,10 @@
         }
 
         .harbor-ledger-metric-grid [data-harbor-active-asset-value] {
-            overflow: visible;
             font-size: 0.94rem;
             line-height: 1;
             letter-spacing: -0.065em;
             font-variant-numeric: tabular-nums;
-            text-overflow: clip;
-            white-space: nowrap;
         }
 
         .harbor-ledger-commentary {
