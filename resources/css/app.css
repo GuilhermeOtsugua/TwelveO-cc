@@ -1134,6 +1134,25 @@
 
 }
 
+@media (min-width: 640px) and (max-width: 1023px) {
+    .project-band__surface-stage {
+        width: min(100%, 28.5rem);
+        margin-inline: auto;
+        max-height: 42rem;
+        border-radius: 1.4rem;
+        padding: 0.48rem;
+    }
+
+    .project-band__surface-stage::before {
+        inset: 0.4rem;
+        border-radius: 1.08rem;
+    }
+
+    .project-band__surface-stage > .project-surface {
+        border-radius: 1.08rem;
+    }
+}
+
 @media (max-width: 639px) {
     .copy-email-toast {
         left: auto;
