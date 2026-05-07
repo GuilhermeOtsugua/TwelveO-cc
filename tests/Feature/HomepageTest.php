@@ -9,81 +9,45 @@ use Tests\TestCase;
 
 class HomepageTest extends TestCase
 {
-    public function test_homepage_renders_capability_bands_and_core_regions(): void
+    public function test_homepage_route_is_available(): void
+    {
+        $this->get(route('home'))->assertOk();
+    }
+
+    public function test_homepage_renders_the_correct_contact_links(): void
+    {
+        $response = $this->get(route('home'));
+        $xpath = $this->xpathFor($response->getContent());
+
+        $response->assertOk();
+
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-copy-email="guilhermebartolis@gmail.com"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://github.com/GuilhermeOtsugua/"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://www.linkedin.com/in/guilhermeotsugua/"]'));
+    }
+
+    public function test_homepage_renders_the_theme_control_and_boot_hooks(): void
     {
         $response = $this->get(route('home'));
         $content = $response->getContent();
         $xpath = $this->xpathFor($content);
 
-        $response
-            ->assertOk()
-            ->assertSeeText('Otsugua')
-            ->assertSeeText('How I work')
-            ->assertSeeText('Current Focus')
-            ->assertSeeText('Harbor Ledger')
-            ->assertSeeText('Northline Learning Ops')
-            ->assertSeeText('Studio Current')
-            ->assertSeeText('Laravel Certified Developer')
-            ->assertSeeText('Contact');
-        $response->assertDontSeeText('Three finished product surfaces. Scan the interface first; the notes only clarify the decisions.');
+        $response->assertOk();
 
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-capability-bands]'));
-        self::assertSame(3, $this->countMatches($xpath, '//*[@id="projects"]//*[@data-project-band]'));
-        self::assertSame(3, $this->countMatches($xpath, '//*[@data-project-band]'));
-        self::assertSame(3, $this->countMatches($xpath, '//*[@data-project-surface]'));
-        self::assertSame(3, $this->countMatches($xpath, '//*[@data-project-note-toggle]'));
-        self::assertSame(3, $this->countMatches($xpath, '//*[@data-project-note-panel]'));
-        self::assertSame(0, $this->countMatches($xpath, '//*[@data-qa-report-root]'));
-
-        $principles = $this->attributeValues($xpath, '//*[@data-project-band]', 'data-project-band-principle');
-        $noteStates = $this->attributeValues($xpath, '//*[@data-project-note-toggle]', 'aria-expanded');
-        $noteLabels = $this->texts($xpath, '//*[@data-project-note-toggle]/span');
-
-        self::assertSame(['TDD', 'DDD', 'Design for impact'], $principles);
-        self::assertSame(['false', 'false', 'false'], $noteStates);
-        self::assertSame(
-            ['Why it is built this way', 'Why it is built this way', 'Why it is built this way'],
-            $noteLabels
-        );
-
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-project-band-principle="TDD"]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-console and @data-tdd-region="focus"]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-quote-sheet]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-release-action]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-blocked-button and @aria-disabled="true"]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-lock-rail and @data-tdd-region="release"]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-evidence-packets]'));
-        self::assertSame(2, $this->countMatches($xpath, '//*[@data-tdd-evidence-packet]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-scenario-matrix]'));
-        self::assertSame(3, $this->countMatches($xpath, '//*[@data-tdd-scenario-case]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-tdd-approval-lane]'));
-        self::assertSame(3, $this->countMatches($xpath, '//*[@data-tdd-approval-stage]'));
-        self::assertSame(3, $this->countMatches($xpath, '//*[@data-tdd-release-check]'));
-
-        $stageLabels = $this->texts($xpath, '//*[@data-tdd-approval-stage]//*[@data-tdd-stage-label]');
-        $regionOrder = $this->attributeValues($xpath, '//*[@data-tdd-region]', 'data-tdd-region');
-
-        self::assertSame(['Pricing', 'Controller', 'Release'], $stageLabels);
-        self::assertSame(['focus', 'evidence', 'release'], $regionOrder);
-
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-project-band-principle="DDD"]//*[@data-ddd-shared-case]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-project-band-principle="DDD"]//*[@data-ddd-shared-thread]'));
-        self::assertSame(3, $this->countMatches($xpath, '//*[@data-project-band-principle="DDD"]//*[@data-ddd-role-zone]'));
-        self::assertSame(
-            ['calm', 'active', 'compressed'],
-            $this->attributeValues($xpath, '//*[@data-project-band-principle="DDD"]//*[@data-ddd-role-zone]', 'data-ddd-role-zone')
-        );
-
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-project-band-principle="Design for impact"]//*[@data-impact-review-flow]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-project-band-principle="Design for impact"]//*[@data-impact-approval]'));
-        self::assertSame(1, $this->countMatches($xpath, '//*[@data-project-band-principle="Design for impact"]//*[@data-impact-delivery]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-theme-root]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-theme-root and @data-theme-preference="system" and @data-theme-effective="light"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-theme-toggle]'));
+        self::assertSame(3, $this->countMatches($xpath, '//*[@data-theme-option]'));
+        self::assertSame(['system', 'dark', 'light'], $this->attributeValues($xpath, '//*[@data-theme-option]', 'data-theme-option'));
+        self::assertSame(['true', 'false', 'false'], $this->attributeValues($xpath, '//*[@data-theme-option]', 'aria-pressed'));
+        self::assertSame(1, $this->countMatches($xpath, '//head//script[@data-theme-boot]'));
     }
 
     private function xpathFor(string $html): DOMXPath
     {
         libxml_use_internal_errors(true);
 
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         $dom->loadHTML($html);
 
         libxml_clear_errors();

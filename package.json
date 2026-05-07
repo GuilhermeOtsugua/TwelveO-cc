@@ -4,8 +4,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "test:visual": "playwright test",
-        "test:visual:update": "playwright test --update-snapshots"
+        "test:browser": "playwright test tests/Browser"
     },
     "devDependencies": {
         "@playwright/test": "^1.58.2",
