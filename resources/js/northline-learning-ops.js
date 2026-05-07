@@ -139,6 +139,7 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
     const overlayLayer = slice.querySelector('[data-northline-overlay-layer]');
     const gradingOverlay = slice.querySelector('[data-northline-overlay="grading"]');
     const messageOverlay = slice.querySelector('[data-northline-overlay="message"]');
+    const mobileWorkflowSurface = window.matchMedia('(max-width: 767px)');
 
     let resumeTimer = null;
     let demoTimer = null;
@@ -461,11 +462,19 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         }
 
         if (target.dataset.northlineWorkflowAction === 'post-materials') {
+            if (mobileWorkflowSurface.matches) {
+                return;
+            }
+
             setView('documents', { studentsFilter: null, examsFilter: null });
             return;
         }
 
         if (target.dataset.northlineWorkflowAction === 'create-exam') {
+            if (mobileWorkflowSurface.matches) {
+                return;
+            }
+
             setView('exams', { studentsFilter: null, examsFilter: null });
             return;
         }

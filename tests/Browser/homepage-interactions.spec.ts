@@ -162,6 +162,33 @@ test.describe('Homepage interactions', () => {
         expect(Math.abs(gradeCenter - noteCenter)).toBeLessThanOrEqual(2);
     });
 
+    test('Northline mobile only enables popup-ready workflow actions', async ({ page, browserName }, testInfo) => {
+        test.skip(browserName !== 'chromium' || testInfo.project.name !== 'mobile-chromium');
+
+        const northline = await openNorthlineSurface(page);
+        const workflowAction = (action: string) => northline.locator(`[data-northline-workflow-action="${action}"]`).first();
+        const triggerWorkflowAction = async (action: string) => {
+            await workflowAction(action).evaluate((element) => {
+                element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            });
+        };
+
+        await triggerWorkflowAction('post-materials');
+        await expect(northline.locator('[data-northline-view-panel="dashboard"]')).toBeVisible();
+        await expect(northline.locator('[data-northline-view-panel="documents"]')).toBeHidden();
+
+        await triggerWorkflowAction('create-exam');
+        await expect(northline.locator('[data-northline-view-panel="dashboard"]')).toBeVisible();
+        await expect(northline.locator('[data-northline-view-panel="exams"]')).toBeHidden();
+
+        await triggerWorkflowAction('bulk-grading');
+        await expect(northline.locator('[data-northline-overlay="grading"]').filter({ visible: true })).toBeVisible();
+        await northline.getByRole('button', { name: 'Close grading workbench' }).click();
+
+        await triggerWorkflowAction('class-message');
+        await expect(northline.locator('[data-northline-overlay="message"]').filter({ visible: true })).toBeVisible();
+    });
+
     test('Northline event row opens the exams workspace with the due soon filter active', async ({ page, browserName }, testInfo) => {
         test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
 
