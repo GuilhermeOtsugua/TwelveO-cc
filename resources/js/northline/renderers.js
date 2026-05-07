@@ -116,9 +116,33 @@ export function formatNorthlineMobileTime(label) {
         .replace(/^Pending\s+submission$/i, 'Pending');
 }
 
+function renderNorthlineMetricStatus(status, priority) {
+    const statusText = String(status ?? '');
+
+    if (!priority) {
+        return escapeNorthlineHtml(statusText);
+    }
+
+    const percentageMatch = statusText.match(/^(\d+(?:\.\d+)?%)(.*)$/);
+
+    if (!percentageMatch) {
+        return escapeNorthlineHtml(statusText);
+    }
+
+    const [, percentage, suffix] = percentageMatch;
+
+    return `<span class="northline-status-metric__status--priority">${escapeNorthlineHtml(percentage)}</span>${escapeNorthlineHtml(suffix)}`;
+}
+
 
 
 export function renderNorthlineMetric(metric) {
+    const statusClass = [
+        'northline-status-metric__status',
+        metric.tone === 'coral' ? 'text-[#ff4b5c]' : 'text-[#0b7b77]',
+    ].filter(Boolean).join(' ');
+    const statusMarkup = renderNorthlineMetricStatus(metric.status, metric.priority);
+
     return `
         <button type="button" class="northline-status-metric ${metric.tone === 'coral' ? 'northline-status-metric--coral' : ''}" data-northline-metric="${escapeNorthlineHtml(metric.id)}">
             <div class="flex items-end justify-between gap-2.5">
@@ -126,7 +150,7 @@ export function renderNorthlineMetric(metric) {
                     <span class="northline-display text-[1.82rem] font-black leading-none text-slate-900">${escapeNorthlineHtml(metric.value)}</span>
                     <span class="northline-stat-label">${escapeNorthlineHtml(metric.label)}</span>
                 </div>
-                <span class="text-[0.8rem] font-bold ${metric.tone === 'coral' ? 'text-[#ff4b5c]' : 'text-[#0b7b77]'}">${escapeNorthlineHtml(metric.status)}</span>
+                <span class="${escapeNorthlineHtml(statusClass)}">${statusMarkup}</span>
             </div>
             <div class="northline-progress">
                 <span class="northline-progress__fill ${metric.tone === 'coral' ? 'bg-[#ff4b5c]' : 'bg-[#0b7b77]'}" style="width: ${metric.progress}%"></span>

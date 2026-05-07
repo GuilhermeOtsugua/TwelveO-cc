@@ -119,7 +119,7 @@
             'dashboardTitle' => "Teacher's Task & Grading Center",
             'dashboardDescription' => 'Assessment pacing, materials, and classroom support for the current history block.',
             'metrics' => [
-                ['id' => 'pending-grade', 'value' => '27', 'label' => 'Pending Grade', 'status' => '54% reviewed · priority', 'tone' => 'teal', 'progress' => 54],
+                ['id' => 'pending-grade', 'value' => '27', 'label' => 'Pending Grade', 'status' => '54% reviewed', 'tone' => 'teal', 'progress' => 54, 'priority' => true],
                 ['id' => 'late-submits', 'value' => '07', 'label' => 'Late Submits', 'status' => 'Follow-up ready', 'tone' => 'coral', 'progress' => 22],
                 ['id' => 'deadlines', 'value' => '04', 'label' => 'Due soon', 'status' => 'Planning active', 'tone' => 'coral', 'progress' => 61],
             ],
@@ -181,7 +181,7 @@
             'dashboardTitle' => "Teacher's Task & Grading Center",
             'dashboardDescription' => 'Current-class planning, grading, and student support for civic history work.',
             'metrics' => [
-                ['id' => 'pending-grade', 'value' => '33', 'label' => 'Pending Grade', 'status' => '59% reviewed · priority', 'tone' => 'teal', 'progress' => 59],
+                ['id' => 'pending-grade', 'value' => '33', 'label' => 'Pending Grade', 'status' => '59% reviewed', 'tone' => 'teal', 'progress' => 59, 'priority' => true],
                 ['id' => 'late-submits', 'value' => '09', 'label' => 'Late Submits', 'status' => 'Follow-up ready', 'tone' => 'coral', 'progress' => 31],
                 ['id' => 'deadlines', 'value' => '06', 'label' => 'Due soon', 'status' => 'Planning active', 'tone' => 'coral', 'progress' => 73],
             ],

@@ -269,6 +269,18 @@
         padding-bottom: 0.28rem;
     }
 
+    .northline-status-metric__status {
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .northline-status-metric__status--priority {
+        text-decoration-line: underline;
+        text-decoration-color: #ff4b5c;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.16em;
+    }
+
     .northline-progress {
         height: 0.38rem;
         overflow: hidden;
@@ -763,6 +775,14 @@
     [data-northline-events] .northline-event-item__content {
         min-width: 0;
         align-self: center;
+    }
+
+    [data-northline-events] .northline-event-item__content .northline-item-meta-row .northline-item-meta:last-child {
+        display: block;
+        max-width: 62ch;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .northline-rolling-text {

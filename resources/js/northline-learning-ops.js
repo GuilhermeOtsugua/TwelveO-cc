@@ -139,7 +139,6 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
     const overlayLayer = slice.querySelector('[data-northline-overlay-layer]');
     const gradingOverlay = slice.querySelector('[data-northline-overlay="grading"]');
     const messageOverlay = slice.querySelector('[data-northline-overlay="message"]');
-    const mobileWorkflowSurface = window.matchMedia('(max-width: 767px)');
 
     let resumeTimer = null;
     let demoTimer = null;
@@ -434,7 +433,6 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         }
 
         if (target.dataset.northlineNav) {
-            setView(target.dataset.northlineNav, { studentsFilter: null, examsFilter: null });
             return;
         }
 
@@ -457,25 +455,14 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         }
 
         if (target.hasAttribute('data-northline-trigger-alerts')) {
-            setView('students', { studentsFilter: 'alerts', examsFilter: null });
             return;
         }
 
         if (target.dataset.northlineWorkflowAction === 'post-materials') {
-            if (mobileWorkflowSurface.matches) {
-                return;
-            }
-
-            setView('documents', { studentsFilter: null, examsFilter: null });
             return;
         }
 
         if (target.dataset.northlineWorkflowAction === 'create-exam') {
-            if (mobileWorkflowSurface.matches) {
-                return;
-            }
-
-            setView('exams', { studentsFilter: null, examsFilter: null });
             return;
         }
 
@@ -495,12 +482,10 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         }
 
         if (target.dataset.northlineMetric === 'late-submits') {
-            setView('students', { studentsFilter: 'late-submissions', examsFilter: null });
             return;
         }
 
         if (target.dataset.northlineMetric === 'deadlines' || target.dataset.northlineOpenEvent) {
-            setView('exams', { studentsFilter: null, examsFilter: 'next-24h' });
             return;
         }
 

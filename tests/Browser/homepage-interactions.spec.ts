@@ -162,44 +162,55 @@ test.describe('Homepage interactions', () => {
         expect(Math.abs(gradeCenter - noteCenter)).toBeLessThanOrEqual(2);
     });
 
-    test('Northline mobile only enables popup-ready workflow actions', async ({ page, browserName }, testInfo) => {
-        test.skip(browserName !== 'chromium' || testInfo.project.name !== 'mobile-chromium');
+    test('Northline only enables popup-ready actions', async ({ page, browserName }) => {
+        test.skip(browserName !== 'chromium');
 
         const northline = await openNorthlineSurface(page);
-        const workflowAction = (action: string) => northline.locator(`[data-northline-workflow-action="${action}"]`).first();
-        const triggerWorkflowAction = async (action: string) => {
-            await workflowAction(action).evaluate((element) => {
+        const triggerClick = async (selector: string) => {
+            await northline.locator(selector).first().evaluate((element) => {
                 element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
             });
         };
+        const expectDashboardOnly = async () => {
+            await expect(northline.locator('[data-northline-view-panel="dashboard"]')).toBeVisible();
+            await expect(northline.locator('[data-northline-view-panel="documents"]')).toBeHidden();
+            await expect(northline.locator('[data-northline-view-panel="exams"]')).toBeHidden();
+            await expect(northline.locator('[data-northline-view-panel="students"]')).toBeHidden();
+        };
 
-        await triggerWorkflowAction('post-materials');
-        await expect(northline.locator('[data-northline-view-panel="dashboard"]')).toBeVisible();
-        await expect(northline.locator('[data-northline-view-panel="documents"]')).toBeHidden();
+        await triggerClick('[data-northline-nav="documents"]');
+        await expectDashboardOnly();
 
-        await triggerWorkflowAction('create-exam');
-        await expect(northline.locator('[data-northline-view-panel="dashboard"]')).toBeVisible();
-        await expect(northline.locator('[data-northline-view-panel="exams"]')).toBeHidden();
+        await triggerClick('[data-northline-nav="exams"]');
+        await expectDashboardOnly();
 
-        await triggerWorkflowAction('bulk-grading');
+        await triggerClick('[data-northline-nav="students"]');
+        await expectDashboardOnly();
+
+        await triggerClick('[data-northline-trigger-alerts]');
+        await expectDashboardOnly();
+
+        await triggerClick('[data-northline-workflow-action="post-materials"]');
+        await expectDashboardOnly();
+
+        await triggerClick('[data-northline-workflow-action="create-exam"]');
+        await expectDashboardOnly();
+
+        await triggerClick('[data-northline-metric="late-submits"]');
+        await expectDashboardOnly();
+
+        await triggerClick('[data-northline-metric="deadlines"]');
+        await expectDashboardOnly();
+
+        await triggerClick('[data-northline-open-event]');
+        await expectDashboardOnly();
+
+        await triggerClick('[data-northline-workflow-action="bulk-grading"]');
         await expect(northline.locator('[data-northline-overlay="grading"]').filter({ visible: true })).toBeVisible();
         await northline.getByRole('button', { name: 'Close grading workbench' }).click();
 
-        await triggerWorkflowAction('class-message');
+        await triggerClick('[data-northline-workflow-action="class-message"]');
         await expect(northline.locator('[data-northline-overlay="message"]').filter({ visible: true })).toBeVisible();
-    });
-
-    test('Northline event row opens the exams workspace with the due soon filter active', async ({ page, browserName }, testInfo) => {
-        test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
-
-        const northline = await openNorthlineSurface(page);
-
-        await northline.getByRole('button', { name: 'Open event: Outline Review Conference' }).click();
-
-        await expect(northline.locator('[data-northline-view-title]')).toHaveText('Assessment Planning');
-        await expect(northline.locator('[data-northline-view-description]')).toHaveText('Upcoming due work for the current class.');
-        await expect(northline.locator('[data-northline-header-filter]')).toContainText('Due soon');
-        await expect(northline.locator('[data-northline-view-panel="exams"]')).toContainText('Unit Essay Checkpoint');
     });
 
     test('Studio Current inner viewport scrolls independently', async ({ page, browserName }, testInfo) => {
