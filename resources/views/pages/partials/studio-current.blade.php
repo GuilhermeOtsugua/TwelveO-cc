@@ -5,16 +5,16 @@
             <div class="studio-current-ambient studio-current-ambient--wash" aria-hidden="true"></div>
 
             <header class="studio-current-topbar" data-studio-current-topbar>
-                <div class="studio-current-wordmark" aria-label="Studio Current">
+                <button type="button" class="studio-current-wordmark" data-studio-current-reset aria-label="Return Studio Current to the top">
                     <span>Studio</span>
                     <span class="studio-current-wordmark__current">Current</span>
-                </div>
+                </button>
 
                 <nav class="studio-current-nav" aria-label="Studio Current sections">
-                    <button type="button">The Portal</button>
-                    <button type="button">Review</button>
-                    <button type="button">Delivery</button>
-                    <button type="button">Workspaces</button>
+                    <button type="button" data-studio-current-scroll-target="portal">The Portal</button>
+                    <button type="button" data-studio-current-scroll-target="review">Review</button>
+                    <button type="button" data-studio-current-scroll-target="delivery">Delivery</button>
+                    <button type="button" data-studio-current-scroll-target="workspaces">Workspaces</button>
                 </nav>
 
                 <button type="button" class="studio-current-pill-button">
@@ -22,7 +22,7 @@
                 </button>
             </header>
 
-            <section class="studio-current-hero" data-studio-current-hero>
+            <section class="studio-current-hero" data-studio-current-hero data-studio-current-section="portal">
                 <div class="studio-current-copy" data-studio-current-overview>
                     <p class="studio-current-eyebrow">Creative Client Portal</p>
 
@@ -244,7 +244,7 @@
             </section>
 
             <section class="studio-current-story" aria-label="Studio Current workflow">
-                <div class="studio-current-feature">
+                <div class="studio-current-feature" data-studio-current-section="review">
                     <div class="studio-current-feature__copy">
                         <p class="studio-current-feature__eyebrow">Review</p>
                         <h5 class="studio-current-feature__headline">
@@ -324,7 +324,7 @@
                     </div>
                 </div>
 
-                <div class="studio-current-feature studio-current-feature--reverse">
+                <div class="studio-current-feature studio-current-feature--reverse" data-studio-current-section="delivery">
                     <div class="studio-current-feature__copy">
                         <p class="studio-current-feature__eyebrow">Delivery</p>
                         <h5 class="studio-current-feature__headline">
@@ -411,7 +411,7 @@
                     </div>
                 </div>
 
-                <div class="studio-current-feature">
+                <div class="studio-current-feature" data-studio-current-section="workspaces">
                     <div class="studio-current-feature__copy">
                         <p class="studio-current-feature__eyebrow">Portal</p>
                         <h5 class="studio-current-feature__headline">

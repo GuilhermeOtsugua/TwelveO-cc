@@ -106,9 +106,43 @@ export function renderNorthlineTemporalToken(label, tone = null) {
     return renderNorthlineBadge(label, 'status', tone);
 }
 
+export function formatNorthlineMobileTime(label) {
+    if (!label) {
+        return 'Pending';
+    }
+
+    return escapeNorthlineHtml(label)
+        .replace(/^Submitted\s+/i, '')
+        .replace(/^Pending\s+submission$/i, 'Pending');
+}
+
+function renderNorthlineMetricStatus(status, priority) {
+    const statusText = String(status ?? '');
+
+    if (!priority) {
+        return escapeNorthlineHtml(statusText);
+    }
+
+    const percentageMatch = statusText.match(/^(\d+(?:\.\d+)?%)(.*)$/);
+
+    if (!percentageMatch) {
+        return escapeNorthlineHtml(statusText);
+    }
+
+    const [, percentage, suffix] = percentageMatch;
+
+    return `<span class="northline-status-metric__status--priority">${escapeNorthlineHtml(percentage)}</span>${escapeNorthlineHtml(suffix)}`;
+}
+
 
 
 export function renderNorthlineMetric(metric) {
+    const statusClass = [
+        'northline-status-metric__status',
+        metric.tone === 'coral' ? 'text-[#ff4b5c]' : 'text-[#0b7b77]',
+    ].filter(Boolean).join(' ');
+    const statusMarkup = renderNorthlineMetricStatus(metric.status, metric.priority);
+
     return `
         <button type="button" class="northline-status-metric ${metric.tone === 'coral' ? 'northline-status-metric--coral' : ''}" data-northline-metric="${escapeNorthlineHtml(metric.id)}">
             <div class="flex items-end justify-between gap-2.5">
@@ -116,7 +150,7 @@ export function renderNorthlineMetric(metric) {
                     <span class="northline-display text-[1.82rem] font-black leading-none text-slate-900">${escapeNorthlineHtml(metric.value)}</span>
                     <span class="northline-stat-label">${escapeNorthlineHtml(metric.label)}</span>
                 </div>
-                <span class="text-[0.8rem] font-bold ${metric.tone === 'coral' ? 'text-[#ff4b5c]' : 'text-[#0b7b77]'}">${escapeNorthlineHtml(metric.status)}</span>
+                <span class="${escapeNorthlineHtml(statusClass)}">${statusMarkup}</span>
             </div>
             <div class="northline-progress">
                 <span class="northline-progress__fill ${metric.tone === 'coral' ? 'bg-[#ff4b5c]' : 'bg-[#0b7b77]'}" style="width: ${metric.progress}%"></span>
@@ -682,12 +716,14 @@ export function renderNorthlineGradingOverlay(classroom, assignment, submission,
                     <label class="northline-field-label"><span>Student</span><select data-northline-grading-student>${studentOptions}</select></label>
                 </div>
                 <section class="northline-mobile-submission-card">
-                    <div>
-                        ${renderNorthlineTemporalToken(submission?.submittedAt ?? 'Pending submission')}
+                    <div class="northline-mobile-submission-card__copy">
                         <h6>${escapeNorthlineHtml(submission?.previewTitle ?? 'Submission preview')}</h6>
                         <p>${escapeNorthlineHtml(previewSummary)}</p>
                     </div>
-                    <button type="button" class="northline-secondary-chip">${escapeNorthlineHtml(submission?.fileName ?? 'Open document')}</button>
+                    <div class="northline-mobile-submission-card__actions">
+                        <span class="northline-mobile-submission-card__time"><span aria-hidden="true"></span>${formatNorthlineMobileTime(submission?.submittedAt ?? 'Pending submission')}</span>
+                        <button type="button" class="northline-secondary-chip">${escapeNorthlineHtml(submission?.fileName ?? 'Open document')}</button>
+                    </div>
                 </section>
                 <section class="northline-mobile-grade-card">
                     <label class="northline-field-label"><span>Grade</span><select data-northline-grade-select>${gradeOptions}</select></label>

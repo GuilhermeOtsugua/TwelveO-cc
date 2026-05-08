@@ -192,21 +192,13 @@
         border-radius: 1rem;
         padding: 0.45rem;
         text-align: left;
-        transition: background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+        transition: transform 180ms ease;
     }
 
     .northline-status-metric:hover,
     .northline-status-metric:focus-visible {
-        background: rgba(11, 123, 119, 0.08);
         transform: translateY(-1px);
-        box-shadow: inset 0 0 0 1px rgba(11, 123, 119, 0.12);
         outline: none;
-    }
-
-    .northline-status-metric--coral:hover,
-    .northline-status-metric--coral:focus-visible {
-        background: rgba(255, 75, 92, 0.08);
-        box-shadow: inset 0 0 0 1px rgba(255, 75, 92, 0.12);
     }
 
     .northline-workspace-grid {
@@ -643,11 +635,32 @@
     }
 
     .northline-overlay--grading .northline-context-chip {
-        background: rgba(255, 255, 255, 0.96);
+        opacity: 1;
+        background: #ffffff !important;
         color: #293032;
         box-shadow:
-            inset 0 0 0 1px rgba(11, 123, 119, 0.12),
-            0 8px 18px rgba(41, 48, 50, 0.06);
+            inset 0 0 0 1px rgba(11, 123, 119, 0.18),
+            0 8px 18px rgba(41, 48, 50, 0.08);
+    }
+
+    .northline-overlay--grading .flex.flex-wrap.gap-2 > .northline-context-chip {
+        background: #ffffff !important;
+    }
+
+    .northline-overlay--grading .northline-context-chip,
+    .northline-overlay--grading .northline-context-chip * {
+        color: #293032 !important;
+        opacity: 1 !important;
+    }
+
+    .northline-overlay--grading .northline-context-chip__dot {
+        background: #ff5c67 !important;
+        box-shadow: 0 0 0 4px rgba(255, 92, 103, 0.18);
+    }
+
+    .northline-overlay--grading .northline-context-chip__label,
+    .northline-overlay--grading .northline-context-chip__name {
+        opacity: 1;
     }
 
     .northline-overlay-header {
@@ -1113,11 +1126,19 @@
 
         .northline-mobile-submission-card {
             grid-template-columns: minmax(0, 1fr) auto;
-            align-items: end;
+            align-items: stretch;
+            column-gap: 0.58rem;
+        }
+
+        .northline-mobile-submission-card__copy {
+            display: flex;
+            min-height: 4.15rem;
+            flex-direction: column;
+            min-width: 0;
         }
 
         .northline-mobile-submission-card h6 {
-            margin-top: 0.4rem;
+            margin-top: 0.02rem;
             font-size: 0.86rem;
             font-weight: 900;
             line-height: 1.05;
@@ -1127,26 +1148,85 @@
 
         .northline-mobile-submission-card p {
             display: -webkit-box;
+            flex: 1;
             overflow: hidden;
-            margin-top: 0.26rem;
+            margin-top: 0.34rem;
             -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             font-size: 0.68rem;
             line-height: 1.35;
             color: #65717b;
         }
 
+        .northline-mobile-submission-card__actions {
+            display: flex;
+            min-width: 7.4rem;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 0.42rem;
+        }
+
+        .northline-mobile-submission-card__time {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.26rem;
+            justify-self: end;
+            border-radius: 999px;
+            background: rgba(155, 98, 0, 0.12);
+            padding: 0.34rem 0.58rem;
+            font-family: 'Roboto Condensed', var(--font-sans);
+            font-size: 0.5rem;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            line-height: 1;
+            text-transform: uppercase;
+            color: #9b6200;
+        }
+
+        .northline-mobile-submission-card__time span {
+            width: 0.32rem;
+            height: 0.32rem;
+            flex: 0 0 auto;
+            border-radius: 999px;
+            background: #c78412;
+            box-shadow: 0 0 0 0.16rem rgba(199, 132, 18, 0.14);
+        }
+
         .northline-mobile-submission-card .northline-secondary-chip {
+            display: block;
             max-width: 7.4rem;
+            min-width: 0;
+            width: min(7.4rem, 100%);
             min-height: 2rem;
+            justify-self: end;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
+        .northline-mobile-submission-card .northline-status-chip {
+            border: 0;
+            box-shadow: none;
+        }
+
         .northline-mobile-grade-card {
             grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr);
-            align-items: end;
+            align-items: stretch;
+        }
+
+        .northline-mobile-grade-card .northline-field-label {
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
+            align-items: start;
+        }
+
+        .northline-mobile-grade-card .northline-field-label select {
+            align-self: center;
+        }
+
+        .northline-mobile-grade-card .northline-field-label--stacked textarea {
+            align-self: stretch;
         }
 
         .northline-mobile-grade-card textarea {

@@ -278,6 +278,8 @@ function initializeStudioCurrentTopbarScroll() {
 
         const viewport = slice.querySelector('[data-studio-current-viewport]');
         const topbar = slice.querySelector('[data-studio-current-topbar]');
+        const resetControl = slice.querySelector('[data-studio-current-reset]');
+        const navControls = slice.querySelectorAll('[data-studio-current-scroll-target]');
 
         if (!(viewport instanceof HTMLElement) || !(topbar instanceof HTMLElement)) {
             return;
@@ -302,6 +304,37 @@ function initializeStudioCurrentTopbarScroll() {
 
         viewport.addEventListener('scroll', requestSync, { passive: true });
         window.addEventListener('resize', requestSync);
+        resetControl?.addEventListener('click', () => {
+            viewport.scrollTo({ top: 0, behavior: 'auto' });
+            requestSync();
+        });
+        navControls.forEach((control) => {
+            control.addEventListener('click', () => {
+                if (!(control instanceof HTMLElement)) {
+                    return;
+                }
+
+                const target = slice.querySelector(`[data-studio-current-section="${control.dataset.studioCurrentScrollTarget}"]`);
+
+                if (!(target instanceof HTMLElement)) {
+                    return;
+                }
+
+                const focalElement = target.matches('.studio-current-feature')
+                    ? target.querySelector('.studio-current-feature__copy')
+                    : target.querySelector('.studio-current-feature__copy');
+                const scrollTarget = focalElement ?? target;
+                const viewportRect = viewport.getBoundingClientRect();
+                const targetRect = scrollTarget.getBoundingClientRect();
+                const viewportScale = viewportRect.height / viewport.clientHeight;
+                const targetOffset = viewport.scrollTop + (((targetRect.top - viewportRect.top) - ((viewportRect.height - targetRect.height) / 2)) / viewportScale);
+                const maxScroll = viewport.scrollHeight - viewport.clientHeight;
+                const nextScroll = Math.max(0, Math.min(targetOffset, maxScroll));
+
+                viewport.scrollTo({ top: nextScroll, behavior: 'smooth' });
+                requestSync();
+            });
+        });
         syncTopbarState();
     });
 }

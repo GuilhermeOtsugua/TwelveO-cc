@@ -192,6 +192,17 @@
         font-size: 1.48rem;
         letter-spacing: 0.02em;
         color: var(--studio-topbar);
+        cursor: pointer;
+        transition:
+            opacity 180ms ease,
+            transform 180ms ease;
+    }
+
+    .studio-current-wordmark:hover,
+    .studio-current-wordmark:focus-visible {
+        opacity: 0.82;
+        transform: translateY(-1px);
+        outline: none;
     }
 
     .studio-current-wordmark__current {

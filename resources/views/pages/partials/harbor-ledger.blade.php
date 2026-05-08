@@ -153,7 +153,7 @@
     data-harbor-summary-collapsed="true"
 >
     <header class="harbor-ledger-header flex h-auto items-center justify-between border-b border-slate-200 bg-white px-4 lg:h-11">
-        <div class="harbor-ledger-header__identity flex items-center gap-3">
+        <button type="button" class="harbor-ledger-header__identity flex items-center gap-3 text-left" data-harbor-reset aria-label="Reset Harbor Ledger workspace">
             <div class="flex h-8 w-8 items-center justify-center rounded-[6px] bg-sky-600 shadow-[0_6px_16px_rgba(2,132,199,0.18)]">
                 <svg viewBox="0 0 24 24" fill="currentColor" class="h-[18px] w-[18px] text-white" aria-hidden="true">
                     <path d="M17 15l1.55 1.55c-.96 1.69-3.33 3.04-5.55 3.37V11h3V9h-3V7.82C14.16 7.4 15 6.3 15 5c0-1.65-1.35-3-3-3S9 3.35 9 5c0 1.3.84 2.4 2 2.82V9H8v2h3v8.92c-2.22-.33-4.59-1.68-5.55-3.37L7 15l-4-3v3c0 3.88 4.92 7 9 7s9-3.12 9-7v-3l-4 3ZM12 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1Z"/>
@@ -164,7 +164,7 @@
                 <p class="text-[1.05rem] font-bold leading-none tracking-tight text-slate-900">Harbor Ledger</p>
                 <span class="harbor-ledger-header__subtitle mt-1 block text-[10px] font-medium uppercase tracking-[0.28em] text-sky-600">Compliance Workbench v2.4</span>
             </div>
-        </div>
+        </button>
 
         <div class="harbor-ledger-header__actions flex items-center gap-5">
             <div class="flex -space-x-2">

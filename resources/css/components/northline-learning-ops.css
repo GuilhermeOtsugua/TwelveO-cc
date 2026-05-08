@@ -70,6 +70,21 @@
         display: none;
     }
 
+    .northline-topbar__identity {
+        cursor: pointer;
+        border-radius: 999px;
+        transition:
+            box-shadow 180ms ease,
+            opacity 180ms ease;
+    }
+
+    .northline-topbar__identity:hover,
+    .northline-topbar__identity:focus-visible {
+        opacity: 0.86;
+        box-shadow: 0 0 0 0.32rem rgba(255, 92, 103, 0.08);
+        outline: none;
+    }
+
     .northline-mark {
         position: relative;
         width: 1.75rem;
@@ -252,6 +267,18 @@
         text-transform: uppercase;
         color: #565d5f;
         padding-bottom: 0.28rem;
+    }
+
+    .northline-status-metric__status {
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .northline-status-metric__status--priority {
+        text-decoration-line: underline;
+        text-decoration-color: #ff4b5c;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.16em;
     }
 
     .northline-progress {
@@ -748,6 +775,14 @@
     [data-northline-events] .northline-event-item__content {
         min-width: 0;
         align-self: center;
+    }
+
+    [data-northline-events] .northline-event-item__content .northline-item-meta-row .northline-item-meta:last-child {
+        display: block;
+        max-width: 62ch;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .northline-rolling-text {

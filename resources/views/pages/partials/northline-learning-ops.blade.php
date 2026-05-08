@@ -119,7 +119,7 @@
             'dashboardTitle' => "Teacher's Task & Grading Center",
             'dashboardDescription' => 'Assessment pacing, materials, and classroom support for the current history block.',
             'metrics' => [
-                ['id' => 'pending-grade', 'value' => '27', 'label' => 'Pending Grade', 'status' => '54% reviewed · priority', 'tone' => 'teal', 'progress' => 54],
+                ['id' => 'pending-grade', 'value' => '27', 'label' => 'Pending Grade', 'status' => '54% reviewed', 'tone' => 'teal', 'progress' => 54, 'priority' => true],
                 ['id' => 'late-submits', 'value' => '07', 'label' => 'Late Submits', 'status' => 'Follow-up ready', 'tone' => 'coral', 'progress' => 22],
                 ['id' => 'deadlines', 'value' => '04', 'label' => 'Due soon', 'status' => 'Planning active', 'tone' => 'coral', 'progress' => 61],
             ],
@@ -181,7 +181,7 @@
             'dashboardTitle' => "Teacher's Task & Grading Center",
             'dashboardDescription' => 'Current-class planning, grading, and student support for civic history work.',
             'metrics' => [
-                ['id' => 'pending-grade', 'value' => '33', 'label' => 'Pending Grade', 'status' => '59% reviewed · priority', 'tone' => 'teal', 'progress' => 59],
+                ['id' => 'pending-grade', 'value' => '33', 'label' => 'Pending Grade', 'status' => '59% reviewed', 'tone' => 'teal', 'progress' => 59, 'priority' => true],
                 ['id' => 'late-submits', 'value' => '09', 'label' => 'Late Submits', 'status' => 'Follow-up ready', 'tone' => 'coral', 'progress' => 31],
                 ['id' => 'deadlines', 'value' => '06', 'label' => 'Due soon', 'status' => 'Planning active', 'tone' => 'coral', 'progress' => 73],
             ],
@@ -247,7 +247,7 @@
     <div class="northline-canvas flex min-h-0 flex-col">
         <header class="northline-topbar flex h-10 shrink-0 items-center justify-between px-4.5" data-northline-topbar>
             <div class="northline-topbar__primary flex min-w-0 items-center gap-6">
-                <div class="northline-topbar__identity flex items-center gap-3">
+                <button type="button" class="northline-topbar__identity flex items-center gap-3 text-left" data-northline-reset aria-label="Return Northline to the dashboard">
                     <div class="northline-mark text-[#ff5c67]" aria-hidden="true">
                         <span class="northline-mark__line northline-mark__line--v"></span>
                         <span class="northline-mark__line northline-mark__line--h"></span>
@@ -259,7 +259,7 @@
                         <p class="northline-display text-[1rem] font-black uppercase tracking-[-0.04em] text-slate-900">Northline</p>
                         <p class="northline-topbar__mobile-copy">Teacher workspace</p>
                     </div>
-                </div>
+                </button>
 
                 <nav class="northline-nav text-slate-500" aria-label="Northline sections">
                     <button type="button" class="northline-nav-pill northline-nav-pill--active" data-northline-nav="dashboard">Dashboard</button>
