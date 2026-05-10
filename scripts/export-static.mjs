@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -8,8 +8,8 @@ const publicDir = path.join(root, 'public');
 const templatePath = path.join(root, 'resources', 'static', 'home.html');
 const manifestPath = path.join(publicDir, 'build', 'manifest.json');
 
-await rm(outputDir, { recursive: true, force: true });
 await mkdir(outputDir, { recursive: true });
+await emptyDir(outputDir);
 
 await copyPublicAsset('build');
 await copyPublicFile('favicon.ico');
@@ -48,6 +48,17 @@ async function copyPublicFile(relativePath) {
             throw error;
         }
     }
+}
+
+async function emptyDir(directory) {
+    const entries = await readdir(directory);
+
+    await Promise.all(entries.map((entry) => rm(path.join(directory, entry), {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+        retryDelay: 100,
+    })));
 }
 
 function findManifestEntry(predicate) {

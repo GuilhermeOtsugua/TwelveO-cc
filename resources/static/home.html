@@ -9,6 +9,15 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Otsugua, the portfolio of Guilherme Augusto. Full-stack Laravel work with technical notes and clean presentation.">
+        <link rel="canonical" href="https://otsugua.dev">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://otsugua.dev">
+        <meta property="og:site_name" content="Otsugua">
+        <meta property="og:title" content="Otsugua">
+        <meta property="og:description" content="Otsugua, the portfolio of Guilherme Augusto. Full-stack Laravel work with technical notes and clean presentation.">
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="Otsugua">
+        <meta name="twitter:description" content="Otsugua, the portfolio of Guilherme Augusto. Full-stack Laravel work with technical notes and clean presentation.">
 
         <title>Otsugua</title>
 
