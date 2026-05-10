@@ -1448,7 +1448,7 @@
         }
     }
 
-    @media (max-width: 639px) {
+    @media (max-width: 1023px) {
         .northline-status-grid,
         .northline-workflow-grid {
             grid-template-columns: minmax(0, 1fr);
@@ -1520,7 +1520,7 @@
         }
 
         .northline-topbar__mobile-copy {
-            display: block;
+            display: none;
             margin-top: 0.12rem;
             font-family: 'Roboto Condensed', var(--font-sans);
             font-size: 0.44rem;
@@ -1895,6 +1895,60 @@
 
         .northline-dashboard-desktop {
             display: none;
+        }
+    }
+
+    @media (min-width: 640px) and (max-width: 1023px) {
+        .northline-slice {
+            height: 38rem;
+            min-height: 38rem;
+        }
+
+        .northline-workspace-frame {
+            display: grid !important;
+            min-height: 0;
+            grid-template-rows: 7rem minmax(0, 1fr);
+            gap: 0.46rem;
+            padding-block: 0.42rem 0.36rem;
+        }
+
+        .northline-workspace-header {
+            display: flex;
+            height: 100%;
+            min-height: 0;
+            align-items: center;
+            align-self: stretch;
+            padding-block: 0;
+        }
+
+        .northline-view-stack {
+            max-height: 32.4rem;
+        }
+
+        .northline-mobile-hub {
+            justify-content: space-between;
+            gap: 0.62rem;
+            padding-block: 0.72rem;
+        }
+
+        .northline-mobile-actions {
+            flex: 0 0 auto;
+            align-content: center;
+        }
+
+        .northline-mobile-action {
+            min-height: 4.4rem;
+            align-content: center;
+            gap: 0.46rem;
+        }
+
+        .northline-mobile-status-metric {
+            min-height: 4.1rem;
+            align-content: center;
+        }
+
+        .northline-mobile-hub__bottom {
+            margin-top: 0;
         }
     }
 }

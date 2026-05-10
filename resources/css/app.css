@@ -776,6 +776,11 @@
             text-decoration-color var(--theme-transition-duration) var(--theme-transition-ease);
     }
 
+    .project-note__principle-label--tablet,
+    .credential-action__label--tablet {
+        display: none;
+    }
+
     .project-note__principle-link:hover,
     .project-note__principle-link:focus-visible {
         color: var(--green-900);
@@ -1136,9 +1141,9 @@
 
 @media (min-width: 640px) and (max-width: 1023px) {
     .project-band__surface-stage {
-        width: min(100%, 28.5rem);
+        width: min(100%, 42rem);
         margin-inline: auto;
-        max-height: 42rem;
+        max-height: 46rem;
         border-radius: 1.4rem;
         padding: 0.48rem;
     }
@@ -1150,6 +1155,31 @@
 
     .project-band__surface-stage > .project-surface {
         border-radius: 1.08rem;
+    }
+
+    [data-credential-section] > .relative {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        text-align: center;
+    }
+
+    [data-credential-card] {
+        width: min(100%, 30rem);
+        justify-content: center;
+    }
+
+    [data-credential-card] a {
+        width: min(100%, 26rem);
+    }
+
+    .project-note__principle-label--full,
+    .credential-action__label--default {
+        display: none;
+    }
+
+    .project-note__principle-label--tablet,
+    .credential-action__label--tablet {
+        display: inline;
     }
 }
 
