@@ -16,15 +16,16 @@ await copyPublicFile('favicon.ico');
 await copyPublicFile('robots.txt');
 
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-const appEntry = manifest['resources/js/app.js'];
+const appScriptEntry = findManifestEntry((entry) => entry.isEntry && entry.file?.endsWith('.js'));
+const appStyleEntry = findManifestEntry((entry) => entry.isEntry && entry.file?.endsWith('.css'));
 
-if (!appEntry?.file || !appEntry?.css?.[0]) {
-    throw new Error('Unable to find the Vite app entry in public/build/manifest.json.');
+if (!appScriptEntry?.file || !appStyleEntry?.file) {
+    throw new Error('Unable to find the Vite app assets in public/build/manifest.json.');
 }
 
 const html = (await readFile(templatePath, 'utf8'))
-    .replaceAll('__APP_CSS__', `/build/${appEntry.css[0]}`)
-    .replaceAll('__APP_JS__', `/build/${appEntry.file}`);
+    .replaceAll('__APP_CSS__', `/build/${appStyleEntry.file}`)
+    .replaceAll('__APP_JS__', `/build/${appScriptEntry.file}`);
 
 await writeFile(path.join(outputDir, 'index.html'), html);
 
@@ -47,4 +48,8 @@ async function copyPublicFile(relativePath) {
             throw error;
         }
     }
+}
+
+function findManifestEntry(predicate) {
+    return Object.values(manifest).find(predicate);
 }
