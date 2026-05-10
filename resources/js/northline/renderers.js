@@ -231,7 +231,6 @@ export function renderNorthlineMobileHub(classroom, workflowActions) {
             <div class="northline-mobile-hub__metrics">
                 <div class="northline-mobile-hub__metrics-header">
                     <p class="northline-mobile-hub__kicker">Grading & Submission Status</p>
-                    <span>${escapeNorthlineHtml(firstAssignment?.title ?? 'Queue ready')}</span>
                 </div>
                 <div class="northline-mobile-hub__metric-grid">
                     ${statusMetrics.map((metric) => renderNorthlineMobileStatusMetric(metric)).join('')}

@@ -60,7 +60,7 @@
             </header>
 
             <main id="top" class="otsugua-shell mx-auto px-6 pb-16 pt-10 lg:px-10 lg:pt-16">
-                <section class="grid gap-8 lg:grid-cols-[minmax(0,1.02fr)_minmax(18rem,0.78fr)] lg:items-end" data-home-hero>
+                <section class="grid gap-8 lg:grid-cols-[minmax(0,1.02fr)_minmax(18rem,0.78fr)] lg:items-center" data-home-hero>
                     <div>
                         <p class="mb-6 text-xs font-semibold uppercase tracking-[0.38em] text-[color:rgba(16,40,31,0.62)]">
                             Laravel / Product engineering / Full-stack
@@ -186,7 +186,8 @@
                                                             target="_blank"
                                                             rel="noreferrer"
                                                         >
-                                                            {{ $project['note']['principle_label'] }}
+                                                            <span class="project-note__principle-label project-note__principle-label--full">{{ $project['note']['principle_label'] }}</span>
+                                                            <span class="project-note__principle-label project-note__principle-label--tablet">{{ $project['note']['principle'] }}</span>
                                                         </a>
                                                     </p>
                                                 </div>
@@ -264,7 +265,8 @@
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                {{ $credential['action']['label'] }}
+                                <span class="credential-action__label credential-action__label--default">{{ $credential['action']['label'] }}</span>
+                                <span class="credential-action__label credential-action__label--tablet">View online certificate</span>
                             </a>
                         </article>
                     </div>
@@ -321,7 +323,11 @@
                                             target="_blank"
                                             rel="noreferrer"
                                         >
-                                            @if ($profile['label'] === 'LinkedIn')
+                                            @if ($profile['label'] === 'Upwork')
+                                                <svg viewBox="0 0 24 24" class="h-4 w-4 text-[color:rgba(244,239,230,0.7)]" fill="currentColor" aria-hidden="true">
+                                                    <path d="M18.64 7.18c-2.2 0-3.92 1.42-4.58 3.52-.98-1.48-1.72-3.38-2.1-5.12H9.2v6.86a2.1 2.1 0 1 1-4.2 0V5.58H2.24v6.86a4.86 4.86 0 0 0 9.72 0v-1.16c.55 1.12 1.25 2.16 2.09 3.03l-1.67 4.11h2.95l1.05-2.66c.67.24 1.43.37 2.26.37a4.48 4.48 0 1 0 0-8.95Zm0 6.28c-.47 0-.9-.08-1.28-.24l.32-.8c.34-.86.64-2.57 1.94-2.57a1.79 1.79 0 0 1-.98 3.61Z"/>
+                                                </svg>
+                                            @elseif ($profile['label'] === 'LinkedIn')
                                                 <svg viewBox="0 0 24 24" class="h-4 w-4 text-[color:rgba(244,239,230,0.7)]" fill="currentColor" aria-hidden="true">
                                                     <path d="M6.94 8.5H3.56V20h3.38V8.5ZM5.25 3A1.97 1.97 0 1 0 5.3 6.94 1.97 1.97 0 0 0 5.25 3Zm5.19 5.5H7.13V20h3.31v-6.03c0-1.6.3-3.15 2.29-3.15 1.96 0 1.98 1.83 1.98 3.26V20H18v-6.6c0-3.24-.7-5.73-4.48-5.73-1.82 0-3.03 1-3.53 1.95h-.05V8.5Z"/>
                                                 </svg>

@@ -976,7 +976,7 @@
         }
     }
 
-    @media (max-width: 639px) {
+    @media (max-width: 1023px) {
         .northline-workspace-header {
             min-height: 3.55rem;
         }
@@ -1432,6 +1432,46 @@
         .northline-list-panel--dashboard:nth-child(n + 3) {
             max-height: 8.7rem;
             overflow: hidden;
+        }
+    }
+
+    @media (min-width: 640px) and (max-width: 1023px) {
+        .northline-overlay {
+            inset: 0.8rem;
+            padding: 1rem;
+            border-radius: 1.45rem;
+        }
+
+        .northline-mobile-grading-sheet {
+            gap: 0.68rem;
+        }
+
+        .northline-mobile-grading-sheet .northline-overlay-header h5 {
+            max-width: 16rem;
+            font-size: 1.45rem;
+        }
+
+        .northline-mobile-grading-sheet__selectors {
+            gap: 0.68rem;
+        }
+
+        .northline-mobile-submission-card,
+        .northline-mobile-grade-card {
+            gap: 0.7rem;
+            border-radius: 1.12rem;
+            padding: 0.82rem;
+        }
+
+        .northline-mobile-submission-card {
+            column-gap: 0.8rem;
+        }
+
+        .northline-mobile-grade-card textarea {
+            min-height: 4.8rem;
+        }
+
+        .northline-mobile-sheet-actions {
+            gap: 0.68rem;
         }
     }
 }

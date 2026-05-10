@@ -3,6 +3,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "build:static": "npm run build && php artisan app:export-static",
         "dev": "vite",
         "test:browser": "playwright test tests/Browser"
     },

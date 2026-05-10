@@ -47,8 +47,8 @@ class HomepageContent
             'email' => 'guilhermebartolis@gmail.com',
             'profiles' => [
                 [
-                    'label' => 'LinkedIn',
-                    'href' => 'https://www.linkedin.com/in/guilhermeotsugua/',
+                    'label' => 'Upwork',
+                    'href' => 'https://www.upwork.com/freelancers/otsugua',
                 ],
                 [
                     'label' => 'GitHub',
