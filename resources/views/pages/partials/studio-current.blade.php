@@ -7,7 +7,7 @@
             <header class="studio-current-topbar" data-studio-current-topbar>
                 <button type="button" class="studio-current-wordmark" data-studio-current-reset aria-label="Return Studio Current to the top">
                     <span>Studio</span>
-                    <span class="studio-current-wordmark__current">Current</span>
+                    <span class="studio-current-wordmark__current" data-no-localize>Current</span>
                 </button>
 
                 <nav class="studio-current-nav" aria-label="Studio Current sections">

@@ -105,7 +105,7 @@ class HomepageContent
                 'tags' => ['Executable rules', 'Scenario coverage', 'Approval flow'],
                 'note' => [
                     'trigger' => 'Design Notes',
-                    'body' => 'TDD keeps this finance workspace dependable by making approval rules, exception paths, and verification states explicit before anyone trusts the release flow, following Kent Beck\'s test-first discipline.',
+                    'body' => 'TDD keeps this finance workspace dependable by making approval rules, exception paths, and verification states explicit before anyone trusts the release flow, following Kent Beck\'s test-first discipline from his book By Example (2002).',
                     'principle' => 'TDD',
                     'principle_label' => 'Test Driven Development',
                     'link_href' => 'https://martinfowler.com/bliki/TestDrivenDevelopment.html',
@@ -121,7 +121,7 @@ class HomepageContent
                 'tags' => ['Shared language', 'Teacher views', 'Classroom support'],
                 'note' => [
                     'trigger' => 'Design Notes',
-                    'body' => 'DDD keeps this learning operations slice coherent by giving attendance, assessment, and classroom follow-up work a shared language across teacher-facing views, in the spirit of Eric Evans.',
+                    'body' => 'DDD keeps this learning operations slice coherent by giving attendance, assessment, and classroom follow-up work a shared language across teacher-facing views, in the spirit of Eric Evans in his book Domain-Driven Design (2003).',
                     'principle' => 'DDD',
                     'principle_label' => 'Domain Driven Design',
                     'link_href' => 'https://martinfowler.com/bliki/DomainDrivenDesign.html',

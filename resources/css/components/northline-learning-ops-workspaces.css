@@ -754,6 +754,7 @@
         padding: 0.72rem 0.82rem;
         font-size: 0.84rem;
         color: #293032;
+        color-scheme: light;
         outline: none;
     }
 
@@ -795,6 +796,22 @@
 
     .northline-field-label textarea {
         resize: none;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(113, 120, 122, 0.45) transparent;
+    }
+
+    .northline-field-label textarea::-webkit-scrollbar {
+        width: 0.55rem;
+    }
+
+    .northline-field-label textarea::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .northline-field-label textarea::-webkit-scrollbar-thumb {
+        border: 2px solid #f8fafb;
+        border-radius: 999px;
+        background: rgba(113, 120, 122, 0.38);
     }
 
     .northline-grading-grid {

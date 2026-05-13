@@ -1467,6 +1467,15 @@
         color: rgba(112, 160, 193, 0.98);
     }
 
+    html[data-locale='pt-BR'] .studio-current-closing__headline span {
+        display: block;
+        width: fit-content;
+        margin-inline: auto;
+        padding-inline: 0.1em;
+        transform: translateX(-0.32em);
+        white-space: nowrap;
+    }
+
     .studio-current-closing__body {
         max-width: 28rem;
         margin: 1.75rem auto 0;

@@ -158,6 +158,7 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         selectedGrade: null,
         messageSubject: '',
         messageBody: '',
+        messageDraftLocale: null,
         demoStep: 0,
     };
 
@@ -180,16 +181,73 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         return students;
     };
     const getSelectedStudent = () => getVisibleStudents().find((item) => item.id === state.selectedStudentId) ?? getVisibleStudents()[0] ?? null;
+    const getCurrentLocale = () => document.documentElement.dataset.locale ?? document.documentElement.lang ?? 'en';
+    const getLocalizedClassroomDraftLabel = (value, locale = getCurrentLocale()) => {
+        if (locale !== 'pt-BR') {
+            return value;
+        }
+
+        return {
+            'Class A': 'Turma A',
+            'Class B': 'Turma B',
+            'Class C': 'Turma C',
+            'World History Seminar': 'Seminário de História Mundial',
+            'Modern European History': 'História Europeia Moderna',
+            'Civic Thought & Revolutions': 'Pensamento Cívico & Revoluções',
+        }[value] ?? value;
+    };
+    const formatMessageDraft = (classroom, locale = getCurrentLocale()) => {
+        const label = getLocalizedClassroomDraftLabel(classroom.label, locale);
+        const name = getLocalizedClassroomDraftLabel(classroom.name, locale);
+
+        if (locale === 'pt-BR') {
+            return {
+                subject: `Atualização para ${label} • ${name}`,
+                body: `Olá, turma,\n\nAqui vai uma atualização rápida sobre ${name}.\n\nConfiram os materiais e prazos mais recentes no Northline.\n\nObrigado.`,
+            };
+        }
+
+        return {
+            subject: `Update for ${label} • ${name}`,
+            body: `Hi class,\n\nHere is a quick update for ${name}.\n\nPlease check the latest materials and deadlines in Northline.\n\nThank you.`,
+        };
+    };
     const ensureMessageDraft = () => {
         const classroom = getCurrentClassroom();
+        const locale = getCurrentLocale();
+        const messageDraft = formatMessageDraft(classroom, locale);
 
         if (state.messageSubject === '') {
-            state.messageSubject = `Update for ${classroom.label} • ${classroom.name}`;
+            state.messageSubject = messageDraft.subject;
         }
 
         if (state.messageBody === '') {
-            state.messageBody = `Hi class,\n\nHere is a quick update for ${classroom.name}.\n\nPlease check the latest materials and deadlines in Northline.\n\nThank you.`;
+            state.messageBody = messageDraft.body;
         }
+
+        state.messageDraftLocale = locale;
+    };
+    const syncMessageDraftLocale = (locale) => {
+        if (state.overlay !== 'message' || state.messageDraftLocale === locale) {
+            return;
+        }
+
+        const classroom = getCurrentClassroom();
+        const previousDraft = formatMessageDraft(classroom, state.messageDraftLocale ?? 'en');
+        const nextDraft = formatMessageDraft(classroom, locale);
+        const canUpdateSubject = state.messageSubject === '' || state.messageSubject === previousDraft.subject;
+        const canUpdateBody = state.messageBody === '' || state.messageBody === previousDraft.body;
+
+        if (canUpdateSubject) {
+            state.messageSubject = nextDraft.subject;
+        }
+
+        if (canUpdateBody) {
+            state.messageBody = nextDraft.body;
+        }
+
+        state.messageDraftLocale = locale;
+        render();
     };
     const resetSelections = () => {
         const classroom = getCurrentClassroom();
@@ -395,6 +453,10 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
     if (document.fonts?.ready) {
         document.fonts.ready.then(scheduleRollingTextRefresh).catch(() => {});
     }
+
+    document.addEventListener('otsugua:localechange', (event) => {
+        syncMessageDraftLocale(event.detail?.locale ?? getCurrentLocale());
+    });
 
     ['pointerdown', 'pointerenter', 'focusin', 'keydown', 'touchstart'].forEach((eventName) => {
         slice.addEventListener(eventName, () => {
