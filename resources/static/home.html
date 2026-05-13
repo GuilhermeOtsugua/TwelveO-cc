@@ -18,6 +18,8 @@
         <meta name="twitter:card" content="summary">
         <meta name="twitter:title" content="Otsugua">
         <meta name="twitter:description" content="Otsugua, the portfolio of Guilherme Augusto. Full-stack Laravel work with technical notes and clean presentation.">
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+        <link rel="shortcut icon" href="/favicon.ico">
 
         <title>Otsugua</title>
 
@@ -52,7 +54,7 @@
 
         <link rel="preload" as="style" href="__APP_CSS__" /><link rel="modulepreload" as="script" href="__APP_JS__" /><link rel="stylesheet" href="__APP_CSS__" /><script type="module" src="__APP_JS__"></script>    </head>
     <body class="antialiased">
-        <div class="otsugua-page">
+        <div id="top" class="otsugua-page">
             <header class="sticky top-0 z-[100] border-b border-[color:var(--line)] glass-bar" data-home-header>
                 <div class="otsugua-shell mx-auto flex items-center justify-between gap-4 px-6 py-4 lg:px-10">
                     <a href="#top" class="font-display nav-brand text-lg tracking-[0.22em] text-[color:var(--green-900)] uppercase sm:text-xl">
@@ -62,12 +64,21 @@
                     <nav class="flex items-center gap-2 text-sm font-medium text-[color:var(--green-900)]">
                         <a href="#projects" class="nav-link rounded-full border border-transparent px-4 py-2">Projects</a>
                         <a href="#contact" class="nav-link rounded-full border border-transparent px-4 py-2">Contact</a>
+                        <button
+                            type="button"
+                            class="locale-toggle"
+                            data-locale-toggle
+                            aria-label="Current language: English. Switch to Brazilian Portuguese"
+                            aria-pressed="false"
+                        >
+                            <span>EN</span><img class="locale-toggle__flag" src="/flags/us.svg" alt="United States flag">
+                        </button>
 
                     </nav>
                 </div>
             </header>
 
-            <main id="top" class="otsugua-shell mx-auto px-6 pb-16 pt-10 lg:px-10 lg:pt-16">
+            <main class="otsugua-shell mx-auto px-6 pb-16 pt-10 lg:px-10 lg:pt-16">
                 <section class="grid gap-8 lg:grid-cols-[minmax(0,1.02fr)_minmax(18rem,0.78fr)] lg:items-center" data-home-hero>
                     <div>
                         <p class="mb-6 text-xs font-semibold uppercase tracking-[0.38em] text-[color:rgba(16,40,31,0.62)]">

@@ -1,6 +1,7 @@
 import './bootstrap';
 import './northline-learning-ops';
 import './harbor-ledger';
+import { initializeLocalization } from './localization';
 
 const themePreferenceStorageKey = 'otsugua.theme.preference';
 const themePreferences = ['system', 'dark', 'light'];
@@ -11,6 +12,8 @@ const fadeDelays = new WeakMap();
 
 const homeHeader = document.querySelector('[data-home-header]');
 const mobileHeaderMediaQuery = window.matchMedia?.('(max-width: 639px)');
+
+initializeLocalization();
 
 function initializeMobileHeaderScroll() {
     if (!homeHeader || !mobileHeaderMediaQuery) {
@@ -508,11 +511,12 @@ document.querySelectorAll('[data-project-band]').forEach((band) => {
         return;
     }
 
-    const closedLabel = toggle.dataset.projectNoteLabelClosed ?? 'Why it is shaped this way';
-    const openLabel = toggle.dataset.projectNoteLabelOpen ?? 'Hide note';
     const label = toggle.querySelector('span');
 
     const setOpenState = (isOpen) => {
+        const closedLabel = toggle.dataset.projectNoteLabelClosed ?? 'Why it is shaped this way';
+        const openLabel = toggle.dataset.projectNoteLabelOpen ?? 'Hide note';
+
         panel.classList.toggle('hidden', !isOpen);
         toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         panel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
@@ -528,6 +532,10 @@ document.querySelectorAll('[data-project-band]').forEach((band) => {
         const isOpen = toggle.getAttribute('aria-expanded') === 'true';
 
         setOpenState(!isOpen);
+    });
+
+    document.addEventListener('otsugua:localechange', () => {
+        setOpenState(toggle.getAttribute('aria-expanded') === 'true');
     });
 
     document.addEventListener('click', (event) => {

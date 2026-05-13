@@ -12,7 +12,9 @@ await mkdir(outputDir, { recursive: true });
 await emptyDir(outputDir);
 
 await copyPublicAsset('build');
+await copyPublicAsset('flags');
 await copyPublicFile('favicon.ico');
+await copyPublicFile('favicon.svg');
 await copyPublicFile('robots.txt');
 
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));

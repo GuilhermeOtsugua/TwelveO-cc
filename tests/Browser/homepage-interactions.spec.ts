@@ -48,6 +48,36 @@ test.describe('Homepage interactions', () => {
         }
     });
 
+    test('language toggle switches homepage and interface copy without navigation', async ({ page, browserName }, testInfo) => {
+        test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
+
+        const originalUrl = page.url();
+        const toggle = page.locator('[data-locale-toggle]');
+        const northline = northlineBand(page);
+
+        await expect(toggle).toHaveText('EN');
+        await expect(toggle.locator('img')).toHaveAttribute('src', '/flags/us.svg');
+        await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+        await expect(page.getByRole('link', { name: 'Projects' })).toBeVisible();
+
+        await toggle.click();
+
+        await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+        await expect(toggle).toHaveText('BR');
+        await expect(toggle.locator('img')).toHaveAttribute('src', '/flags/br.svg');
+        await expect(page.getByRole('link', { name: 'Projetos' })).toBeVisible();
+        await expect(northline.locator('[data-northline-view-title]')).toHaveText('Central de tarefas do professor');
+        expect(page.url()).toBe(originalUrl);
+
+        await toggle.click();
+
+        await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+        await expect(toggle).toHaveText('EN');
+        await expect(toggle.locator('img')).toHaveAttribute('src', '/flags/us.svg');
+        await expect(northline.locator('[data-northline-view-title]')).toHaveText("Teacher's Task & Grading Center");
+        expect(page.url()).toBe(originalUrl);
+    });
+
     test('Harbor review queue selection updates the active transaction workspace', async ({ page, browserName }, testInfo) => {
         test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
 
