@@ -17,7 +17,7 @@
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0;
     font: inherit;
     font-size: 0.78rem;
     font-weight: 800;
@@ -34,6 +34,19 @@
     border-radius: 0.12rem;
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--green-900) 16%, transparent);
     object-fit: cover;
+}
+
+.locale-toggle__flag--inactive {
+    opacity: 0.35;
+}
+
+.locale-toggle__separator {
+    color: color-mix(in srgb, currentColor 54%, transparent);
+    margin-inline: 0.32rem;
+}
+
+.locale-toggle__active-label {
+    margin-right: 0.35rem;
 }
 
 .locale-toggle:hover,

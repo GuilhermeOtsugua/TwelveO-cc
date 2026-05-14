@@ -9,6 +9,7 @@ const ptBR = {
     'Switch language to English': 'Mudar idioma para inglês',
     'Current language: English. Switch to Brazilian Portuguese': 'Idioma atual: inglês. Mudar para português do Brasil',
     'Idioma atual: português do Brasil. Mudar para inglês': 'Idioma atual: português do Brasil. Mudar para inglês',
+    done: 'concluído',
     Projects: 'Projetos',
     Contact: 'Contato',
     'You can find me here': 'Você pode me encontrar aqui',
@@ -118,6 +119,7 @@ const ptBR = {
     Waiting: 'Aguardando',
     'Total Batch Value': 'Valor total do lote',
     'USD equivalent': 'Equivalente em USD',
+    'USD EQUIVALENT': 'Equivalente em USD',
     'Audit Documents': 'Documentos de auditoria',
     'Upload Proof': 'Enviar comprovante',
     '+ UPLOAD PROOF': '+ ENVIAR COMPROVANTE',
@@ -145,6 +147,7 @@ const ptBR = {
     'Class management, grading activity, and classroom follow-up for the current seminar.': 'Gestão da turma, correções e acompanhamento da sala para o seminário atual.',
     'Grading & Submission Status': 'Status de correção e entregas',
     'Midterm Paper': 'Trabalho bimestral',
+    'Pending Items': 'Pendentes',
     'Pending Grade': 'Correções pendentes',
     '68% reviewed': '68% revisado',
     '68% done': '68% concluído',
@@ -590,6 +593,12 @@ function translateValue(value, locale) {
 }
 
 function translateDynamicValue(value) {
+    const percentDoneMatch = value.match(/^(\d+)% done$/);
+
+    if (percentDoneMatch) {
+        return `${percentDoneMatch[1]}% concluído`;
+    }
+
     const transactionMatch = value.match(/^TRANSACTION #(.*)$/);
 
     if (transactionMatch) {
@@ -697,17 +706,22 @@ function updateLocaleToggle(locale) {
 
     const nextLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
     const label = locale === 'pt-BR' ? 'BR' : 'EN';
-    const flagPath = locale === 'pt-BR' ? '/flags/br.svg' : '/flags/us.svg';
-    const flagAlt = locale === 'pt-BR' ? 'Brazil' : 'United States';
+    const usFlagClass = locale === 'pt-BR' ? 'locale-toggle__flag--inactive' : 'locale-toggle__flag--active';
+    const brFlagClass = locale === 'pt-BR' ? 'locale-toggle__flag--active' : 'locale-toggle__flag--inactive';
 
-    toggle.innerHTML = `<span>${label}</span><img class="locale-toggle__flag" src="${flagPath}" alt="${flagAlt} flag">`;
+    toggle.innerHTML = `
+        <span class="locale-toggle__active-label">${label}</span>
+        <img class="locale-toggle__flag locale-toggle__flag--us ${usFlagClass}" src="/flags/us.svg" alt="United States flag">
+        <span class="locale-toggle__separator" aria-hidden="true">/</span>
+        <img class="locale-toggle__flag locale-toggle__flag--br ${brFlagClass}" src="/flags/br.svg" alt="Brazil flag">
+    `;
     toggle.dataset.localeTarget = nextLocale;
     toggle.setAttribute('aria-pressed', String(locale === 'pt-BR'));
     toggle.setAttribute(
         'aria-label',
         locale === 'pt-BR'
-            ? 'Idioma atual: português do Brasil. Mudar para inglês'
-            : 'Current language: English. Switch to Brazilian Portuguese',
+            ? 'Idioma atual: português do Brasil. Inglês disponível. Mudar para inglês'
+            : 'Current language: English. Brazilian Portuguese available. Switch to Brazilian Portuguese',
     );
 }
 

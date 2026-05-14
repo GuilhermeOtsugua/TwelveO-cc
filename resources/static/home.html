@@ -18,8 +18,11 @@
         <meta name="twitter:card" content="summary">
         <meta name="twitter:title" content="Otsugua">
         <meta name="twitter:description" content="Otsugua, the portfolio of Guilherme Augusto. Full-stack Laravel work with technical notes and clean presentation.">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="shortcut icon" href="/favicon.ico">
+        <link rel="icon" href="/favicon.svg?v=planet" type="image/svg+xml">
+        <link rel="icon" href="/favicon-32.png?v=planet" type="image/png" sizes="32x32">
+        <link rel="icon" href="/favicon-192.png?v=planet" type="image/png" sizes="192x192">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=planet" sizes="180x180">
+        <link rel="shortcut icon" href="/favicon.ico?v=planet">
 
         <title>Otsugua</title>
 
@@ -71,7 +74,10 @@
                             aria-label="Current language: English. Switch to Brazilian Portuguese"
                             aria-pressed="false"
                         >
-                            <span>EN</span><img class="locale-toggle__flag" src="/flags/us.svg" alt="United States flag">
+                            <span class="locale-toggle__active-label">EN</span>
+                            <img class="locale-toggle__flag locale-toggle__flag--us locale-toggle__flag--active" src="/flags/us.svg" alt="United States flag">
+                            <span class="locale-toggle__separator" aria-hidden="true">/</span>
+                            <img class="locale-toggle__flag locale-toggle__flag--br locale-toggle__flag--inactive" src="/flags/br.svg" alt="Brazil flag">
                         </button>
 
                     </nav>

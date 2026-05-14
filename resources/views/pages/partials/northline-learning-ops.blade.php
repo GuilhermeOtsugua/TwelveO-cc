@@ -14,7 +14,7 @@
             'dashboardTitle' => "Teacher's Task & Grading Center",
             'dashboardDescription' => 'Class management, grading activity, and classroom follow-up for the current seminar.',
             'metrics' => [
-                ['id' => 'pending-grade', 'value' => '42', 'label' => 'Pending', 'status' => '68% done', 'tone' => 'teal', 'progress' => 68],
+                ['id' => 'pending-grade', 'value' => '42', 'label' => 'Pending Items', 'status' => '68% done', 'tone' => 'teal', 'progress' => 68],
                 ['id' => 'late-submits', 'value' => '12', 'label' => 'Late Submits', 'status' => 'Follow-up ready', 'tone' => 'coral', 'progress' => 34],
                 ['id' => 'deadlines', 'value' => '08', 'label' => 'Due soon', 'status' => 'Checks OK', 'tone' => 'coral', 'progress' => 86],
             ],
@@ -119,7 +119,7 @@
             'dashboardTitle' => "Teacher's Task & Grading Center",
             'dashboardDescription' => 'Assessment pacing, materials, and classroom support for the current history block.',
             'metrics' => [
-                ['id' => 'pending-grade', 'value' => '27', 'label' => 'Pending', 'status' => '54% done', 'tone' => 'teal', 'progress' => 54, 'priority' => true],
+                ['id' => 'pending-grade', 'value' => '27', 'label' => 'Pending Items', 'status' => '54% done', 'tone' => 'teal', 'progress' => 54, 'priority' => true],
                 ['id' => 'late-submits', 'value' => '07', 'label' => 'Late Submits', 'status' => 'Follow-up ready', 'tone' => 'coral', 'progress' => 22],
                 ['id' => 'deadlines', 'value' => '04', 'label' => 'Due soon', 'status' => 'Checks OK', 'tone' => 'coral', 'progress' => 61],
             ],
@@ -181,7 +181,7 @@
             'dashboardTitle' => "Teacher's Task & Grading Center",
             'dashboardDescription' => 'Current-class planning, grading, and student support for civic history work.',
             'metrics' => [
-                ['id' => 'pending-grade', 'value' => '33', 'label' => 'Pending', 'status' => '59% done', 'tone' => 'teal', 'progress' => 59, 'priority' => true],
+                ['id' => 'pending-grade', 'value' => '33', 'label' => 'Pending Items', 'status' => '59% done', 'tone' => 'teal', 'progress' => 59, 'priority' => true],
                 ['id' => 'late-submits', 'value' => '09', 'label' => 'Late Submits', 'status' => 'Follow-up ready', 'tone' => 'coral', 'progress' => 31],
                 ['id' => 'deadlines', 'value' => '06', 'label' => 'Due soon', 'status' => 'Checks OK', 'tone' => 'coral', 'progress' => 73],
             ],

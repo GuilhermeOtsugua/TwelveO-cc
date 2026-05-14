@@ -55,16 +55,22 @@ test.describe('Homepage interactions', () => {
         const toggle = page.locator('[data-locale-toggle]');
         const northline = northlineBand(page);
 
-        await expect(toggle).toHaveText('EN');
-        await expect(toggle.locator('img')).toHaveAttribute('src', '/flags/us.svg');
+        await expect(toggle.locator('.locale-toggle__active-label')).toHaveText('EN');
+        await expect(toggle.locator('.locale-toggle__flag--us')).toHaveAttribute('src', '/flags/us.svg');
+        await expect(toggle.locator('.locale-toggle__flag--br')).toHaveAttribute('src', '/flags/br.svg');
+        await expect(toggle.locator('.locale-toggle__flag--us')).toHaveClass(/locale-toggle__flag--active/);
+        await expect(toggle.locator('.locale-toggle__flag--br')).toHaveClass(/locale-toggle__flag--inactive/);
         await expect(page.locator('html')).toHaveAttribute('lang', 'en');
         await expect(page.getByRole('link', { name: 'Projects' })).toBeVisible();
 
         await toggle.click();
 
         await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
-        await expect(toggle).toHaveText('BR');
-        await expect(toggle.locator('img')).toHaveAttribute('src', '/flags/br.svg');
+        await expect(toggle.locator('.locale-toggle__active-label')).toHaveText('BR');
+        await expect(toggle.locator('.locale-toggle__flag--us')).toHaveAttribute('src', '/flags/us.svg');
+        await expect(toggle.locator('.locale-toggle__flag--br')).toHaveAttribute('src', '/flags/br.svg');
+        await expect(toggle.locator('.locale-toggle__flag--us')).toHaveClass(/locale-toggle__flag--inactive/);
+        await expect(toggle.locator('.locale-toggle__flag--br')).toHaveClass(/locale-toggle__flag--active/);
         await expect(page.getByRole('link', { name: 'Projetos' })).toBeVisible();
         await expect(northline.locator('[data-northline-view-title]')).toHaveText('Central de tarefas do professor');
         expect(page.url()).toBe(originalUrl);
@@ -72,8 +78,11 @@ test.describe('Homepage interactions', () => {
         await toggle.click();
 
         await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-        await expect(toggle).toHaveText('EN');
-        await expect(toggle.locator('img')).toHaveAttribute('src', '/flags/us.svg');
+        await expect(toggle.locator('.locale-toggle__active-label')).toHaveText('EN');
+        await expect(toggle.locator('.locale-toggle__flag--us')).toHaveAttribute('src', '/flags/us.svg');
+        await expect(toggle.locator('.locale-toggle__flag--br')).toHaveAttribute('src', '/flags/br.svg');
+        await expect(toggle.locator('.locale-toggle__flag--us')).toHaveClass(/locale-toggle__flag--active/);
+        await expect(toggle.locator('.locale-toggle__flag--br')).toHaveClass(/locale-toggle__flag--inactive/);
         await expect(northline.locator('[data-northline-view-title]')).toHaveText("Teacher's Task & Grading Center");
         expect(page.url()).toBe(originalUrl);
     });
