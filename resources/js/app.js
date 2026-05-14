@@ -589,8 +589,155 @@ sizeProjectInterfaceSlices();
 window.addEventListener('resize', sizeProjectInterfaceSlices, { passive: true });
 
 const contactCopyFeedback = document.querySelector('[data-copy-email-feedback]');
+const contactSourceStorageKey = 'otsugua.contact-source';
+const contactSourceStorageDuration = 24 * 60 * 60 * 1000;
+const contactSourceParamNames = ['ref', 'source', 'utm_source'];
+const contactCopyFeedbackMessages = {
+    success: {
+        en: 'Email copied to clipboard!',
+        'pt-BR': 'Copiado!',
+    },
+    disabled: {
+        en: 'Temporarily disabled.',
+        'pt-BR': 'Temporariamente indisponível.',
+    },
+};
 let copyFeedbackTimer = null;
 let copyFeedbackHideTimer = null;
+let contactSourceExpiresAt = null;
+
+const getCurrentLocale = () => document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en';
+
+const getContactCopyFeedbackMessage = (state) => {
+    const messages = contactCopyFeedbackMessages[state] ?? contactCopyFeedbackMessages.success;
+
+    return messages[getCurrentLocale()] ?? messages.en;
+};
+
+const isUpworkHost = (hostname) => {
+    const normalizedHostname = hostname.toLowerCase();
+
+    return normalizedHostname === 'upwork.com' || normalizedHostname.endsWith('.upwork.com');
+};
+
+const readStoredContactSource = () => {
+    try {
+        const storedSource = window.localStorage.getItem(contactSourceStorageKey);
+
+        if (!storedSource) {
+            return null;
+        }
+
+        const parsedSource = JSON.parse(storedSource);
+
+        if (parsedSource?.source !== 'upwork' || typeof parsedSource.expiresAt !== 'number') {
+            window.localStorage.removeItem(contactSourceStorageKey);
+
+            return null;
+        }
+
+        if (parsedSource.expiresAt <= Date.now()) {
+            window.localStorage.removeItem(contactSourceStorageKey);
+
+            return null;
+        }
+
+        contactSourceExpiresAt = parsedSource.expiresAt;
+
+        return parsedSource.source;
+    } catch {
+        try {
+            window.localStorage.removeItem(contactSourceStorageKey);
+        } catch {
+            // Storage may be fully unavailable; ignore and let this page continue normally.
+        }
+
+        return null;
+    }
+};
+
+const writeStoredContactSource = () => {
+    contactSourceExpiresAt = Date.now() + contactSourceStorageDuration;
+
+    try {
+        window.localStorage.setItem(contactSourceStorageKey, JSON.stringify({
+            source: 'upwork',
+            expiresAt: contactSourceExpiresAt,
+        }));
+    } catch {
+        // Ignore private browsing or storage-denied contexts; this page view still uses the detected source.
+    }
+};
+
+const clearStoredContactSource = () => {
+    contactSourceExpiresAt = null;
+
+    try {
+        window.localStorage.removeItem(contactSourceStorageKey);
+    } catch {
+        // Storage may be unavailable in strict browsing contexts.
+    }
+};
+
+const getContactSourceFromUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+
+    for (const paramName of contactSourceParamNames) {
+        const paramValue = params.get(paramName)?.trim().toLowerCase();
+
+        if (paramValue === 'direct' || paramValue === 'upwork') {
+            return paramValue;
+        }
+    }
+
+    return null;
+};
+
+const hasUpworkReferrer = () => {
+    if (!document.referrer) {
+        return false;
+    }
+
+    try {
+        return isUpworkHost(new URL(document.referrer).hostname);
+    } catch {
+        return false;
+    }
+};
+
+const resolveContactSource = () => {
+    const urlSource = getContactSourceFromUrl();
+
+    if (urlSource === 'direct') {
+        clearStoredContactSource();
+
+        return null;
+    }
+
+    if (urlSource === 'upwork' || hasUpworkReferrer()) {
+        writeStoredContactSource();
+
+        return 'upwork';
+    }
+
+    return readStoredContactSource();
+};
+
+let contactSource = resolveContactSource();
+
+const isEmailCopyDisabled = () => {
+    if (contactSource === 'upwork') {
+        if (contactSourceExpiresAt && contactSourceExpiresAt > Date.now()) {
+            return true;
+        }
+
+        contactSource = readStoredContactSource();
+
+        return contactSource === 'upwork';
+    }
+
+    return false;
+};
 
 const copyTextWithSelectionFallback = (text) => {
     const textarea = document.createElement('textarea');
@@ -659,7 +806,7 @@ const hideContactCopyFeedback = () => {
     }, 180);
 };
 
-const showContactCopyFeedback = () => {
+const showContactCopyFeedback = (message = getContactCopyFeedbackMessage('success'), state = 'success') => {
     if (!contactCopyFeedback) {
         return;
     }
@@ -672,6 +819,8 @@ const showContactCopyFeedback = () => {
         window.clearTimeout(copyFeedbackHideTimer);
     }
 
+    contactCopyFeedback.textContent = message;
+    contactCopyFeedback.dataset.copyEmailFeedbackState = state;
     contactCopyFeedback.hidden = false;
     contactCopyFeedback.classList.remove('is-visible');
 
@@ -687,6 +836,12 @@ document.querySelectorAll('[data-copy-email]').forEach((button) => {
         const email = button.dataset.copyEmail;
 
         if (!email) {
+            return;
+        }
+
+        if (isEmailCopyDisabled()) {
+            showContactCopyFeedback(getContactCopyFeedbackMessage('disabled'), 'error');
+
             return;
         }
 

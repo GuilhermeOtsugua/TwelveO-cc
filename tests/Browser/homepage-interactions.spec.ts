@@ -87,6 +87,36 @@ test.describe('Homepage interactions', () => {
         expect(page.url()).toBe(originalUrl);
     });
 
+    test('Upwork contact source disables email copy until direct override', async ({ page, browserName }, testInfo) => {
+        test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
+
+        await page.goto('/?ref=upwork#contact');
+        await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
+
+        await expect.poll(() => page.evaluate(() => window.localStorage.getItem('otsugua.contact-source')))
+            .toContain('"source":"upwork"');
+
+        const emailButton = page.locator('[data-copy-email]').first();
+        const feedback = page.locator('[data-copy-email-feedback]');
+
+        await emailButton.scrollIntoViewIfNeeded();
+        await emailButton.click();
+
+        await expect(feedback).toHaveText('Temporarily disabled.');
+        await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'error');
+
+        await page.locator('[data-locale-toggle]').click();
+        await emailButton.click();
+
+        await expect(feedback).toHaveText('Temporariamente indisponível.');
+        await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'error');
+
+        await page.goto('/?ref=direct#contact');
+        await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
+
+        await expect.poll(() => page.evaluate(() => window.localStorage.getItem('otsugua.contact-source'))).toBeNull();
+    });
+
     test('Harbor review queue selection updates the active transaction workspace', async ({ page, browserName }, testInfo) => {
         test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
 

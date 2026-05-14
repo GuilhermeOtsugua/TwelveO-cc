@@ -445,6 +445,8 @@ const ptBR = {
     'View certificate': 'Ver certificado',
     'View online certificate': 'Ver certificado online',
     'Email copied': 'Email copiado',
+    'Email copied to clipboard!': 'Copiado!',
+    'Temporarily disabled.': 'Temporariamente indisponível.',
     'Copy email': 'Copiar email',
     'Technical note': 'Nota técnica',
     'Hover / Tap': 'Passe / toque',

@@ -460,6 +460,14 @@
         box-shadow: 0 0 0 0.28rem var(--copy-email-toast-glow);
     }
 
+    .copy-email-toast[data-copy-email-feedback-state='error'] {
+        --copy-email-toast-accent: rgba(235, 96, 86, 0.96);
+        --copy-email-toast-glow: rgba(235, 96, 86, 0.2);
+        --copy-email-toast-bg: var(--feedback-error-bg);
+        --copy-email-toast-border: var(--feedback-error-border);
+        --copy-email-toast-color: var(--feedback-error-text);
+    }
+
     .copy-email-toast.is-visible {
         opacity: 1;
         transform: translate3d(-50%, 0, 0);
