@@ -90,11 +90,9 @@ test.describe('Homepage interactions', () => {
     test('Upwork contact source disables email copy until direct override', async ({ page, browserName }, testInfo) => {
         test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
 
+        await page.evaluate(() => window.localStorage.removeItem('otsugua.locale.preference'));
         await page.goto('/?ref=upwork#contact');
         await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
-
-        await expect.poll(() => page.evaluate(() => window.localStorage.getItem('otsugua.contact-source')))
-            .toContain('"source":"upwork"');
 
         const emailButton = page.locator('[data-copy-email]').first();
         const feedback = page.locator('[data-copy-email-feedback]');
@@ -111,10 +109,26 @@ test.describe('Homepage interactions', () => {
         await expect(feedback).toHaveText('Temporariamente indisponível.');
         await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'error');
 
+        await page.goto('/#contact');
+        await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
+        await emailButton.click();
+
+        await expect(feedback).toHaveText('Temporariamente indisponível.');
+        await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'error');
+
+        await page.goto('/?source=direct#contact');
+        await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
+        await emailButton.click();
+
+        await expect(feedback).toHaveText('Temporariamente indisponível.');
+        await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'error');
+
         await page.goto('/?ref=direct#contact');
         await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
+        await emailButton.click();
 
-        await expect.poll(() => page.evaluate(() => window.localStorage.getItem('otsugua.contact-source'))).toBeNull();
+        await expect(feedback).toHaveText('Copiado!');
+        await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'success');
     });
 
     test('Harbor review queue selection updates the active transaction workspace', async ({ page, browserName }, testInfo) => {

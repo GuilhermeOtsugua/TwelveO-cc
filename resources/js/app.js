@@ -1,7 +1,7 @@
 import './bootstrap';
 import './northline-learning-ops';
 import './harbor-ledger';
-import { initializeLocalization } from './localization';
+import { initializeLocalization, translateValue } from './localization';
 
 const themePreferenceStorageKey = 'otsugua.theme.preference';
 const themePreferences = ['system', 'dark', 'light'];
@@ -593,25 +593,19 @@ const contactSourceStorageKey = 'otsugua.contact-source';
 const contactSourceStorageDuration = 24 * 60 * 60 * 1000;
 const contactSourceParamNames = ['ref', 'source', 'utm_source'];
 const contactCopyFeedbackMessages = {
-    success: {
-        en: 'Email copied to clipboard!',
-        'pt-BR': 'Copiado!',
-    },
-    disabled: {
-        en: 'Temporarily disabled.',
-        'pt-BR': 'Temporariamente indisponível.',
-    },
+    success: 'Email copied to clipboard!',
+    disabled: 'Temporarily disabled.',
 };
 let copyFeedbackTimer = null;
 let copyFeedbackHideTimer = null;
-let contactSourceExpiresAt = null;
+let contactSourceState = null;
 
 const getCurrentLocale = () => document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en';
 
 const getContactCopyFeedbackMessage = (state) => {
-    const messages = contactCopyFeedbackMessages[state] ?? contactCopyFeedbackMessages.success;
+    const message = contactCopyFeedbackMessages[state] ?? contactCopyFeedbackMessages.success;
 
-    return messages[getCurrentLocale()] ?? messages.en;
+    return translateValue(message, getCurrentLocale());
 };
 
 const isUpworkHost = (hostname) => {
@@ -642,9 +636,10 @@ const readStoredContactSource = () => {
             return null;
         }
 
-        contactSourceExpiresAt = parsedSource.expiresAt;
-
-        return parsedSource.source;
+        return {
+            source: parsedSource.source,
+            expiresAt: parsedSource.expiresAt,
+        };
     } catch {
         try {
             window.localStorage.removeItem(contactSourceStorageKey);
@@ -657,20 +652,22 @@ const readStoredContactSource = () => {
 };
 
 const writeStoredContactSource = () => {
-    contactSourceExpiresAt = Date.now() + contactSourceStorageDuration;
+    const nextSourceState = {
+        source: 'upwork',
+        expiresAt: Date.now() + contactSourceStorageDuration,
+    };
+
+    contactSourceState = nextSourceState;
 
     try {
-        window.localStorage.setItem(contactSourceStorageKey, JSON.stringify({
-            source: 'upwork',
-            expiresAt: contactSourceExpiresAt,
-        }));
+        window.localStorage.setItem(contactSourceStorageKey, JSON.stringify(nextSourceState));
     } catch {
         // Ignore private browsing or storage-denied contexts; this page view still uses the detected source.
     }
 };
 
 const clearStoredContactSource = () => {
-    contactSourceExpiresAt = null;
+    contactSourceState = null;
 
     try {
         window.localStorage.removeItem(contactSourceStorageKey);
@@ -682,10 +679,14 @@ const clearStoredContactSource = () => {
 const getContactSourceFromUrl = () => {
     const params = new URLSearchParams(window.location.search);
 
+    if (params.get('ref')?.trim().toLowerCase() === 'direct') {
+        return 'direct';
+    }
+
     for (const paramName of contactSourceParamNames) {
         const paramValue = params.get(paramName)?.trim().toLowerCase();
 
-        if (paramValue === 'direct' || paramValue === 'upwork') {
+        if (paramValue === 'upwork') {
             return paramValue;
         }
     }
@@ -717,23 +718,23 @@ const resolveContactSource = () => {
     if (urlSource === 'upwork' || hasUpworkReferrer()) {
         writeStoredContactSource();
 
-        return 'upwork';
+        return contactSourceState;
     }
 
     return readStoredContactSource();
 };
 
-let contactSource = resolveContactSource();
+contactSourceState = resolveContactSource();
 
 const isEmailCopyDisabled = () => {
-    if (contactSource === 'upwork') {
-        if (contactSourceExpiresAt && contactSourceExpiresAt > Date.now()) {
+    if (contactSourceState?.source === 'upwork') {
+        if (contactSourceState.expiresAt > Date.now()) {
             return true;
         }
 
-        contactSource = readStoredContactSource();
+        contactSourceState = readStoredContactSource();
 
-        return contactSource === 'upwork';
+        return contactSourceState?.source === 'upwork';
     }
 
     return false;

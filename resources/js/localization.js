@@ -568,7 +568,7 @@ function getOriginalAttribute(element, attributeName) {
     return elementAttributes.get(attributeName);
 }
 
-function translateValue(value, locale) {
+export function translateValue(value, locale) {
     const normalizedValue = normalizeText(value);
 
     if (locale === 'en' || !normalizedValue) {
