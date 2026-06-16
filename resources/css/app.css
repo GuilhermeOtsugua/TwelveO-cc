@@ -1034,6 +1034,11 @@
         border-color: var(--surface-contact-line);
     }
 
+    [data-contact-section] .social-link[aria-disabled='true'] {
+        cursor: not-allowed;
+        opacity: 0.58;
+    }
+
     [data-contact-section] .social-link svg {
         color: var(--ink-on-contrast-muted);
     }

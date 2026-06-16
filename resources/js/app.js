@@ -726,7 +726,7 @@ const resolveContactSource = () => {
 
 contactSourceState = resolveContactSource();
 
-const isEmailCopyDisabled = () => {
+const isContactActionDisabled = () => {
     if (contactSourceState?.source === 'upwork') {
         if (contactSourceState.expiresAt > Date.now()) {
             return true;
@@ -807,9 +807,15 @@ const hideContactCopyFeedback = () => {
     }, 180);
 };
 
-const showContactCopyFeedback = (message = getContactCopyFeedbackMessage('success'), state = 'success') => {
+const showContactCopyFeedback = (message = getContactCopyFeedbackMessage('success'), state = 'success', trigger = null) => {
     if (!contactCopyFeedback) {
         return;
+    }
+
+    const feedbackHost = trigger?.closest?.('[data-contact-action]');
+
+    if (feedbackHost && contactCopyFeedback.parentElement !== feedbackHost) {
+        feedbackHost.prepend(contactCopyFeedback);
     }
 
     if (copyFeedbackTimer) {
@@ -833,6 +839,10 @@ const showContactCopyFeedback = (message = getContactCopyFeedbackMessage('succes
 };
 
 document.querySelectorAll('[data-copy-email]').forEach((button) => {
+    if (isContactActionDisabled()) {
+        button.setAttribute('aria-disabled', 'true');
+    }
+
     button.addEventListener('click', async () => {
         const email = button.dataset.copyEmail;
 
@@ -840,8 +850,8 @@ document.querySelectorAll('[data-copy-email]').forEach((button) => {
             return;
         }
 
-        if (isEmailCopyDisabled()) {
-            showContactCopyFeedback(getContactCopyFeedbackMessage('disabled'), 'error');
+        if (isContactActionDisabled()) {
+            showContactCopyFeedback(getContactCopyFeedbackMessage('disabled'), 'error', button);
 
             return;
         }
@@ -852,6 +862,39 @@ document.querySelectorAll('[data-copy-email]').forEach((button) => {
             return;
         }
 
-        showContactCopyFeedback();
+        showContactCopyFeedback(getContactCopyFeedbackMessage('success'), 'success', button);
+    });
+});
+
+document.querySelectorAll('[data-download-cv]').forEach((button) => {
+    if (isContactActionDisabled()) {
+        button.setAttribute('aria-disabled', 'true');
+    }
+
+    button.addEventListener('click', () => {
+        if (isContactActionDisabled()) {
+            showContactCopyFeedback(getContactCopyFeedbackMessage('disabled'), 'error', button);
+
+            return;
+        }
+
+        const cvUrl = button.dataset.cvUrl;
+        const cvFilename = button.dataset.cvFilename;
+
+        if (!cvUrl) {
+            return;
+        }
+
+        const downloadLink = document.createElement('a');
+        downloadLink.href = cvUrl;
+
+        if (cvFilename) {
+            downloadLink.download = cvFilename;
+        }
+
+        downloadLink.hidden = true;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
     });
 });

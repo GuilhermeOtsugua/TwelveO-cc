@@ -22,8 +22,9 @@ class HomepageTest extends TestCase
         $response->assertOk();
 
         self::assertSame(1, $this->countMatches($xpath, '//*[@data-copy-email="guilhermebartolis@gmail.com"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//button[@data-download-cv and @data-cv-url="/files/guilherme-augusto-cv.pdf" and @data-cv-filename="guilherme-augusto-cv.pdf"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://www.upwork.com/freelancers/otsugua"]'));
         self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://github.com/GuilhermeOtsugua/"]'));
-        self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://www.linkedin.com/in/guilhermeotsugua/"]'));
     }
 
     public function test_homepage_renders_the_theme_control_and_boot_hooks(): void

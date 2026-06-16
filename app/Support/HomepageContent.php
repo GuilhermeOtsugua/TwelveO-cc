@@ -35,6 +35,11 @@ class HomepageContent
     /**
      * @return array{
      *     email: string,
+     *     cv: array{
+     *         label: string,
+     *         href: string,
+     *         filename: string
+     *     },
      *     profiles: array<int, array{
      *         label: string,
      *         href: string
@@ -45,6 +50,11 @@ class HomepageContent
     {
         return [
             'email' => 'guilhermebartolis@gmail.com',
+            'cv' => [
+                'label' => 'CV',
+                'href' => '/files/guilherme-augusto-cv.pdf',
+                'filename' => 'guilherme-augusto-cv.pdf',
+            ],
             'profiles' => [
                 [
                     'label' => 'Upwork',

@@ -13,6 +13,7 @@ await emptyDir(outputDir);
 
 await copyPublicAsset('build');
 await copyPublicAsset('flags');
+await copyPublicAsset('files');
 await copyPublicFile('apple-touch-icon.png');
 await copyPublicFile('favicon.ico');
 await copyPublicFile('favicon-32.png');

@@ -448,6 +448,7 @@ const ptBR = {
     'Email copied to clipboard!': 'Copiado!',
     'Temporarily disabled.': 'Temporariamente indisponível.',
     'Copy email': 'Copiar email',
+    CV: 'CV',
     'Technical note': 'Nota técnica',
     'Hover / Tap': 'Passe / toque',
     'Project note': 'Nota do projeto',
