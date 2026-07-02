@@ -498,7 +498,7 @@
                     <p class="studio-current-feature__eyebrow">Studio Current</p>
                     <h5 class="studio-current-closing__headline">
                         A portal built for
-                        <span>the work you care about</span>
+                        <span>the work you care about <span class="studio-current-closing__headline-extra">for you</span></span>
                     </h5>
                     <p class="studio-current-closing__body">
                         Currently available to a limited number of independent studios. Access is by invitation.

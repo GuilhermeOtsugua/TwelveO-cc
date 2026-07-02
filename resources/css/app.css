@@ -1463,6 +1463,24 @@
     }
 }
 
+@media (max-width: 419px) {
+    html[data-locale='pt-BR'] [data-home-focus-panel] > div:first-child {
+        align-items: flex-start;
+    }
+
+    html[data-locale='pt-BR'] [data-home-focus-panel] > div:first-child span:first-child {
+        max-width: 4.5rem;
+        line-height: 1.35;
+    }
+
+    html[data-locale='pt-BR'] [data-home-focus-panel] > div:first-child span:last-child {
+        max-width: 9.25rem;
+        margin-left: auto;
+        line-height: 1.35;
+        text-align: right;
+    }
+}
+
 @keyframes project-band-rise {
     0% {
         opacity: 0;
