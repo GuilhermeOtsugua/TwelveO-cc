@@ -1199,6 +1199,16 @@
         max-width: calc(100vw - 2.75rem);
     }
 
+    .project-note__principle-label--full,
+    .credential-action__label--default {
+        display: none;
+    }
+
+    .project-note__principle-label--tablet,
+    .credential-action__label--tablet {
+        display: inline;
+    }
+
 }
 
 @media (min-width: 640px) and (max-width: 1023px) {
@@ -1234,15 +1244,6 @@
         width: min(100%, 26rem);
     }
 
-    .project-note__principle-label--full,
-    .credential-action__label--default {
-        display: none;
-    }
-
-    .project-note__principle-label--tablet,
-    .credential-action__label--tablet {
-        display: inline;
-    }
 }
 
 @media (max-width: 639px) {
