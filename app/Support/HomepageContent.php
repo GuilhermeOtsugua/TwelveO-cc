@@ -82,18 +82,18 @@ class HomepageContent
     public function currentFocus(): array
     {
         return [
-            'topic' => 'Agentic development',
-            'summary' => 'I am studying how agent loops, scoped delegation, and acceptance-driven workflows keep AI-assisted product work inspectable instead of noisy.',
+            'topic' => 'Agentic Engineering',
+            'summary' => 'I am studying how focused prompts, scoped agent loops, and independent verification make AI-assisted product work inspectable rather than noisy.',
             'links' => [
                 [
                     'label' => 'Theory',
-                    'title' => 'Building effective agents',
-                    'href' => 'https://www.anthropic.com/engineering/building-effective-agents',
+                    'title' => 'Why the Legendary Erdős Problems Are Falling to AI',
+                    'href' => 'https://www.quantamagazine.org/why-the-legendary-erdos-problems-are-falling-to-ai-20260803/',
                 ],
                 [
                     'label' => 'Repository',
-                    'title' => 'TwelveO-cc',
-                    'href' => 'https://github.com/GuilhermeOtsugua/TwelveO-cc',
+                    'title' => 'Simeioma',
+                    'href' => 'https://github.com/GuilhermeOtsugua/Simeioma',
                 ],
             ],
         ];
