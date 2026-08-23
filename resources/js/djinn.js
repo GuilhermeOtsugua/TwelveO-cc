@@ -17,6 +17,7 @@ if (panel instanceof HTMLElement) {
     let audioContext = null;
     let processor = null;
     let activeAudio = null;
+    let audioQueue = [];
     let opener = null;
 
     const setStatus = (message) => {
@@ -42,8 +43,10 @@ if (panel instanceof HTMLElement) {
     };
 
     const stopAudio = () => {
+        audioQueue = [];
         if (activeAudio) {
             activeAudio.pause();
+            URL.revokeObjectURL(activeAudio.src);
             activeAudio.src = '';
             activeAudio = null;
         }
@@ -97,13 +100,28 @@ if (panel instanceof HTMLElement) {
         }
     };
 
-    const playAudio = (base64, mime) => {
-        stopAudio();
-        const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
-        const url = URL.createObjectURL(new Blob([bytes], { type: mime || 'audio/mpeg' }));
+    const playNextAudio = () => {
+        if (activeAudio || audioQueue.length === 0) return;
+        const next = audioQueue.shift();
+        const bytes = Uint8Array.from(atob(next.base64), (character) => character.charCodeAt(0));
+        const url = URL.createObjectURL(new Blob([bytes], { type: next.mime || 'audio/mpeg' }));
         activeAudio = new Audio(url);
-        activeAudio.onended = () => URL.revokeObjectURL(url);
-        activeAudio.play().catch(() => setStatus('Djinn answered, but your browser could not play the audio.'));
+        activeAudio.onended = () => {
+            URL.revokeObjectURL(url);
+            activeAudio = null;
+            playNextAudio();
+        };
+        activeAudio.play().catch(() => {
+            URL.revokeObjectURL(url);
+            activeAudio = null;
+            audioQueue = [];
+            setStatus('Djinn answered, but your browser could not play the audio.');
+        });
+    };
+
+    const queueAudio = (base64, mime) => {
+        audioQueue.push({ base64, mime });
+        playNextAudio();
     };
 
     const connect = async () => {
@@ -142,7 +160,7 @@ if (panel instanceof HTMLElement) {
                     }
                     setStatus('Djinn is speaking.');
                 }
-                if (message.type === 'audio') playAudio(message.data, message.mime);
+                if (message.type === 'audio') queueAudio(message.data, message.mime);
                 if (message.type === 'playback_stopped') stopAudio();
                 if (['audio_unavailable', 'stt_unavailable'].includes(message.type)) setStatus('Djinn needs a moment. Please try again.');
                 if (message.type === 'ended') setUnavailable();
