@@ -1,13 +1,13 @@
 @layer components {
     .nav-link--djinn {
-        background: var(--green-900);
-        color: var(--surface);
+        background: transparent;
+        color: var(--green-900);
     }
 
     .nav-link--djinn:hover,
     .nav-link--djinn:focus-visible {
-        background: var(--accent);
-        color: var(--green-900);
+        background: var(--green-900);
+        color: var(--ink-on-contrast);
     }
 
     .djinn-panel[hidden] { display: none; }
