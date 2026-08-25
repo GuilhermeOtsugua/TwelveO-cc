@@ -88,16 +88,12 @@ if (control instanceof HTMLElement) {
         }
     };
 
-    const showActiveTranscript = (text = '') => {
-        clearTimeout(responseTimer);
-        responseTimer = null;
-        stopWordReveal();
-        if (answer instanceof HTMLElement) answer.textContent = String(text).trim();
-        if (response instanceof HTMLElement) {
-            response.dataset.kind = 'transcript';
-            response.setAttribute('role', 'presentation');
-            response.hidden = false;
-        }
+    const showListeningIndicator = () => {
+        showResponse('', 'activity', false);
+    };
+
+    const showLoading = () => {
+        showResponse('Djinn loading...', 'loading');
     };
 
     const progressiveText = () => [
@@ -266,7 +262,7 @@ if (control instanceof HTMLElement) {
         processor.connect(silent);
         silent.connect(context.destination);
         socket?.send(JSON.stringify({ type: 'start' }));
-        showActiveTranscript();
+        showLoading();
         setState('listening', 'Listening. You can interrupt Djinn at any time.');
     };
 
@@ -317,9 +313,9 @@ if (control instanceof HTMLElement) {
         const delays = [1000, 2000, 4000, 5000];
         const delay = delays[Math.min(retryAttempt, delays.length - 1)];
         retryAttempt += 1;
-        const waitingMessage = 'Djinn is getting ready…';
+        const waitingMessage = 'Djinn loading...';
         setState('connecting', waitingMessage);
-        showResponse(waitingMessage, 'notice');
+        showLoading();
         retryTimer = window.setTimeout(() => {
             retryTimer = null;
             void connect();
@@ -334,8 +330,11 @@ if (control instanceof HTMLElement) {
 
         const message = JSON.parse(event.data);
         if (message.type === 'ready') ready?.();
-        if (message.type === 'transcript' && message.text && desiredActive) showActiveTranscript(message.text);
-        if (message.type === 'thinking') setStatus('Djinn is grounding an answer…');
+        if (message.type === 'listening_ready' && desiredActive) showListeningIndicator();
+        if (message.type === 'thinking') {
+            showLoading();
+            setStatus('Djinn is grounding an answer…');
+        }
         if (message.type === 'audio_start') {
             currentAudioSampleRate = message.sampleRate ?? 24000;
             beginWordRevealWithPlayback(message.text, message.sequence);
@@ -345,7 +344,7 @@ if (control instanceof HTMLElement) {
         if (message.type === 'playback_stopped') {
             stopAudio();
             if (desiredActive) {
-                showActiveTranscript();
+                showListeningIndicator();
                 setState('listening', 'Listening. You can interrupt Djinn at any time.');
             } else {
                 const pausedMessage = 'Djinn is paused. Click to resume.';
@@ -379,12 +378,14 @@ if (control instanceof HTMLElement) {
             connectionAbort = new AbortController();
             const timeout = window.setTimeout(() => connectionAbort?.abort(), 2500);
             let microphoneRequested = false;
-            setState('connecting', 'Checking whether Djinn is ready…');
-            showResponse('Checking whether Djinn is ready…', 'notice');
+            setState('connecting', 'Djinn loading...');
+            showLoading();
 
             try {
-                await ensureAudioContext();
-                const health = await fetch(`${endpoint}/health`, { signal: connectionAbort.signal });
+                const [, health] = await Promise.all([
+                    ensureAudioContext(),
+                    fetch(`${endpoint}/health`, { signal: connectionAbort.signal }),
+                ]);
                 window.clearTimeout(timeout);
                 if (!health.ok || !(await health.json()).demo) throw new Error('unavailable');
                 if (!desiredActive) {
@@ -455,12 +456,14 @@ if (control instanceof HTMLElement) {
         desiredActive = true;
         clearRetry();
         if (socket?.readyState === WebSocket.OPEN) {
+            setState('connecting', 'Djinn loading...');
+            showLoading();
             void resumeCapture();
             return;
         }
         if (connectingPromise) {
-            setState('connecting', 'Djinn is getting ready…');
-            showResponse('Djinn is getting ready…', 'notice');
+            setState('connecting', 'Djinn loading...');
+            showLoading();
             return;
         }
         retryStartedAt = Date.now();

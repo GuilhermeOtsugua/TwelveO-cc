@@ -89,20 +89,19 @@
         transform: translateY(0.38rem) rotate(45deg);
     }
 
+    .djinn-response__line {
+        display: inline;
+    }
+
     .djinn-activity {
-        display: none;
+        display: inline-grid;
         width: 0.72em;
         height: 0.72em;
         margin-left: 0.38em;
         grid-template-columns: repeat(2, 1fr);
         grid-template-rows: repeat(2, 1fr);
         gap: 0.12em;
-        vertical-align: 0.02em;
-    }
-
-    .djinn-control[data-state='connecting'] .djinn-activity,
-    .djinn-control[data-state='listening'] .djinn-activity {
-        display: inline-grid;
+        vertical-align: 0.19em;
     }
 
     .djinn-activity i {
@@ -112,10 +111,25 @@
         background: currentColor;
     }
 
-    .djinn-activity i:nth-child(1) { animation: djinn-vertex-top-left 800ms steps(1, end) infinite; }
-    .djinn-activity i:nth-child(2) { animation: djinn-vertex-top-right 800ms steps(1, end) infinite; }
-    .djinn-activity i:nth-child(3) { animation: djinn-vertex-bottom-left 800ms steps(1, end) infinite; }
-    .djinn-activity i:nth-child(4) { animation: djinn-vertex-bottom-right 800ms steps(1, end) infinite; }
+    .djinn-activity i:nth-child(2) { opacity: 0; }
+
+    .djinn-control:is([data-state='connecting'], [data-state='listening'], [data-state='speaking']) .djinn-activity i:nth-child(1) { animation: djinn-vertex-top-left 800ms steps(1, end) infinite; }
+    .djinn-control:is([data-state='connecting'], [data-state='listening'], [data-state='speaking']) .djinn-activity i:nth-child(2) { animation: djinn-vertex-top-right 800ms steps(1, end) infinite; }
+    .djinn-control:is([data-state='connecting'], [data-state='listening'], [data-state='speaking']) .djinn-activity i:nth-child(3) { animation: djinn-vertex-bottom-left 800ms steps(1, end) infinite; }
+    .djinn-control:is([data-state='connecting'], [data-state='listening'], [data-state='speaking']) .djinn-activity i:nth-child(4) { animation: djinn-vertex-bottom-right 800ms steps(1, end) infinite; }
+
+    .djinn-response[data-kind='loading'] {
+        color: #f2c94c;
+    }
+
+    .djinn-response[data-kind='loading'] [data-djinn-answer] {
+        -webkit-text-stroke: 0.55px rgba(0, 0, 0, 0.9);
+        paint-order: stroke fill;
+    }
+
+    .djinn-response[data-kind='loading'] .djinn-activity i {
+        box-shadow: 0 0 0 0.6px rgba(0, 0, 0, 0.9);
+    }
 
     .djinn-status {
         position: absolute;

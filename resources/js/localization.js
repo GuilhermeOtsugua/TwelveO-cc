@@ -24,6 +24,7 @@ const ptBR = {
     'Close Djinn': 'Fechar Djinn',
     'Checking whether Djinn is ready…': 'Verificando se Djinn está pronto…',
     'Djinn is getting ready…': 'Djinn está se preparando…',
+    'Djinn loading...': 'Djinn carregando...',
     'Djinn is paused. Click to resume.': 'Djinn está pausado. Clique para retomar.',
     'Djinn is taking a short pause. Please try again later.': 'Djinn está em uma breve pausa. Tente novamente mais tarde.',
     'Djinn is ready. Start when you are ready to speak.': 'Djinn está pronto. Comece quando estiver pronto para falar.',
