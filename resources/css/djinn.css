@@ -4,9 +4,10 @@
     }
 
     .nav-link--djinn {
-        display: inline-flex;
+        display: inline-grid;
+        grid-template-columns: 1rem auto 1rem;
         align-items: center;
-        gap: 0.45rem;
+        column-gap: 0.45rem;
         background: transparent;
         color: var(--green-900);
     }
@@ -15,6 +16,12 @@
     .nav-link.nav-link--djinn:focus-visible {
         background: var(--surface-soft-strong);
         color: var(--green-900);
+    }
+
+    .nav-link--djinn::before {
+        width: 1rem;
+        height: 1rem;
+        content: '';
     }
 
     .djinn-microphone {
@@ -61,6 +68,15 @@
         line-height: 1.55;
     }
 
+    .djinn-response[data-kind='error'] {
+        border-color: rgba(181, 56, 56, 0.42);
+        color: #9f2424;
+    }
+
+    .djinn-response[data-kind='notice'] {
+        color: color-mix(in srgb, var(--green-900) 82%, transparent);
+    }
+
     .djinn-response::before {
         position: absolute;
         right: 1.15rem;
@@ -91,8 +107,16 @@
 
     @media (max-width: 639px) {
         [data-home-header] .nav-link--djinn {
+            grid-template-columns: 0.8rem auto 0.8rem;
+            column-gap: 0.25rem;
             padding-inline: clamp(0.44rem, 1.4vw, 0.58rem);
             font-size: clamp(0.62rem, 2.5vw, 0.72rem);
+        }
+
+        [data-home-header] .nav-link--djinn::before,
+        [data-home-header] .djinn-microphone {
+            width: 0.8rem;
+            height: 0.8rem;
         }
 
         .djinn-response {

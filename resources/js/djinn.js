@@ -49,14 +49,25 @@ if (control instanceof HTMLElement) {
         if (response instanceof HTMLElement) response.hidden = true;
     };
 
+    const showResponse = (message, kind = 'notice', translate = true) => {
+        clearTimeout(responseTimer);
+        responseTimer = null;
+        const text = translate ? translateValue(message, locale()) : message;
+        if (answer instanceof HTMLElement) answer.textContent = text;
+        if (response instanceof HTMLElement) {
+            response.dataset.kind = kind;
+            response.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+            response.hidden = false;
+        }
+    };
+
     const showResponseAfterPlayback = (text) => {
         clearTimeout(responseTimer);
         const remainingMs = audioContext
             ? Math.max(0, (nextPlaybackTime - audioContext.currentTime) * 1000)
             : 0;
         responseTimer = window.setTimeout(() => {
-            if (answer instanceof HTMLElement) answer.textContent = text;
-            if (response instanceof HTMLElement) response.hidden = false;
+            showResponse(text, 'response', false);
             setState('listening', 'Listening. You can interrupt Djinn at any time.');
         }, remainingMs + 40);
     };
@@ -151,6 +162,7 @@ if (control instanceof HTMLElement) {
         processor.connect(silent);
         silent.connect(context.destination);
         socket?.send(JSON.stringify({ type: 'start' }));
+        hideResponse();
         setState('listening', 'Listening. You can interrupt Djinn at any time.');
     };
 
@@ -175,9 +187,15 @@ if (control instanceof HTMLElement) {
             setState('listening', 'Listening. You can interrupt Djinn at any time.');
         }
         if (['audio_unavailable', 'stt_unavailable'].includes(message.type)) {
-            setState('error', 'Djinn needs a moment. Please try again.');
+            const errorMessage = 'Djinn needs a moment. Please try again.';
+            setState('error', errorMessage);
+            showResponse(errorMessage, 'error');
         }
-        if (message.type === 'ended' && !closing) close('Djinn is taking a short pause. Please try again later.');
+        if (message.type === 'ended' && !closing) {
+            const unavailableMessage = 'Djinn is taking a short pause. Please try again later.';
+            close(unavailableMessage);
+            showResponse(unavailableMessage, 'notice');
+        }
     };
 
     const connect = async () => {
@@ -185,6 +203,7 @@ if (control instanceof HTMLElement) {
         closing = false;
         let microphoneRequested = false;
         setState('connecting', 'Checking whether Djinn is ready…');
+        showResponse('Checking whether Djinn is ready…', 'notice');
         try {
             await ensureAudioContext();
             const health = await fetch(`${endpoint}/health`, { signal: AbortSignal.timeout(2500) });
@@ -210,12 +229,12 @@ if (control instanceof HTMLElement) {
             stopAudio();
             socket?.close();
             socket = null;
-            setState(
-                'error',
-                microphoneRequested
-                    ? 'Microphone access is needed to speak with Djinn. Please allow it and try again.'
-                    : 'Djinn is taking a short pause. Please try again later.',
-            );
+            const errorMessage = microphoneRequested
+                ? 'Microphone access is needed to speak with Djinn. Please allow it and try again.'
+                : 'Djinn is taking a short pause. Please try again later.';
+            const messageKind = microphoneRequested ? 'error' : 'notice';
+            setState('error', errorMessage);
+            showResponse(errorMessage, messageKind);
         }
     };
 
