@@ -88,6 +88,18 @@ if (control instanceof HTMLElement) {
         }
     };
 
+    const showActiveTranscript = (text = '') => {
+        clearTimeout(responseTimer);
+        responseTimer = null;
+        stopWordReveal();
+        if (answer instanceof HTMLElement) answer.textContent = String(text).trim();
+        if (response instanceof HTMLElement) {
+            response.dataset.kind = 'transcript';
+            response.setAttribute('role', 'presentation');
+            response.hidden = false;
+        }
+    };
+
     const progressiveText = () => [
         completedText,
         segmentWords.slice(0, revealedWords).join(' '),
@@ -254,7 +266,7 @@ if (control instanceof HTMLElement) {
         processor.connect(silent);
         silent.connect(context.destination);
         socket?.send(JSON.stringify({ type: 'start' }));
-        hideResponse();
+        showActiveTranscript();
         setState('listening', 'Listening. You can interrupt Djinn at any time.');
     };
 
@@ -322,7 +334,7 @@ if (control instanceof HTMLElement) {
 
         const message = JSON.parse(event.data);
         if (message.type === 'ready') ready?.();
-        if (message.type === 'transcript' && message.text && desiredActive) hideResponse();
+        if (message.type === 'transcript' && message.text && desiredActive) showActiveTranscript(message.text);
         if (message.type === 'thinking') setStatus('Djinn is grounding an answer…');
         if (message.type === 'audio_start') {
             currentAudioSampleRate = message.sampleRate ?? 24000;
@@ -333,7 +345,7 @@ if (control instanceof HTMLElement) {
         if (message.type === 'playback_stopped') {
             stopAudio();
             if (desiredActive) {
-                hideResponse();
+                showActiveTranscript();
                 setState('listening', 'Listening. You can interrupt Djinn at any time.');
             } else {
                 const pausedMessage = 'Djinn is paused. Click to resume.';

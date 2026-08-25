@@ -89,6 +89,34 @@
         transform: translateY(0.38rem) rotate(45deg);
     }
 
+    .djinn-activity {
+        display: none;
+        width: 0.72em;
+        height: 0.72em;
+        margin-left: 0.38em;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 0.12em;
+        vertical-align: 0.02em;
+    }
+
+    .djinn-control[data-state='connecting'] .djinn-activity,
+    .djinn-control[data-state='listening'] .djinn-activity {
+        display: inline-grid;
+    }
+
+    .djinn-activity i {
+        width: 100%;
+        height: 100%;
+        border-radius: 1px;
+        background: currentColor;
+    }
+
+    .djinn-activity i:nth-child(1) { animation: djinn-vertex-top-left 800ms steps(1, end) infinite; }
+    .djinn-activity i:nth-child(2) { animation: djinn-vertex-top-right 800ms steps(1, end) infinite; }
+    .djinn-activity i:nth-child(3) { animation: djinn-vertex-bottom-left 800ms steps(1, end) infinite; }
+    .djinn-activity i:nth-child(4) { animation: djinn-vertex-bottom-right 800ms steps(1, end) infinite; }
+
     .djinn-status {
         position: absolute;
         width: 1px;
@@ -102,6 +130,26 @@
     @keyframes djinn-microphone-pulse {
         from { opacity: 0.4; }
         to { opacity: 1; }
+    }
+
+    @keyframes djinn-vertex-top-right {
+        0%, 24.99% { opacity: 0; }
+        25%, 100% { opacity: 1; }
+    }
+
+    @keyframes djinn-vertex-bottom-right {
+        0%, 24.99%, 50%, 100% { opacity: 1; }
+        25%, 49.99% { opacity: 0; }
+    }
+
+    @keyframes djinn-vertex-bottom-left {
+        0%, 49.99%, 75%, 100% { opacity: 1; }
+        50%, 74.99% { opacity: 0; }
+    }
+
+    @keyframes djinn-vertex-top-left {
+        0%, 74.99% { opacity: 1; }
+        75%, 100% { opacity: 0; }
     }
 
     @media (max-width: 639px) {
@@ -131,9 +179,17 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .djinn-control[data-state='connecting'] .djinn-microphone {
+        .djinn-control[data-state='connecting'] .djinn-microphone,
+        .djinn-activity i:nth-child(n) {
             animation: none;
+        }
+
+        .djinn-control[data-state='connecting'] .djinn-microphone {
             opacity: 0.65;
+        }
+
+        .djinn-activity i:nth-child(2) {
+            opacity: 0;
         }
     }
 }
