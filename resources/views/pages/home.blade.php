@@ -66,7 +66,20 @@
                     </a>
 
                     <nav class="flex items-center gap-2 text-sm font-medium text-[color:var(--green-900)]">
-                        <button type="button" class="nav-link nav-link--djinn rounded-full border border-[color:var(--line-strong)] px-4 py-2" data-djinn-open>Ask Djinn!</button>
+                        <div class="djinn-control" data-djinn-control>
+                            <button type="button" class="nav-link nav-link--djinn rounded-full border border-[color:var(--line-strong)] px-4 py-2" data-djinn-open aria-pressed="false" aria-label="Ask Djinn">
+                                <span class="nav-link__label--full">Ask Djinn!</span>
+                                <span class="nav-link__label--compact">Djinn</span>
+                                <svg class="djinn-microphone" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+                                    <path d="M5.5 11.5v.5a6.5 6.5 0 0 0 13 0v-.5M12 18.5V22M9 22h6" />
+                                </svg>
+                            </button>
+                            <div class="djinn-response" data-djinn-response hidden role="status">
+                                <strong data-djinn-answer></strong>
+                            </div>
+                            <span class="djinn-status" data-djinn-status aria-live="polite"></span>
+                        </div>
                         <a href="#projects" class="nav-link rounded-full border border-transparent px-4 py-2">Projects</a>
                         <a href="#contact" class="nav-link rounded-full border border-transparent px-4 py-2">Contact</a>
                         <button
@@ -85,25 +98,6 @@
                     </nav>
                 </div>
             </header>
-
-            <section class="djinn-panel" data-djinn-panel hidden aria-label="Ask Djinn" aria-live="polite">
-                <div class="djinn-panel__backdrop" data-djinn-close></div>
-                <div class="djinn-panel__surface" role="dialog" aria-modal="true" aria-labelledby="djinn-panel-title">
-                    <button type="button" class="djinn-panel__close" data-djinn-close aria-label="Close Djinn">×</button>
-                    <p class="djinn-panel__eyebrow">A grounded voice experiment</p>
-                    <h2 id="djinn-panel-title">Ask Djinn!</h2>
-                    <p class="djinn-panel__intro" data-djinn-copy="intro">Ask about this portfolio, or how Djinn retrieves approved context before it answers.</p>
-                    <p class="djinn-panel__status" data-djinn-status>Checking whether Djinn is ready…</p>
-                    <p class="djinn-panel__transcript" data-djinn-transcript hidden></p>
-                    <p class="djinn-panel__answer" data-djinn-answer hidden></p>
-                    <p class="djinn-panel__sources" data-djinn-sources hidden></p>
-                    <div class="djinn-panel__actions">
-                        <button type="button" class="cta-button cta-button--primary rounded-full px-5 py-3 text-sm font-semibold" data-djinn-start disabled>Start conversation</button>
-                        <button type="button" class="nav-link rounded-full border border-transparent px-4 py-2" data-djinn-retry hidden>Try again</button>
-                    </div>
-                    <p class="djinn-panel__privacy" data-djinn-copy="privacy">Djinn does not store this conversation or your audio.</p>
-                </div>
-            </section>
 
             <main class="otsugua-shell mx-auto px-6 pb-16 pt-10 lg:px-10 lg:pt-16">
                 <section class="grid gap-8 lg:grid-cols-[minmax(0,1.02fr)_minmax(18rem,0.78fr)] lg:items-center" data-home-hero>

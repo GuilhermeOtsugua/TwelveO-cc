@@ -27,6 +27,20 @@ class HomepageTest extends TestCase
         self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://github.com/GuilhermeOtsugua/"]'));
     }
 
+    public function test_homepage_renders_the_compact_djinn_control_and_rag_reference(): void
+    {
+        $response = $this->get(route('home'));
+        $xpath = $this->xpathFor($response->getContent());
+
+        $response->assertOk();
+
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-djinn-control]'));
+        self::assertSame(1, $this->countMatches($xpath, '//button[@data-djinn-open and @aria-pressed="false"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-djinn-response and @hidden]//*[@data-djinn-answer]'));
+        self::assertSame(0, $this->countMatches($xpath, '//*[@data-djinn-panel]'));
+        self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://cloud.google.com/blog/products/ai-machine-learning/optimizing-rag-retrieval"]'));
+    }
+
     public function test_homepage_renders_the_theme_control_and_boot_hooks(): void
     {
         $response = $this->get(route('home'));

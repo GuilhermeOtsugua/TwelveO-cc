@@ -87,8 +87,8 @@ class HomepageContent
             'links' => [
                 [
                     'label' => 'Theory',
-                    'title' => 'Why the Legendary Erdős Problems Are Falling to AI',
-                    'href' => 'https://www.quantamagazine.org/why-the-legendary-erdos-problems-are-falling-to-ai-20260803/',
+                    'title' => 'Optimizing RAG retrieval: Test, tune, succeed',
+                    'href' => 'https://cloud.google.com/blog/products/ai-machine-learning/optimizing-rag-retrieval',
                 ],
                 [
                     'label' => 'Repository',

@@ -1,14 +1,12 @@
 import { translateValue } from './localization';
 
-const panel = document.querySelector('[data-djinn-panel]');
+const control = document.querySelector('[data-djinn-control]');
 
-if (panel instanceof HTMLElement) {
-    const startButton = panel.querySelector('[data-djinn-start]');
-    const retryButton = panel.querySelector('[data-djinn-retry]');
-    const status = panel.querySelector('[data-djinn-status]');
-    const transcript = panel.querySelector('[data-djinn-transcript]');
-    const answer = panel.querySelector('[data-djinn-answer]');
-    const sources = panel.querySelector('[data-djinn-sources]');
+if (control instanceof HTMLElement) {
+    const trigger = control.querySelector('[data-djinn-open]');
+    const status = control.querySelector('[data-djinn-status]');
+    const response = control.querySelector('[data-djinn-response]');
+    const answer = control.querySelector('[data-djinn-answer]');
     const endpoint = ['twelveo-cc.test', '127.0.0.1', 'localhost'].includes(window.location.hostname)
         ? 'http://127.0.0.1:8080'
         : 'https://voice.otsugua.dev';
@@ -16,21 +14,101 @@ if (panel instanceof HTMLElement) {
     let stream = null;
     let audioContext = null;
     let processor = null;
-    let activeAudio = null;
-    let audioQueue = [];
-    let opener = null;
+    let currentState = 'idle';
+    let currentAudioSampleRate = 24000;
+    let pcmRemainder = new Uint8Array(0);
+    let nextPlaybackTime = 0;
+    let responseTimer = null;
+    let closing = false;
+    const activeSources = new Set();
+
+    const locale = () => document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en';
 
     const setStatus = (message) => {
-        if (status instanceof HTMLElement) {
-            const locale = document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en';
-            status.textContent = translateValue(message, locale);
-        }
+        const translated = translateValue(message, locale());
+        if (status instanceof HTMLElement) status.textContent = translated;
+        if (trigger instanceof HTMLButtonElement) trigger.title = translated;
     };
 
-    const setUnavailable = () => {
-        setStatus('Djinn is taking a short pause. Please try again later.');
-        if (startButton instanceof HTMLButtonElement) startButton.disabled = true;
-        if (retryButton instanceof HTMLButtonElement) retryButton.hidden = false;
+    const setState = (state, message) => {
+        currentState = state;
+        control.dataset.state = state;
+        if (trigger instanceof HTMLButtonElement) {
+            trigger.setAttribute('aria-pressed', String(['listening', 'speaking'].includes(state)));
+            trigger.setAttribute('aria-label', translateValue(
+                ['listening', 'speaking'].includes(state) ? 'Stop Djinn conversation' : 'Ask Djinn',
+                locale(),
+            ));
+        }
+        if (message) setStatus(message);
+    };
+
+    const hideResponse = () => {
+        clearTimeout(responseTimer);
+        responseTimer = null;
+        if (response instanceof HTMLElement) response.hidden = true;
+    };
+
+    const showResponseAfterPlayback = (text) => {
+        clearTimeout(responseTimer);
+        const remainingMs = audioContext
+            ? Math.max(0, (nextPlaybackTime - audioContext.currentTime) * 1000)
+            : 0;
+        responseTimer = window.setTimeout(() => {
+            if (answer instanceof HTMLElement) answer.textContent = text;
+            if (response instanceof HTMLElement) response.hidden = false;
+            setState('listening', 'Listening. You can interrupt Djinn at any time.');
+        }, remainingMs + 40);
+    };
+
+    const ensureAudioContext = async () => {
+        if (!audioContext || audioContext.state === 'closed') audioContext = new AudioContext();
+        if (audioContext.state === 'suspended') await audioContext.resume();
+        return audioContext;
+    };
+
+    const stopAudio = () => {
+        activeSources.forEach((source) => {
+            try { source.stop(); } catch {}
+        });
+        activeSources.clear();
+        pcmRemainder = new Uint8Array(0);
+        nextPlaybackTime = audioContext?.currentTime ?? 0;
+        clearTimeout(responseTimer);
+        responseTimer = null;
+    };
+
+    const queuePcm = (arrayBuffer) => {
+        const context = audioContext;
+        if (!context) return;
+
+        const incoming = new Uint8Array(arrayBuffer);
+        let bytes = incoming;
+        if (pcmRemainder.length) {
+            bytes = new Uint8Array(pcmRemainder.length + incoming.length);
+            bytes.set(pcmRemainder);
+            bytes.set(incoming, pcmRemainder.length);
+        }
+        const usableBytes = bytes.byteLength - (bytes.byteLength % 2);
+        pcmRemainder = bytes.slice(usableBytes);
+        if (!usableBytes) return;
+
+        const sampleCount = usableBytes / 2;
+        const samples = new DataView(bytes.buffer, bytes.byteOffset, usableBytes);
+        const audioBuffer = context.createBuffer(1, sampleCount, currentAudioSampleRate);
+        const channel = audioBuffer.getChannelData(0);
+        for (let index = 0; index < sampleCount; index += 1) {
+            channel[index] = samples.getInt16(index * 2, true) / 0x8000;
+        }
+
+        const source = context.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(context.destination);
+        const startsAt = Math.max(context.currentTime + 0.025, nextPlaybackTime);
+        nextPlaybackTime = startsAt + audioBuffer.duration;
+        activeSources.add(source);
+        source.onended = () => activeSources.delete(source);
+        source.start(startsAt);
     };
 
     const stopCapture = () => {
@@ -38,27 +116,6 @@ if (panel instanceof HTMLElement) {
         processor = null;
         stream?.getTracks().forEach((track) => track.stop());
         stream = null;
-        audioContext?.close().catch(() => {});
-        audioContext = null;
-    };
-
-    const stopAudio = () => {
-        audioQueue = [];
-        if (activeAudio) {
-            activeAudio.pause();
-            URL.revokeObjectURL(activeAudio.src);
-            activeAudio.src = '';
-            activeAudio = null;
-        }
-    };
-
-    const close = () => {
-        stopCapture();
-        stopAudio();
-        socket?.close();
-        socket = null;
-        panel.hidden = true;
-        opener?.focus();
     };
 
     const toPcm16 = (input, inputRate) => {
@@ -77,110 +134,109 @@ if (panel instanceof HTMLElement) {
     };
 
     const startCapture = async () => {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
-            audioContext = new AudioContext();
-            const source = audioContext.createMediaStreamSource(stream);
-            processor = audioContext.createScriptProcessor(4096, 1, 1);
-            const silent = audioContext.createGain();
-            silent.gain.value = 0;
-            processor.onaudioprocess = (event) => {
-                if (socket?.readyState === WebSocket.OPEN) {
-                    socket.send(toPcm16(event.inputBuffer.getChannelData(0), audioContext.sampleRate));
-                }
-            };
-            source.connect(processor);
-            processor.connect(silent);
-            silent.connect(audioContext.destination);
-            socket?.send(JSON.stringify({ type: 'start' }));
-            setStatus('Listening. You can interrupt Djinn at any time.');
-        } catch {
-            setStatus('Microphone access is needed to speak with Djinn. Please allow it and try again.');
-            if (retryButton instanceof HTMLButtonElement) retryButton.hidden = false;
-        }
-    };
-
-    const playNextAudio = () => {
-        if (activeAudio || audioQueue.length === 0) return;
-        const next = audioQueue.shift();
-        const bytes = Uint8Array.from(atob(next.base64), (character) => character.charCodeAt(0));
-        const url = URL.createObjectURL(new Blob([bytes], { type: next.mime || 'audio/mpeg' }));
-        activeAudio = new Audio(url);
-        activeAudio.onended = () => {
-            URL.revokeObjectURL(url);
-            activeAudio = null;
-            playNextAudio();
-        };
-        activeAudio.play().catch(() => {
-            URL.revokeObjectURL(url);
-            activeAudio = null;
-            audioQueue = [];
-            setStatus('Djinn answered, but your browser could not play the audio.');
+        stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         });
+        const context = await ensureAudioContext();
+        const source = context.createMediaStreamSource(stream);
+        processor = context.createScriptProcessor(4096, 1, 1);
+        const silent = context.createGain();
+        silent.gain.value = 0;
+        processor.onaudioprocess = (event) => {
+            if (socket?.readyState === WebSocket.OPEN) {
+                socket.send(toPcm16(event.inputBuffer.getChannelData(0), context.sampleRate));
+            }
+        };
+        source.connect(processor);
+        processor.connect(silent);
+        silent.connect(context.destination);
+        socket?.send(JSON.stringify({ type: 'start' }));
+        setState('listening', 'Listening. You can interrupt Djinn at any time.');
     };
 
-    const queueAudio = (base64, mime) => {
-        audioQueue.push({ base64, mime });
-        playNextAudio();
+    const handleMessage = (event, ready) => {
+        if (event.data instanceof ArrayBuffer) {
+            void queuePcm(event.data);
+            return;
+        }
+
+        const message = JSON.parse(event.data);
+        if (message.type === 'ready') ready();
+        if (message.type === 'transcript' && message.text) hideResponse();
+        if (message.type === 'thinking') setStatus('Djinn is grounding an answer…');
+        if (message.type === 'audio_start') {
+            currentAudioSampleRate = message.sampleRate ?? 24000;
+            setState('speaking', 'Djinn is speaking.');
+        }
+        if (message.type === 'turn_complete') showResponseAfterPlayback(message.text);
+        if (message.type === 'playback_stopped') {
+            stopAudio();
+            hideResponse();
+            setState('listening', 'Listening. You can interrupt Djinn at any time.');
+        }
+        if (['audio_unavailable', 'stt_unavailable'].includes(message.type)) {
+            setState('error', 'Djinn needs a moment. Please try again.');
+        }
+        if (message.type === 'ended' && !closing) close('Djinn is taking a short pause. Please try again later.');
     };
 
     const connect = async () => {
-        if (startButton instanceof HTMLButtonElement) startButton.disabled = true;
-        if (retryButton instanceof HTMLButtonElement) retryButton.hidden = true;
-        setStatus('Checking whether Djinn is ready…');
+        hideResponse();
+        closing = false;
+        let microphoneRequested = false;
+        setState('connecting', 'Checking whether Djinn is ready…');
         try {
+            await ensureAudioContext();
             const health = await fetch(`${endpoint}/health`, { signal: AbortSignal.timeout(2500) });
             if (!health.ok || !(await health.json()).demo) throw new Error('unavailable');
+
             const wsUrl = new URL(endpoint);
             wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
             wsUrl.pathname = '/browser/voice';
             socket = new WebSocket(wsUrl);
-            socket.onopen = () => {
-                if (startButton instanceof HTMLButtonElement) startButton.disabled = false;
-                setStatus('Djinn is ready. Start when you are ready to speak.');
-            };
-            socket.onerror = setUnavailable;
+            socket.binaryType = 'arraybuffer';
+            await new Promise((resolve, reject) => {
+                socket.onmessage = (event) => handleMessage(event, resolve);
+                socket.onerror = reject;
+                socket.onclose = () => reject(new Error('closed'));
+            });
             socket.onclose = () => {
-                if (!panel.hidden && socket?.readyState !== WebSocket.OPEN) setUnavailable();
+                if (!closing) close('Djinn is taking a short pause. Please try again later.');
             };
-            socket.onmessage = (event) => {
-                const message = JSON.parse(event.data);
-                if (message.type === 'transcript' && transcript instanceof HTMLElement) {
-                    transcript.hidden = false;
-                    transcript.textContent = message.text;
-                }
-                if (message.type === 'thinking') setStatus('Djinn is grounding an answer…');
-                if (message.type === 'answer' && answer instanceof HTMLElement) {
-                    answer.hidden = false;
-                    answer.textContent = message.text;
-                    if (sources instanceof HTMLElement) {
-                        sources.hidden = !message.sources?.length;
-                        const locale = document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en';
-                        sources.textContent = message.sources?.length ? `${translateValue('Grounded by', locale)} ${message.sources.join(' · ')}` : '';
-                    }
-                    setStatus('Djinn is speaking.');
-                }
-                if (message.type === 'audio') queueAudio(message.data, message.mime);
-                if (message.type === 'playback_stopped') stopAudio();
-                if (['audio_unavailable', 'stt_unavailable'].includes(message.type)) setStatus('Djinn needs a moment. Please try again.');
-                if (message.type === 'ended') setUnavailable();
-            };
+            microphoneRequested = true;
+            await startCapture();
         } catch {
-            setUnavailable();
+            stopCapture();
+            stopAudio();
+            socket?.close();
+            socket = null;
+            setState(
+                'error',
+                microphoneRequested
+                    ? 'Microphone access is needed to speak with Djinn. Please allow it and try again.'
+                    : 'Djinn is taking a short pause. Please try again later.',
+            );
         }
     };
 
-    document.querySelectorAll('[data-djinn-open]').forEach((button) => button.addEventListener('click', () => {
-        opener = button;
-        panel.hidden = false;
-        answer.hidden = true;
-        transcript.hidden = true;
-        sources.hidden = true;
-        connect();
-        panel.querySelector('[data-djinn-close]')?.focus();
-    }));
-    panel.querySelectorAll('[data-djinn-close]').forEach((button) => button.addEventListener('click', close));
-    startButton?.addEventListener('click', startCapture);
-    retryButton?.addEventListener('click', () => { stopCapture(); socket?.close(); connect(); });
-    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !panel.hidden) close(); });
+    const close = (message = 'Ask Djinn') => {
+        closing = true;
+        stopCapture();
+        stopAudio();
+        if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'end' }));
+        socket?.close();
+        socket = null;
+        setState('idle', message);
+    };
+
+    trigger?.addEventListener('click', () => {
+        if (['connecting', 'listening', 'speaking'].includes(currentState)) {
+            close();
+            return;
+        }
+        void connect();
+    });
+
+    window.addEventListener('pagehide', () => close());
+    setState('idle', 'Ask Djinn');
 }
