@@ -19,6 +19,18 @@ if (control instanceof HTMLElement) {
     let pcmRemainder = new Uint8Array(0);
     let nextPlaybackTime = 0;
     let responseTimer = null;
+    let revealTimer = null;
+    let revealStartTimer = null;
+    let completedText = '';
+    let segmentText = '';
+    let segmentWords = [];
+    let revealedWords = 0;
+    let desiredActive = false;
+    let connectingPromise = null;
+    let connectionAbort = null;
+    let retryTimer = null;
+    let retryStartedAt = 0;
+    let retryAttempt = 0;
     let closing = false;
     const activeSources = new Set();
 
@@ -36,22 +48,37 @@ if (control instanceof HTMLElement) {
         if (trigger instanceof HTMLButtonElement) {
             trigger.setAttribute('aria-pressed', String(['listening', 'speaking'].includes(state)));
             trigger.setAttribute('aria-label', translateValue(
-                ['listening', 'speaking'].includes(state) ? 'Stop Djinn conversation' : 'Ask Djinn',
+                ['listening', 'speaking'].includes(state) ? 'Pause Djinn microphone' : 'Ask Djinn',
                 locale(),
             ));
         }
         if (message) setStatus(message);
     };
 
+    const stopWordReveal = (reset = true) => {
+        clearTimeout(revealStartTimer);
+        revealStartTimer = null;
+        clearInterval(revealTimer);
+        revealTimer = null;
+        if (reset) {
+            completedText = '';
+            segmentText = '';
+            segmentWords = [];
+            revealedWords = 0;
+        }
+    };
+
     const hideResponse = () => {
         clearTimeout(responseTimer);
         responseTimer = null;
+        stopWordReveal();
         if (response instanceof HTMLElement) response.hidden = true;
     };
 
     const showResponse = (message, kind = 'notice', translate = true) => {
         clearTimeout(responseTimer);
         responseTimer = null;
+        stopWordReveal();
         const text = translate ? translateValue(message, locale()) : message;
         if (answer instanceof HTMLElement) answer.textContent = text;
         if (response instanceof HTMLElement) {
@@ -59,6 +86,62 @@ if (control instanceof HTMLElement) {
             response.setAttribute('role', kind === 'error' ? 'alert' : 'status');
             response.hidden = false;
         }
+    };
+
+    const progressiveText = () => [
+        completedText,
+        segmentWords.slice(0, revealedWords).join(' '),
+    ].filter(Boolean).join(' ');
+
+    const renderProgressiveResponse = () => {
+        if (answer instanceof HTMLElement) answer.textContent = progressiveText();
+        if (response instanceof HTMLElement) {
+            response.dataset.kind = 'response';
+            response.setAttribute('role', 'presentation');
+            response.hidden = false;
+        }
+    };
+
+    const finishCurrentSegment = () => {
+        clearInterval(revealTimer);
+        revealTimer = null;
+        if (segmentText) completedText = [completedText, segmentText].filter(Boolean).join(' ');
+        segmentText = '';
+        segmentWords = [];
+        revealedWords = 0;
+    };
+
+    const beginWordReveal = (text, sequence = 0) => {
+        clearTimeout(responseTimer);
+        responseTimer = null;
+        if (sequence === 0) stopWordReveal();
+        else finishCurrentSegment();
+
+        segmentText = String(text ?? '').trim();
+        segmentWords = segmentText.split(/\s+/).filter(Boolean);
+        if (!segmentWords.length) return;
+        revealedWords = 1;
+        renderProgressiveResponse();
+        revealTimer = window.setInterval(() => {
+            if (revealedWords >= segmentWords.length) {
+                clearInterval(revealTimer);
+                revealTimer = null;
+                return;
+            }
+            revealedWords += 1;
+            renderProgressiveResponse();
+        }, 185);
+    };
+
+    const beginWordRevealWithPlayback = (text, sequence = 0) => {
+        clearTimeout(revealStartTimer);
+        const beginsInMs = sequence > 0 && audioContext
+            ? Math.max(0, (nextPlaybackTime - audioContext.currentTime) * 1000)
+            : 0;
+        revealStartTimer = window.setTimeout(() => {
+            revealStartTimer = null;
+            beginWordReveal(text, sequence);
+        }, beginsInMs);
     };
 
     const showResponseAfterPlayback = (text) => {
@@ -69,6 +152,7 @@ if (control instanceof HTMLElement) {
         responseTimer = window.setTimeout(() => {
             showResponse(text, 'response', false);
             setState('listening', 'Listening. You can interrupt Djinn at any time.');
+            setStatus(`Djinn answered: ${text}`);
         }, remainingMs + 40);
     };
 
@@ -87,6 +171,7 @@ if (control instanceof HTMLElement) {
         nextPlaybackTime = audioContext?.currentTime ?? 0;
         clearTimeout(responseTimer);
         responseTimer = null;
+        stopWordReveal();
     };
 
     const queuePcm = (arrayBuffer) => {
@@ -145,16 +230,23 @@ if (control instanceof HTMLElement) {
     };
 
     const startCapture = async () => {
-        stream = await navigator.mediaDevices.getUserMedia({
+        if (stream || !desiredActive) return;
+        const captured = await navigator.mediaDevices.getUserMedia({
             audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         });
+        if (!desiredActive) {
+            captured.getTracks().forEach((track) => track.stop());
+            return;
+        }
+
+        stream = captured;
         const context = await ensureAudioContext();
         const source = context.createMediaStreamSource(stream);
         processor = context.createScriptProcessor(4096, 1, 1);
         const silent = context.createGain();
         silent.gain.value = 0;
         processor.onaudioprocess = (event) => {
-            if (socket?.readyState === WebSocket.OPEN) {
+            if (desiredActive && socket?.readyState === WebSocket.OPEN) {
                 socket.send(toPcm16(event.inputBuffer.getChannelData(0), context.sampleRate));
             }
         };
@@ -166,96 +258,222 @@ if (control instanceof HTMLElement) {
         setState('listening', 'Listening. You can interrupt Djinn at any time.');
     };
 
+    const clearRetry = () => {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+    };
+
+    const pause = () => {
+        desiredActive = false;
+        clearRetry();
+        if (!socket) connectionAbort?.abort();
+        stopCapture();
+        stopAudio();
+        if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'interrupt' }));
+        const pausedMessage = 'Djinn is paused. Click to resume.';
+        setState('paused', pausedMessage);
+        showResponse(pausedMessage, 'notice');
+    };
+
+    const showMicrophoneError = () => {
+        desiredActive = false;
+        const errorMessage = 'Microphone access is needed to speak with Djinn. Please allow it and try again.';
+        setState('error', errorMessage);
+        showResponse(errorMessage, 'error');
+    };
+
+    const resumeCapture = async () => {
+        try {
+            await startCapture();
+        } catch {
+            stopCapture();
+            showMicrophoneError();
+        }
+    };
+
+    const scheduleRetry = () => {
+        if (!desiredActive || retryTimer) return;
+        retryStartedAt ||= Date.now();
+        if (Date.now() - retryStartedAt >= 35000) {
+            desiredActive = false;
+            const unavailableMessage = 'Djinn is taking a short pause. Please try again later.';
+            setState('error', unavailableMessage);
+            showResponse(unavailableMessage, 'notice');
+            return;
+        }
+
+        const delays = [1000, 2000, 4000, 5000];
+        const delay = delays[Math.min(retryAttempt, delays.length - 1)];
+        retryAttempt += 1;
+        const waitingMessage = 'Djinn is getting ready…';
+        setState('connecting', waitingMessage);
+        showResponse(waitingMessage, 'notice');
+        retryTimer = window.setTimeout(() => {
+            retryTimer = null;
+            void connect();
+        }, delay);
+    };
+
     const handleMessage = (event, ready) => {
         if (event.data instanceof ArrayBuffer) {
-            void queuePcm(event.data);
+            queuePcm(event.data);
             return;
         }
 
         const message = JSON.parse(event.data);
-        if (message.type === 'ready') ready();
-        if (message.type === 'transcript' && message.text) hideResponse();
+        if (message.type === 'ready') ready?.();
+        if (message.type === 'transcript' && message.text && desiredActive) hideResponse();
         if (message.type === 'thinking') setStatus('Djinn is grounding an answer…');
         if (message.type === 'audio_start') {
             currentAudioSampleRate = message.sampleRate ?? 24000;
+            beginWordRevealWithPlayback(message.text, message.sequence);
             setState('speaking', 'Djinn is speaking.');
         }
         if (message.type === 'turn_complete') showResponseAfterPlayback(message.text);
         if (message.type === 'playback_stopped') {
             stopAudio();
-            hideResponse();
-            setState('listening', 'Listening. You can interrupt Djinn at any time.');
+            if (desiredActive) {
+                hideResponse();
+                setState('listening', 'Listening. You can interrupt Djinn at any time.');
+            } else {
+                const pausedMessage = 'Djinn is paused. Click to resume.';
+                setState('paused', pausedMessage);
+                showResponse(pausedMessage, 'notice');
+            }
         }
         if (['audio_unavailable', 'stt_unavailable'].includes(message.type)) {
+            desiredActive = false;
             const errorMessage = 'Djinn needs a moment. Please try again.';
             setState('error', errorMessage);
             showResponse(errorMessage, 'error');
         }
-        if (message.type === 'ended' && !closing) {
+        if (message.type === 'ended') {
+            desiredActive = false;
+            closing = true;
+            stopCapture();
+            stopAudio();
             const unavailableMessage = 'Djinn is taking a short pause. Please try again later.';
-            close(unavailableMessage);
+            setState('error', unavailableMessage);
             showResponse(unavailableMessage, 'notice');
         }
     };
 
-    const connect = async () => {
-        hideResponse();
-        closing = false;
-        let microphoneRequested = false;
-        setState('connecting', 'Checking whether Djinn is ready…');
-        showResponse('Checking whether Djinn is ready…', 'notice');
-        try {
-            await ensureAudioContext();
-            const health = await fetch(`${endpoint}/health`, { signal: AbortSignal.timeout(2500) });
-            if (!health.ok || !(await health.json()).demo) throw new Error('unavailable');
+    const connect = () => {
+        if (connectingPromise) return connectingPromise;
+        if (socket?.readyState === WebSocket.OPEN) return resumeCapture();
 
-            const wsUrl = new URL(endpoint);
-            wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
-            wsUrl.pathname = '/browser/voice';
-            socket = new WebSocket(wsUrl);
-            socket.binaryType = 'arraybuffer';
-            await new Promise((resolve, reject) => {
-                socket.onmessage = (event) => handleMessage(event, resolve);
-                socket.onerror = reject;
-                socket.onclose = () => reject(new Error('closed'));
-            });
-            socket.onclose = () => {
-                if (!closing) close('Djinn is taking a short pause. Please try again later.');
-            };
-            microphoneRequested = true;
-            await startCapture();
-        } catch {
-            stopCapture();
-            stopAudio();
-            socket?.close();
-            socket = null;
-            const errorMessage = microphoneRequested
-                ? 'Microphone access is needed to speak with Djinn. Please allow it and try again.'
-                : 'Djinn is taking a short pause. Please try again later.';
-            const messageKind = microphoneRequested ? 'error' : 'notice';
-            setState('error', errorMessage);
-            showResponse(errorMessage, messageKind);
-        }
+        connectingPromise = (async () => {
+            closing = false;
+            connectionAbort = new AbortController();
+            const timeout = window.setTimeout(() => connectionAbort?.abort(), 2500);
+            let microphoneRequested = false;
+            setState('connecting', 'Checking whether Djinn is ready…');
+            showResponse('Checking whether Djinn is ready…', 'notice');
+
+            try {
+                await ensureAudioContext();
+                const health = await fetch(`${endpoint}/health`, { signal: connectionAbort.signal });
+                window.clearTimeout(timeout);
+                if (!health.ok || !(await health.json()).demo) throw new Error('unavailable');
+                if (!desiredActive) {
+                    pause();
+                    return;
+                }
+
+                const wsUrl = new URL(endpoint);
+                wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+                wsUrl.pathname = '/browser/voice';
+                const connectingSocket = new WebSocket(wsUrl);
+                connectingSocket.binaryType = 'arraybuffer';
+                socket = connectingSocket;
+                await new Promise((resolve, reject) => {
+                    const readyTimeout = window.setTimeout(() => reject(new Error('ready_timeout')), 3500);
+                    connectingSocket.onmessage = (event) => handleMessage(event, () => {
+                        window.clearTimeout(readyTimeout);
+                        resolve();
+                    });
+                    connectingSocket.onerror = reject;
+                    connectingSocket.onclose = () => reject(new Error('closed'));
+                });
+
+                connectingSocket.onclose = () => {
+                    if (socket === connectingSocket) socket = null;
+                    stopCapture();
+                    stopAudio();
+                    if (!closing && desiredActive) scheduleRetry();
+                };
+                retryStartedAt = 0;
+                retryAttempt = 0;
+                clearRetry();
+                if (!desiredActive) {
+                    pause();
+                    return;
+                }
+
+                microphoneRequested = true;
+                await startCapture();
+            } catch {
+                window.clearTimeout(timeout);
+                if (socket?.readyState !== WebSocket.OPEN) {
+                    try { socket?.close(); } catch {}
+                    socket = null;
+                }
+                stopCapture();
+                stopAudio();
+                if (!desiredActive) {
+                    const pausedMessage = 'Djinn is paused. Click to resume.';
+                    setState('paused', pausedMessage);
+                    showResponse(pausedMessage, 'notice');
+                } else if (microphoneRequested) {
+                    showMicrophoneError();
+                } else {
+                    scheduleRetry();
+                }
+            } finally {
+                window.clearTimeout(timeout);
+                connectionAbort = null;
+                connectingPromise = null;
+            }
+        })();
+
+        return connectingPromise;
     };
 
-    const close = (message = 'Ask Djinn') => {
+    const activate = () => {
+        desiredActive = true;
+        clearRetry();
+        if (socket?.readyState === WebSocket.OPEN) {
+            void resumeCapture();
+            return;
+        }
+        if (connectingPromise) {
+            setState('connecting', 'Djinn is getting ready…');
+            showResponse('Djinn is getting ready…', 'notice');
+            return;
+        }
+        retryStartedAt = Date.now();
+        retryAttempt = 0;
+        void connect();
+    };
+
+    const closeSession = () => {
+        desiredActive = false;
         closing = true;
+        clearRetry();
+        connectionAbort?.abort();
         stopCapture();
         stopAudio();
         if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'end' }));
-        socket?.close();
+        try { socket?.close(); } catch {}
         socket = null;
-        setState('idle', message);
+        setState('idle', 'Ask Djinn');
     };
 
     trigger?.addEventListener('click', () => {
-        if (['connecting', 'listening', 'speaking'].includes(currentState)) {
-            close();
-            return;
-        }
-        void connect();
+        if (desiredActive) pause();
+        else activate();
     });
 
-    window.addEventListener('pagehide', () => close());
+    window.addEventListener('pagehide', closeSession);
     setState('idle', 'Ask Djinn');
 }
