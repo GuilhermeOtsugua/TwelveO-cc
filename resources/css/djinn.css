@@ -101,7 +101,7 @@
         grid-template-columns: repeat(2, 1fr);
         grid-template-rows: repeat(2, 1fr);
         gap: 0.12em;
-        vertical-align: 0.19em;
+        vertical-align: 0.36em;
     }
 
     .djinn-activity i {
