@@ -78,9 +78,7 @@
                             <div class="djinn-response" data-djinn-response data-kind="notice" role="status">
                                 <span class="djinn-response__line">
                                     <strong data-djinn-answer>This message shall be removed later...</strong>
-                                    <span class="djinn-activity" data-djinn-activity aria-hidden="true">
-                                        <i></i><i></i><i></i><i></i>
-                                    </span>
+                                    <canvas class="djinn-activity" data-djinn-activity aria-hidden="true"></canvas>
                                 </span>
                             </div>
                             <span class="djinn-status" data-djinn-status aria-live="polite"></span>

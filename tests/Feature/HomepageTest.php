@@ -37,7 +37,7 @@ class HomepageTest extends TestCase
         self::assertSame(1, $this->countMatches($xpath, '//*[@data-djinn-control]'));
         self::assertSame(1, $this->countMatches($xpath, '//button[@data-djinn-open and @aria-pressed="false"]'));
         self::assertSame(1, $this->countMatches($xpath, '//*[@data-djinn-response and @data-kind="notice" and not(@hidden)]//*[@data-djinn-answer and normalize-space()="This message shall be removed later..."]'));
-        self::assertSame(4, $this->countMatches($xpath, '//*[@data-djinn-activity]/*[self::i]'));
+        self::assertSame(1, $this->countMatches($xpath, '//canvas[@data-djinn-activity]'));
         self::assertSame(0, $this->countMatches($xpath, '//*[@data-djinn-panel]'));
         self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://cloud.google.com/blog/products/ai-machine-learning/optimizing-rag-retrieval"]'));
     }

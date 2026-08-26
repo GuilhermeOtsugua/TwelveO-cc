@@ -7,6 +7,7 @@ if (control instanceof HTMLElement) {
     const status = control.querySelector('[data-djinn-status]');
     const response = control.querySelector('[data-djinn-response]');
     const answer = control.querySelector('[data-djinn-answer]');
+    const activity = control.querySelector('[data-djinn-activity]');
     const endpoint = ['twelveo-cc.test', '127.0.0.1', 'localhost'].includes(window.location.hostname)
         ? 'http://127.0.0.1:8080'
         : 'https://voice.otsugua.dev';
@@ -33,6 +34,47 @@ if (control instanceof HTMLElement) {
     let retryAttempt = 0;
     let closing = false;
     const activeSources = new Set();
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let activityFrame = 0;
+    let activityTimer = null;
+
+    const drawActivity = () => {
+        if (!(activity instanceof HTMLCanvasElement)) return;
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const cell = Math.max(1, Math.round(4 * dpr));
+        const gap = Math.max(1, Math.round(dpr));
+        const size = (cell * 2) + gap;
+        if (activity.width !== size || activity.height !== size) {
+            activity.width = size;
+            activity.height = size;
+            activity.style.width = `${size / dpr}px`;
+            activity.style.height = `${size / dpr}px`;
+        }
+
+        const context = activity.getContext('2d');
+        if (!context) return;
+        context.clearRect(0, 0, size, size);
+        context.fillStyle = getComputedStyle(activity).color;
+        const positions = [[0, 0], [cell + gap, 0], [0, cell + gap], [cell + gap, cell + gap]];
+        const missingByFrame = [1, 3, 2, 0];
+        const missing = missingByFrame[reducedMotion.matches ? 0 : activityFrame];
+        positions.forEach(([x, y], index) => {
+            if (index !== missing) context.fillRect(x, y, cell, cell);
+        });
+    };
+
+    const startActivity = () => {
+        clearInterval(activityTimer);
+        activityTimer = null;
+        activityFrame = 0;
+        drawActivity();
+        if (!reducedMotion.matches) {
+            activityTimer = window.setInterval(() => {
+                activityFrame = (activityFrame + 1) % 4;
+                drawActivity();
+            }, 200);
+        }
+    };
 
     const locale = () => document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en';
 
@@ -86,6 +128,7 @@ if (control instanceof HTMLElement) {
             response.setAttribute('role', kind === 'error' ? 'alert' : 'status');
             response.hidden = false;
         }
+        drawActivity();
     };
 
     const showListeningIndicator = () => {
@@ -108,6 +151,7 @@ if (control instanceof HTMLElement) {
             response.setAttribute('role', 'presentation');
             response.hidden = false;
         }
+        drawActivity();
     };
 
     const finishCurrentSegment = () => {
@@ -484,11 +528,21 @@ if (control instanceof HTMLElement) {
         setState('idle', 'Ask Djinn');
     };
 
+    reducedMotion.addEventListener?.('change', startActivity);
+    new MutationObserver(drawActivity).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme-effective'],
+    });
+    startActivity();
+
     trigger?.addEventListener('click', () => {
         if (desiredActive) pause();
         else activate();
     });
 
-    window.addEventListener('pagehide', closeSession);
+    window.addEventListener('pagehide', () => {
+        clearInterval(activityTimer);
+        closeSession();
+    });
     setState('idle', 'Ask Djinn');
 }
