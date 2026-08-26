@@ -89,7 +89,7 @@ if (control instanceof HTMLElement) {
     };
 
     const showListeningIndicator = () => {
-        showResponse('', 'activity', false);
+        showResponse('Listening...', 'activity');
     };
 
     const showLoading = () => {

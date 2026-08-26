@@ -29,6 +29,7 @@ const ptBR = {
     'Djinn is taking a short pause. Please try again later.': 'Djinn está em uma breve pausa. Tente novamente mais tarde.',
     'Djinn is ready. Start when you are ready to speak.': 'Djinn está pronto. Comece quando estiver pronto para falar.',
     'Listening. You can interrupt Djinn at any time.': 'Ouvindo. Você pode interromper Djinn a qualquer momento.',
+    'Listening...': 'Ouvindo...',
     'Microphone access is needed to speak with Djinn. Please allow it and try again.': 'O acesso ao microfone é necessário para falar com Djinn. Permita o acesso e tente novamente.',
     'Djinn is grounding an answer…': 'Djinn está preparando uma resposta com contexto…',
     'Djinn is speaking.': 'Djinn está falando.',
