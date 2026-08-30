@@ -20,12 +20,10 @@ if (control instanceof HTMLElement) {
     let pcmRemainder = new Uint8Array(0);
     let nextPlaybackTime = 0;
     let responseTimer = null;
-    let revealTimer = null;
-    let revealStartTimer = null;
-    let completedText = '';
-    let segmentText = '';
-    let segmentWords = [];
-    let revealedWords = 0;
+    let revealFrame = null;
+    let revealSegments = [];
+    let activeRevealSequence = null;
+    let estimatedSpeechUnitsPerSecond = 12;
     let desiredActive = false;
     let connectingPromise = null;
     let connectionAbort = null;
@@ -33,6 +31,10 @@ if (control instanceof HTMLElement) {
     let retryStartedAt = 0;
     let retryAttempt = 0;
     let closing = false;
+    let lastVisibleResponse = '';
+    let sessionAudioScheduledMs = 0;
+    let lastPlaybackOffsetMs = 0;
+    let playbackRanges = [];
     const activeSources = new Set();
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let activityFrame = 0;
@@ -98,16 +100,10 @@ if (control instanceof HTMLElement) {
     };
 
     const stopWordReveal = (reset = true) => {
-        clearTimeout(revealStartTimer);
-        revealStartTimer = null;
-        clearInterval(revealTimer);
-        revealTimer = null;
-        if (reset) {
-            completedText = '';
-            segmentText = '';
-            segmentWords = [];
-            revealedWords = 0;
-        }
+        if (revealFrame !== null) window.cancelAnimationFrame(revealFrame);
+        revealFrame = null;
+        activeRevealSequence = null;
+        if (reset) revealSegments = [];
     };
 
     const hideResponse = () => {
@@ -132,20 +128,31 @@ if (control instanceof HTMLElement) {
     };
 
     const showListeningIndicator = () => {
-        showResponse('Listening...', 'activity');
+        if (lastVisibleResponse) showResponse(lastVisibleResponse, 'response', false);
+        else showResponse('Listening...', 'activity');
     };
 
     const showLoading = () => {
         showResponse('Djinn loading...', 'loading');
     };
 
-    const progressiveText = () => [
-        completedText,
-        segmentWords.slice(0, revealedWords).join(' '),
-    ].filter(Boolean).join(' ');
+    const speechWeight = (word) => {
+        const spokenCharacters = word.match(/[\p{L}\p{N}]/gu)?.length ?? 0;
+        let weight = Math.max(2.5, spokenCharacters);
+        if (/[,]["')\]]*$/.test(word)) weight += 2;
+        if (/[;:]["')\]]*$/.test(word)) weight += 3;
+        if (/[.!?]["')\]]*$/.test(word)) weight += 4;
+        return weight;
+    };
+
+    const progressiveText = () => revealSegments
+        .flatMap((segment) => segment.words.slice(0, segment.revealed))
+        .join(' ');
 
     const renderProgressiveResponse = () => {
-        if (answer instanceof HTMLElement) answer.textContent = progressiveText();
+        const text = progressiveText();
+        if (text) lastVisibleResponse = text;
+        if (answer instanceof HTMLElement) answer.textContent = text;
         if (response instanceof HTMLElement) {
             response.dataset.kind = 'response';
             response.setAttribute('role', 'presentation');
@@ -154,46 +161,85 @@ if (control instanceof HTMLElement) {
         drawActivity();
     };
 
-    const finishCurrentSegment = () => {
-        clearInterval(revealTimer);
-        revealTimer = null;
-        if (segmentText) completedText = [completedText, segmentText].filter(Boolean).join(' ');
-        segmentText = '';
-        segmentWords = [];
-        revealedWords = 0;
+    const targetRevealedWords = (segment) => {
+        if (!audioContext || segment.startsAt === null || audioContext.currentTime < segment.startsAt) return 0;
+        const elapsedMs = Math.max(0, (audioContext.currentTime - segment.startsAt) * 1000);
+        const totalWeight = segment.weights.reduce((total, weight) => total + weight, 0);
+        const millisecondsPerUnit = segment.complete && segment.audioDurationMs > 0 && totalWeight > 0
+            ? segment.audioDurationMs / totalWeight
+            : 1000 / estimatedSpeechUnitsPerSecond;
+        let thresholdMs = 0;
+        let target = 0;
+        for (let index = 0; index < segment.words.length; index += 1) {
+            if (elapsedMs + 45 < thresholdMs) break;
+            target = index + 1;
+            thresholdMs += segment.weights[index] * millisecondsPerUnit;
+        }
+        return target;
     };
 
-    const beginWordReveal = (text, sequence = 0) => {
-        clearTimeout(responseTimer);
-        responseTimer = null;
-        if (sequence === 0) stopWordReveal();
-        else finishCurrentSegment();
-
-        segmentText = String(text ?? '').trim();
-        segmentWords = segmentText.split(/\s+/).filter(Boolean);
-        if (!segmentWords.length) return;
-        revealedWords = 1;
-        renderProgressiveResponse();
-        revealTimer = window.setInterval(() => {
-            if (revealedWords >= segmentWords.length) {
-                clearInterval(revealTimer);
-                revealTimer = null;
-                return;
+    const revealTick = () => {
+        revealFrame = null;
+        let changed = false;
+        let pending = false;
+        for (const segment of revealSegments) {
+            const target = Math.max(segment.revealed, targetRevealedWords(segment));
+            if (target !== segment.revealed) {
+                segment.revealed = target;
+                changed = true;
             }
-            revealedWords += 1;
-            renderProgressiveResponse();
-        }, 185);
+            if (segment.revealed < segment.words.length || !segment.complete) pending = true;
+            if (segment.revealed < segment.words.length) break;
+        }
+        if (changed) renderProgressiveResponse();
+        if (pending) revealFrame = window.requestAnimationFrame(revealTick);
+    };
+
+    const scheduleWordReveal = () => {
+        if (revealFrame === null) revealFrame = window.requestAnimationFrame(revealTick);
     };
 
     const beginWordRevealWithPlayback = (text, sequence = 0) => {
-        clearTimeout(revealStartTimer);
-        const beginsInMs = sequence > 0 && audioContext
-            ? Math.max(0, (nextPlaybackTime - audioContext.currentTime) * 1000)
-            : 0;
-        revealStartTimer = window.setTimeout(() => {
-            revealStartTimer = null;
-            beginWordReveal(text, sequence);
-        }, beginsInMs);
+        clearTimeout(responseTimer);
+        responseTimer = null;
+        if (sequence === 0) stopWordReveal();
+        const words = String(text ?? '').trim().split(/\s+/).filter(Boolean);
+        if (!words.length) return;
+        const segment = {
+            sequence,
+            words,
+            weights: words.map(speechWeight),
+            revealed: 0,
+            startsAt: null,
+            audioDurationMs: 0,
+            complete: false,
+        };
+        revealSegments.push(segment);
+        activeRevealSequence = sequence;
+        scheduleWordReveal();
+    };
+
+    const appendWordReveal = (text) => {
+        const words = String(text ?? '').trim().split(/\s+/).filter(Boolean);
+        const segment = revealSegments.at(-1);
+        if (!segment || !words.length) return;
+        segment.words.push(...words);
+        segment.weights.push(...words.map(speechWeight));
+        scheduleWordReveal();
+    };
+
+    const completeWordRevealSegment = (sequence) => {
+        const segment = revealSegments.find((candidate) => candidate.sequence === sequence);
+        if (!segment) return;
+        segment.complete = true;
+        const totalWeight = segment.weights.reduce((total, weight) => total + weight, 0);
+        if (segment.audioDurationMs > 0 && totalWeight > 0) {
+            const observedRate = totalWeight / (segment.audioDurationMs / 1000);
+            if (observedRate >= 6 && observedRate <= 24) {
+                estimatedSpeechUnitsPerSecond = (estimatedSpeechUnitsPerSecond * 0.7) + (observedRate * 0.3);
+            }
+        }
+        scheduleWordReveal();
     };
 
     const showResponseAfterPlayback = (text) => {
@@ -202,6 +248,7 @@ if (control instanceof HTMLElement) {
             ? Math.max(0, (nextPlaybackTime - audioContext.currentTime) * 1000)
             : 0;
         responseTimer = window.setTimeout(() => {
+            lastVisibleResponse = String(text ?? '').trim();
             showResponse(text, 'response', false);
             setState('listening', 'Listening. You can interrupt Djinn at any time.');
             setStatus(`Djinn answered: ${text}`);
@@ -214,16 +261,32 @@ if (control instanceof HTMLElement) {
         return audioContext;
     };
 
+    const currentPlaybackOffsetMs = () => {
+        const now = audioContext?.currentTime ?? 0;
+        let offset = lastPlaybackOffsetMs;
+        playbackRanges.forEach((range) => {
+            if (now <= range.startsAt) return;
+            const playedMs = Math.min(range.durationMs, (now - range.startsAt) * 1000);
+            offset = Math.max(offset, range.sessionStartMs + playedMs);
+        });
+        lastPlaybackOffsetMs = Math.round(offset);
+        return lastPlaybackOffsetMs;
+    };
+
     const stopAudio = () => {
+        const playbackOffsetMs = currentPlaybackOffsetMs();
         activeSources.forEach((source) => {
             try { source.stop(); } catch {}
         });
         activeSources.clear();
+        playbackRanges = [];
+        sessionAudioScheduledMs = playbackOffsetMs;
         pcmRemainder = new Uint8Array(0);
         nextPlaybackTime = audioContext?.currentTime ?? 0;
         clearTimeout(responseTimer);
         responseTimer = null;
         stopWordReveal();
+        return playbackOffsetMs;
     };
 
     const queuePcm = (arrayBuffer) => {
@@ -253,6 +316,19 @@ if (control instanceof HTMLElement) {
         source.buffer = audioBuffer;
         source.connect(context.destination);
         const startsAt = Math.max(context.currentTime + 0.025, nextPlaybackTime);
+        const durationMs = audioBuffer.duration * 1000;
+        const revealSegment = revealSegments.find((segment) => segment.sequence === activeRevealSequence);
+        if (revealSegment) {
+            revealSegment.startsAt ??= startsAt;
+            revealSegment.audioDurationMs += durationMs;
+            scheduleWordReveal();
+        }
+        playbackRanges.push({
+            startsAt,
+            durationMs,
+            sessionStartMs: sessionAudioScheduledMs,
+        });
+        sessionAudioScheduledMs += durationMs;
         nextPlaybackTime = startsAt + audioBuffer.duration;
         activeSources.add(source);
         source.onended = () => activeSources.delete(source);
@@ -306,7 +382,8 @@ if (control instanceof HTMLElement) {
         processor.connect(silent);
         silent.connect(context.destination);
         socket?.send(JSON.stringify({ type: 'start' }));
-        showLoading();
+        if (lastVisibleResponse) showListeningIndicator();
+        else showLoading();
         setState('listening', 'Listening. You can interrupt Djinn at any time.');
     };
 
@@ -384,9 +461,21 @@ if (control instanceof HTMLElement) {
             beginWordRevealWithPlayback(message.text, message.sequence);
             setState('speaking', 'Djinn is speaking.');
         }
+        if (message.type === 'answer_append') appendWordReveal(message.text);
+        if (message.type === 'audio_end') {
+            completeWordRevealSegment(message.sequence);
+            activeRevealSequence = null;
+        }
         if (message.type === 'turn_complete') showResponseAfterPlayback(message.text);
         if (message.type === 'playback_stopped') {
-            stopAudio();
+            const playbackOffsetMs = stopAudio();
+            if (message.interruptToken && socket?.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'playback_stopped_ack',
+                    interruptToken: message.interruptToken,
+                    playbackOffsetMs,
+                }));
+            }
             if (desiredActive) {
                 showListeningIndicator();
                 setState('listening', 'Listening. You can interrupt Djinn at any time.');
@@ -500,8 +589,8 @@ if (control instanceof HTMLElement) {
         desiredActive = true;
         clearRetry();
         if (socket?.readyState === WebSocket.OPEN) {
-            setState('connecting', 'Djinn loading...');
-            showLoading();
+            setState('listening', 'Listening. You can interrupt Djinn at any time.');
+            showListeningIndicator();
             void resumeCapture();
             return;
         }
