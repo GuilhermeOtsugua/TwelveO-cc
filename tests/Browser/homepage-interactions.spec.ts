@@ -426,7 +426,7 @@ test.describe('Homepage interactions', () => {
         });
         await expect.poll(async () => page.evaluate(() => window.localStorage.getItem('djinn:voice-volume'))).toBe('35');
         await page.locator('[data-djinn-input]').fill('Can it explain our refund policy?');
-        await page.getByRole('button', { name: 'Send question', exact: true }).click();
+        await page.locator('[data-djinn-input]').press('Enter');
         await expect(page.locator('[data-djinn-message="visitor"]')).toHaveText('Can it explain our refund policy?');
         expect(await page.evaluate(() => (window as any).__microphoneCalls ?? 0)).toBe(0);
         await expect.poll(async () => page.evaluate(() => {
@@ -492,7 +492,7 @@ test.describe('Homepage interactions', () => {
 
         await page.locator('[data-djinn-keyboard]').click();
         await page.locator('[data-djinn-input]').fill('How would that work for a museum?');
-        await page.getByRole('button', { name: 'Send question', exact: true }).click();
+        await page.locator('[data-djinn-input]').press('Enter');
         await expect(page.locator('[data-djinn-message="visitor"]')).toHaveCount(2);
         await expect(page.locator('[data-djinn-message="assistant"]').first()).toHaveText('This is the latest Djinn response.');
         await page.locator('[data-djinn-close]').click();

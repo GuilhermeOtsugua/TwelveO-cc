@@ -9,7 +9,7 @@ if (control instanceof HTMLElement) {
     const status = control.querySelector('[data-djinn-status]');
     const form = control.querySelector('[data-djinn-form]');
     const input = control.querySelector('[data-djinn-input]');
-    const submit = form.querySelector('button');
+    const composerMicrophone = form.querySelector('[data-djinn-compose-microphone]');
     const volume = control.querySelector('[data-djinn-volume]');
     const challenge = control.querySelector('[data-djinn-challenge]');
     const endpoint = location.hostname === 'twelveo-cc.test'
@@ -49,7 +49,7 @@ if (control instanceof HTMLElement) {
     const sayStatus = (text) => { status.textContent = translate(text); };
     const state = (value) => {
         control.dataset.state = value;
-        microphone.setAttribute('aria-pressed', String(mode === 'voice' && Boolean(capture)));
+        for (const button of [microphone, composerMicrophone]) button.setAttribute('aria-pressed', String(mode === 'voice' && Boolean(capture)));
         keyboard.setAttribute('aria-pressed', String(mode === 'text' && !panel.hidden));
     };
     const openPanel = () => {
@@ -58,8 +58,10 @@ if (control instanceof HTMLElement) {
         keyboard.setAttribute('aria-expanded', 'true');
         state(control.dataset.state ?? 'idle');
     };
-    const scrollLog = () => { log.scrollTop = log.scrollHeight; };
+    const nearBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 24;
+    const scrollLog = (follow) => { if (follow) log.scrollTop = log.scrollHeight; };
     function appendMessage(role, text) {
+        const follow = nearBottom();
         const row = document.createElement('p');
         row.className = `djinn-message djinn-message--${role}`;
         row.dataset.djinnMessage = role;
@@ -67,7 +69,7 @@ if (control instanceof HTMLElement) {
         row.textContent = text;
         log.append(row);
         while (log.children.length > 48) log.firstElementChild.remove();
-        scrollLog();
+        scrollLog(follow);
         return row;
     }
     function applyVolume() {
@@ -104,8 +106,9 @@ if (control instanceof HTMLElement) {
     }
     function renderSpeech() {
         if (responseRow && packets.length) {
+            const follow = nearBottom();
             responseRow.textContent = packets.map((packet) => packet.words.slice(0, heardWords(packet)).join(' ')).filter(Boolean).join(' ');
-            scrollLog();
+            scrollLog(follow);
         }
     }
     function tick() {
@@ -204,7 +207,7 @@ if (control instanceof HTMLElement) {
     function clearPending() {
         pendingText = false;
         clearTimeout(pendingTimer);
-        submit.disabled = false;
+        input.removeAttribute('aria-busy');
     }
     function receive(event) {
         if (event.data instanceof ArrayBuffer) { queueAudio(event.data); return; }
@@ -357,7 +360,7 @@ if (control instanceof HTMLElement) {
             state('ready'); sayStatus('Djinn is paused. Click to resume.');
             return;
         }
-        mode = 'voice'; form.hidden = true;
+        mode = 'voice'; form.hidden = false;
         const request = ++captureVersion;
         let stage = 'capture';
         try {
@@ -416,7 +419,7 @@ if (control instanceof HTMLElement) {
         event.preventDefault();
         const text = input.value.trim();
         if (!text || text.length > 1200 || pendingText) return;
-        pendingText = true; submit.disabled = true;
+        pendingText = true; input.setAttribute('aria-busy', 'true');
         const version = sessionVersion;
         try {
             await ensureAudio();
@@ -437,6 +440,8 @@ if (control instanceof HTMLElement) {
     applyVolume();
     microphone.addEventListener('click', () => { void useMicrophone(); });
     keyboard.addEventListener('click', useKeyboard);
+    composerMicrophone.addEventListener('click', () => { void useMicrophone(); });
+    input.addEventListener('focus', () => { if (mode !== 'text') useKeyboard(); });
     control.querySelector('[data-djinn-close]').addEventListener('click', () => { closeSession(); keyboard.focus(); });
     panel.addEventListener('keydown', (event) => { if (event.key === 'Escape') { closeSession(); keyboard.focus(); } });
     window.addEventListener('pagehide', closeSession);

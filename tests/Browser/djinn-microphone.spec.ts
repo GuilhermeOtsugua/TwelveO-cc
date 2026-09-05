@@ -55,9 +55,13 @@ test('HTTPS exposes native microphone capture and forwards PCM over the voice pr
     await expect.poll(() => binaryFrames).toBeGreaterThan(0);
     expect(captureVerified).toBe(true);
     expect(voiceStarted).toBe(true);
-    await page.locator('[data-djinn-keyboard]').click();
+    await expect(page.locator('[data-djinn-form]')).toBeVisible();
+    await expect(page.locator('[data-djinn-compose-microphone]')).toHaveAttribute('aria-pressed', 'true');
+    await page.locator('[data-djinn-input]').focus();
     await expect.poll(async () => page.evaluate(() => (window as any).__nativeTracks.every((track: MediaStreamTrack) => track.readyState === 'ended'))).toBe(true);
     await expect(page.locator('[data-djinn-form]')).toBeVisible();
+    await page.locator('[data-djinn-compose-microphone]').click();
+    await expect(page.locator('[data-djinn-compose-microphone]')).toHaveAttribute('aria-pressed', 'true');
 });
 
 for (const [error, expected] of [
@@ -123,6 +127,38 @@ test('switching to keyboard during permission acquisition releases late micropho
     await expect.poll(async () => page.evaluate(() => (window as any).__nativeTracks.every((track: MediaStreamTrack) => track.readyState === 'ended'))).toBe(true);
     await expect(page.locator('[data-djinn-form]')).toBeVisible();
     expect(providerCalls).toBe(0);
+});
+
+test('compact conversation scrolls without a scrollbar and aligns its volume endpoint', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('[data-djinn-keyboard]').click();
+    await expect(page.locator('.nav-link__label--full', { hasText: 'Ask Djinn!' })).toHaveText('Ask Djinn!');
+    await page.locator('[data-djinn-log]').evaluate((log) => {
+        for (let index = 0; index < 20; index++) {
+            const row = document.createElement('p');
+            row.className = 'djinn-message';
+            row.textContent = `Conversation line ${index}. ` .repeat(8);
+            log.append(row);
+        }
+    });
+    const geometry = await page.evaluate(() => {
+        const log = document.querySelector('[data-djinn-log]')!;
+        const panel = document.querySelector('[data-djinn-response]')!;
+        return {
+            height: panel.getBoundingClientRect().height,
+            cap: parseFloat(getComputedStyle(panel).maxHeight),
+            overflows: log.scrollHeight > log.clientHeight,
+            scrollbar: getComputedStyle(log).scrollbarWidth,
+            endpointDifference: Math.abs(document.querySelector('[data-djinn-volume]')!.getBoundingClientRect().right - document.querySelector('[data-djinn-form]')!.getBoundingClientRect().right),
+        };
+    });
+    expect(geometry.height).toBeLessThanOrEqual(geometry.cap + 1);
+    expect(geometry.overflows).toBe(true);
+    expect(geometry.scrollbar).toBe('none');
+    expect(geometry.endpointDifference).toBeLessThan(2);
+    await page.locator('[data-djinn-log]').focus();
+    await page.keyboard.press('End');
+    await expect.poll(() => page.locator('[data-djinn-log]').evaluate((log) => log.scrollTop)).toBeGreaterThan(0);
 });
 
 test('backend failure after capture is not presented as a microphone failure', async ({ page }) => {

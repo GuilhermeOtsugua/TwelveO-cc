@@ -68,7 +68,7 @@
                         <div class="djinn-control" data-djinn-control>
                             <div class="djinn-control__actions">
                                 <button type="button" class="nav-link nav-link--djinn" data-djinn-open aria-pressed="false" aria-expanded="false" aria-controls="djinn-chat" aria-label="Ask Djinn with microphone">
-                                    <span class="nav-link__label--full">Ask Djinn</span>
+                                    <span class="nav-link__label--full">Ask Djinn!</span>
                                     <span class="nav-link__label--compact">Djinn</span>
                                     <svg class="djinn-microphone" viewBox="0 0 24 24" aria-hidden="true">
                                         <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
@@ -85,13 +85,13 @@
                             </div>
                             <section id="djinn-chat" class="djinn-response" data-djinn-response aria-label="Djinn conversation" hidden>
                                 <div class="djinn-response__heading"><strong>Djinn</strong><button type="button" data-djinn-close aria-label="Close Djinn conversation">×</button></div>
-                                <div class="djinn-log" data-djinn-log role="log" aria-label="Conversation" aria-live="off"></div>
+                                <div class="djinn-log" data-djinn-log tabindex="0" role="log" aria-label="Conversation" aria-live="off"></div>
                                 <p class="djinn-status" data-djinn-status role="status" aria-live="polite"></p>
                                 <div class="djinn-challenge" data-djinn-challenge hidden></div>
                                 <form class="djinn-form" data-djinn-form hidden>
                                     <label class="sr-only" for="djinn-question">Your question for Djinn</label>
-                                    <input id="djinn-question" data-djinn-input type="text" maxlength="1200" placeholder="Ask Djinn…" autocomplete="off" required>
-                                    <button type="submit" aria-label="Send question">↑</button>
+                                    <input id="djinn-question" data-djinn-input type="text" maxlength="1200" placeholder="Ask Djinn…" enterkeyhint="send" autocomplete="off" required>
+                                    <button type="button" data-djinn-compose-microphone aria-label="Ask Djinn with microphone" aria-pressed="false"><svg class="djinn-microphone" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg></button>
                                 </form>
                                 <label class="djinn-volume">
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H2v8h4l5 4V4Zm4 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" /></svg>
