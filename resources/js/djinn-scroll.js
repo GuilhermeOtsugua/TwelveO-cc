@@ -7,6 +7,8 @@ export function createChatScroller(log) {
     let direction = 0;
     let lastTop = 0;
     let timer = null;
+    let animation = null;
+    const stopAnimation = () => { if (animation !== null) cancelAnimationFrame(animation); animation = null; };
     const maximum = () => Math.max(0, log.scrollHeight - log.clientHeight);
     const atBottom = () => maximum() - log.scrollTop <= 2;
     const clearTimer = () => { clearTimeout(timer); timer = null; };
@@ -39,7 +41,20 @@ export function createChatScroller(log) {
         }
         if (target === null || distance < 1) return;
         following = maximum() - target <= 2;
-        log.scrollTo({ top: target, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+        stopAnimation();
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            log.scrollTo({ top: target, behavior: 'instant' });
+            return;
+        }
+        const from = log.scrollTop;
+        const started = performance.now();
+        const step = (now) => {
+            const progress = Math.min(1, (now - started) / 380);
+            const eased = progress * progress * (3 - 2 * progress);
+            log.scrollTop = from + (target - from) * eased;
+            animation = progress < 1 ? requestAnimationFrame(step) : null;
+        };
+        animation = requestAnimationFrame(step);
     }
     function schedule() {
         clearTimer();
@@ -47,6 +62,7 @@ export function createChatScroller(log) {
     }
     function begin() {
         clearTimer();
+        stopAnimation();
         // A new gesture takes precedence over an in-flight smooth adjustment.
         if (!manual) {
             log.scrollTo({ top: log.scrollTop, behavior: 'instant' });
@@ -90,6 +106,7 @@ export function createChatScroller(log) {
         },
         cancel() {
             clearTimer();
+            stopAnimation();
             log.scrollTo({ top: log.scrollTop, behavior: 'instant' });
             manual = false;
             pointerDown = false;

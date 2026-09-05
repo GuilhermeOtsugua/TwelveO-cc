@@ -133,6 +133,25 @@ test('switching to keyboard during permission acquisition releases late micropho
     expect(providerCalls).toBe(0);
 });
 
+test('mute restores a saved nonzero level and survives hide/reopen', async ({ page }) => {
+    await page.addInitScript(() => {
+        localStorage.setItem('djinn:voice-volume', '0');
+        localStorage.setItem('djinn:voice-volume:last', '40');
+    });
+    await page.goto('/');
+    await page.locator('[data-djinn-keyboard]').click();
+    await expect(page.locator('[data-djinn-mute]')).toHaveAttribute('aria-pressed', 'true');
+    await page.locator('[data-djinn-mute]').click();
+    await expect(page.locator('[data-djinn-volume]')).toHaveValue('40');
+    await page.locator('[data-djinn-mute]').click();
+    await page.locator('[data-djinn-input]').press('Escape');
+    await page.locator('[data-djinn-keyboard]').click();
+    await expect(page.locator('[data-djinn-volume]')).toHaveValue('0');
+    await expect(page.locator('[data-djinn-volume-cross]')).toBeVisible();
+    await page.locator('[data-djinn-mute]').click();
+    await expect(page.locator('[data-djinn-volume]')).toHaveValue('40');
+});
+
 test('compact conversation scrolls without a scrollbar and aligns its volume endpoint', async ({ page }) => {
     await page.goto('/');
     await page.locator('[data-djinn-keyboard]').click();

@@ -13,6 +13,7 @@ if (control instanceof HTMLElement) {
     const input = control.querySelector('[data-djinn-input]');
     const composerMicrophone = form.querySelector('[data-djinn-compose-microphone]');
     const volume = control.querySelector('[data-djinn-volume]');
+    const mute = control.querySelector('[data-djinn-mute]');
     const challenge = control.querySelector('[data-djinn-challenge]');
     const endpoint = location.hostname === 'twelveo-cc.test'
         ? 'https://djinn-voice.test'
@@ -36,6 +37,7 @@ if (control instanceof HTMLElement) {
     let packets = [];
     let responseRow = null;
     let currentTurnId = null;
+    let generatedTurnId = null;
     let turnReceivedAt = 0;
     let pendingText = false;
     let pendingTimer = null;
@@ -47,6 +49,10 @@ if (control instanceof HTMLElement) {
     const volumeKey = 'djinn:voice-volume';
     let level = 100;
     try { level = Math.max(0, Math.min(100, Number(localStorage.getItem(volumeKey) ?? 100))) || 0; } catch {}
+    let lastVolume = level || 100;
+    if (!level) {
+        try { lastVolume = Math.max(1, Math.min(100, Number(localStorage.getItem(`${volumeKey}:last`) ?? 100))) || 100; } catch {}
+    }
     const translate = (text) => translateValue(text, document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en');
     const send = (message) => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message)); };
     const sayStatus = (text) => { status.textContent = translate(text); };
@@ -58,8 +64,15 @@ if (control instanceof HTMLElement) {
     };
     const openPanel = () => {
         panel.hidden = false;
+        applyVolume();
+        scroller.update(() => {});
         document.documentElement.classList.add('djinn-open');
         positionPanel();
+        renderSpeech();
+        packets.forEach(acknowledge);
+        if (generatedTurnId === currentTurnId && packets.length && packets.every((packet) => packet.ended && heardWords(packet) === packet.words.length)) {
+            send({ type: 'playback_complete', turnId: currentTurnId });
+        }
         microphone.setAttribute('aria-expanded', 'true');
         keyboard.setAttribute('aria-expanded', 'true');
         state(control.dataset.state ?? 'idle');
@@ -95,7 +108,20 @@ if (control instanceof HTMLElement) {
         volume.value = String(level);
         volume.style.setProperty('--djinn-volume-level', `${level}%`);
         volume.setAttribute('aria-valuetext', `${level}%`);
-        if (gain) gain.gain.setTargetAtTime(level / 100, audio.currentTime, 0.012);
+        mute.setAttribute('aria-pressed', String(level === 0));
+        mute.setAttribute('aria-label', translate(level === 0 ? 'Unmute Djinn' : 'Mute Djinn'));
+        mute.querySelector('[data-djinn-volume-waves]').toggleAttribute('hidden', level === 0);
+        mute.querySelector('[data-djinn-volume-cross]').toggleAttribute('hidden', level !== 0);
+        if (gain) gain.gain.setTargetAtTime(panel.hidden ? 0 : level / 100, audio.currentTime, 0.012);
+    }
+    function setVolume(value) {
+        level = value;
+        if (level > 0) lastVolume = level;
+        applyVolume();
+        try {
+            localStorage.setItem(volumeKey, String(level));
+            localStorage.setItem(`${volumeKey}:last`, String(lastVolume));
+        } catch {}
     }
     async function ensureAudio() {
         if (!audio || audio.state === 'closed') {
@@ -136,6 +162,8 @@ if (control instanceof HTMLElement) {
         revealFrame = requestAnimationFrame(tick);
     }
     function acknowledge(packet) {
+        // Hidden playback is muted and not presented. Reopening exposes the text.
+        if (panel.hidden) return;
         const words = heardWords(packet);
         if (words > (packet.acknowledged ?? 0)) {
             send({ type: 'playback_ack', turnId: packet.turnId, sequence: packet.sequence, words });
@@ -237,6 +265,7 @@ if (control instanceof HTMLElement) {
         if (message.type === 'user_turn') {
             stopPlayback();
             currentTurnId = message.turnId;
+            generatedTurnId = null;
             turnReceivedAt = performance.now();
             appendMessage('visitor', message.text);
             responseRow = appendMessage('assistant', '');
@@ -259,6 +288,7 @@ if (control instanceof HTMLElement) {
             activePacket = null;
         }
         if (message.type === 'turn_complete' && message.turnId === currentTurnId) {
+            generatedTurnId = message.turnId;
             afterPlayback(() => {
                 packets.forEach(acknowledge);
                 renderSpeech();
@@ -430,6 +460,18 @@ if (control instanceof HTMLElement) {
         // Merely opening the panel does not create a paid provider session.
         void ensureAudio().catch(() => sayStatus('Audio is unavailable in this browser.'));
     }
+    function hidePanel() {
+        scroller.cancel();
+        stopCapture();
+        mode = 'text'; send({ type: 'mode', mode });
+        // Cancel an unfinished microphone admission, not a submitted text turn.
+        if (connection && !pendingText) connectAbort?.abort();
+        panel.hidden = true;
+        applyVolume();
+        state(control.dataset.state ?? 'ready');
+        document.documentElement.classList.remove('djinn-open');
+        microphone.setAttribute('aria-expanded', 'false'); keyboard.setAttribute('aria-expanded', 'false');
+    }
     function closeSession() {
         scroller.cancel();
         sessionVersion++;
@@ -461,19 +503,18 @@ if (control instanceof HTMLElement) {
             pendingTimer = setTimeout(() => { clearPending(); sayStatus('Please wait a moment, then try again.'); }, 7000);
         } catch { if (version === sessionVersion) clearPending(); }
     });
-    volume.addEventListener('input', () => {
-        level = Number(volume.value); applyVolume();
-        try { localStorage.setItem(volumeKey, String(level)); } catch {}
-    });
+    volume.addEventListener('input', () => setVolume(Number(volume.value)));
+    mute.addEventListener('click', () => setVolume(level === 0 ? lastVolume : 0));
+    document.addEventListener('otsugua:localechange', applyVolume);
     applyVolume();
     microphone.addEventListener('click', () => { void useMicrophone(); });
     keyboard.addEventListener('click', useKeyboard);
     composerMicrophone.addEventListener('click', () => { void useMicrophone(); });
     input.addEventListener('focus', () => { if (mode !== 'text') useKeyboard(); });
     document.addEventListener('pointerdown', (event) => {
-        if (!panel.hidden && event.target instanceof Node && !control.contains(event.target)) closeSession();
+        if (!panel.hidden && event.target instanceof Node && !control.contains(event.target)) hidePanel();
     });
-    panel.addEventListener('keydown', (event) => { if (event.key === 'Escape') { closeSession(); keyboard.focus(); } });
+    panel.addEventListener('keydown', (event) => { if (event.key === 'Escape') { hidePanel(); keyboard.focus(); } });
     window.addEventListener('pagehide', closeSession);
     state('idle');
 }

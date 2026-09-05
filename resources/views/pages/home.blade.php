@@ -93,11 +93,13 @@
                                     <input id="djinn-question" data-djinn-input type="text" maxlength="1200" placeholder="Ask Djinn…" enterkeyhint="send" autocomplete="off" required>
                                     <button type="button" data-djinn-compose-microphone aria-label="Ask Djinn with microphone" aria-pressed="false"><svg class="djinn-microphone" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg></button>
                                 </form>
-                                <label class="djinn-volume">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H2v8h4l5 4V4Zm4 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" /></svg>
+                                <div class="djinn-volume">
+                                    <button class="djinn-mute" type="button" data-djinn-mute aria-label="Mute Djinn" aria-pressed="false">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H2v8h4l5 4V4Z" /><path data-djinn-volume-waves d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" /><path data-djinn-volume-cross d="m16 9 6 6m0-6-6 6" hidden /></svg>
+                                    </button>
                                     <span class="sr-only">Djinn voice volume</span>
                                     <input class="djinn-volume__range" type="range" min="0" max="100" step="5" value="100" data-djinn-volume aria-label="Djinn voice volume" aria-valuetext="100%">
-                                </label>
+                                </div>
                             </section>
                         </div>
                         <a href="#projects" class="nav-link nav-link--projects rounded-full border border-transparent px-4 py-2">Projects</a>
