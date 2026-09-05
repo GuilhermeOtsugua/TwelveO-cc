@@ -506,6 +506,11 @@ test.describe('Homepage interactions', () => {
         })).toBe(true);
 
         await page.locator('[data-djinn-keyboard]').click();
+        await expect(page.locator('[data-djinn-response]')).toBeHidden();
+        expect(await page.evaluate(() => (window as any).__djinnSocket.readyState)).toBe(1);
+        await page.locator('[data-djinn-keyboard]').click();
+        await expect(page.locator('[data-djinn-response]')).toBeVisible();
+        await expect(answer).toHaveText('This is the latest Djinn response.');
         await page.locator('[data-djinn-input]').fill('How would that work for a museum?');
         await page.locator('[data-djinn-input]').press('Enter');
         await expect(page.locator('[data-djinn-message="visitor"]')).toHaveCount(2);

@@ -45,6 +45,19 @@ for (const direction of ['up', 'down'] as const) {
     });
 }
 
+for (const direction of ['up', 'down'] as const) {
+    test(`scrolling ${direction} never reverses to align an already revealed message`, async ({ page }) => {
+        const target = await boundary(page, 7, direction);
+        const sign = direction === 'up' ? -1 : 1;
+        await position(page, target - sign * 60);
+        await page.locator('#log').hover();
+        await page.mouse.wheel(0, sign * 70);
+        await expect.poll(() => scrollTop(page)).toBeCloseTo(target + sign * 10, 0);
+        await page.waitForTimeout(450);
+        expect(await scrollTop(page)).toBeCloseTo(target + sign * 10, 0);
+    });
+}
+
 test('smooth settling completes without repeatedly snapping', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     const target = await boundary(page, 7, 'up');

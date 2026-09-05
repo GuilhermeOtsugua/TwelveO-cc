@@ -508,7 +508,7 @@ if (control instanceof HTMLElement) {
     document.addEventListener('otsugua:localechange', applyVolume);
     applyVolume();
     microphone.addEventListener('click', () => { void useMicrophone(); });
-    keyboard.addEventListener('click', useKeyboard);
+    keyboard.addEventListener('click', () => { if (panel.hidden) useKeyboard(); else hidePanel(); });
     composerMicrophone.addEventListener('click', () => { void useMicrophone(); });
     input.addEventListener('focus', () => { if (mode !== 'text') useKeyboard(); });
     document.addEventListener('pointerdown', (event) => {

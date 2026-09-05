@@ -34,7 +34,10 @@ export function createChatScroller(log) {
         for (const row of log.querySelectorAll('[data-djinn-message="visitor"], [data-djinn-message="assistant"]')) {
             const rect = row.getBoundingClientRect();
             if (!rect.height || rect.height > height || row.classList.contains('djinn-message--active')) continue;
+            // Only finish revealing a message clipped at the leading edge.
+            if (rect.bottom <= top || rect.top >= bottom) continue;
             const offset = direction < 0 ? rect.top - top : rect.bottom - bottom;
+            if (offset * direction <= 0) continue;
             const candidate = Math.max(0, Math.min(maximum(), log.scrollTop + offset));
             const delta = Math.abs(candidate - log.scrollTop);
             if (delta < distance) { target = candidate; distance = delta; }
@@ -49,7 +52,7 @@ export function createChatScroller(log) {
         const from = log.scrollTop;
         const started = performance.now();
         const step = (now) => {
-            const progress = Math.min(1, (now - started) / 380);
+            const progress = Math.min(1, (now - started) / 280);
             const eased = progress * progress * (3 - 2 * progress);
             log.scrollTop = from + (target - from) * eased;
             animation = progress < 1 ? requestAnimationFrame(step) : null;

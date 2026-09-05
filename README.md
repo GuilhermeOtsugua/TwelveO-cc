@@ -71,9 +71,9 @@ Approve local certificate trust if Windows prompts. Start Djinn on port 8080 and
 
 Microphone permission and device acquisition happen before any paid provider connection. The browser tests include native media capture with a synthetic input device, as well as insecure-origin and permission/device failure cases.
 
-The chat grows to its responsive height cap and keeps the composer and volume controls visible. Manual scrolling gently settles near message starts when moving upward and message ends when moving downward, using an interruptible 380ms eased movement. Long or actively growing messages remain freely scrollable. Live replies follow the bottom only while the visitor is not reading history or selecting text; reduced-motion preferences disable animated settling.
+The chat grows to its responsive height cap and keeps the composer and volume controls visible. Manual scrolling gently settles near message starts when moving upward and message ends when moving downward, using an interruptible 280ms eased movement. Settling only continues in the gesture direction to reveal a partially clipped message; it never reverses to align an already visible message. Long or actively growing messages remain freely scrollable. Live replies follow the bottom only while the visitor is not reading history or selecting text; reduced-motion preferences disable animated settling.
 
-Outside tap and Escape hide the panel without ending its conversation. Capture stops and TTS is muted while hidden; reopening restores the chosen volume. The speaker button toggles between zero and the last nonzero volume, and the crossed-out icon also follows manual slider changes. The backend session timeout still applies; navigating away ends the connection.
+Outside tap, Escape, and pressing the keyboard button while the panel is open hide it without ending its conversation. Capture stops and TTS is muted while hidden; reopening restores the chosen volume. The speaker button toggles between zero and the last nonzero volume, and the crossed-out icon also follows manual slider changes. The backend session timeout still applies; navigating away ends the connection.
 
 ## Verification
 

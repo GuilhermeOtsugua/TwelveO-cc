@@ -126,7 +126,7 @@ test('switching to keyboard during permission acquisition releases late micropho
     await page.goto('/');
     await page.locator('[data-djinn-open]').click();
     await expect.poll(async () => page.evaluate(() => typeof (window as any).__finishCapture)).toBe('function');
-    await page.locator('[data-djinn-keyboard]').click();
+    await page.locator('[data-djinn-input]').focus();
     await page.evaluate(() => (window as any).__finishCapture());
     await expect.poll(async () => page.evaluate(() => (window as any).__nativeTracks.every((track: MediaStreamTrack) => track.readyState === 'ended'))).toBe(true);
     await expect(page.locator('[data-djinn-form]')).toBeVisible();
