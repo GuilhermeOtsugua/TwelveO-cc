@@ -360,6 +360,7 @@ test.describe('Homepage interactions', () => {
                 static CONNECTING = 0;
                 readyState = FakeWebSocket.CONNECTING;
                 bufferedAmount = 0;
+                turnCount = 0;
                 binaryType = 'arraybuffer';
                 onmessage: ((event: MessageEvent) => void) | null = null;
                 onclose: (() => void) | null = null;
@@ -389,7 +390,7 @@ test.describe('Homepage interactions', () => {
                     const message = JSON.parse(payload);
                     this.sent.push(message);
                     if (message.type === 'mode') queueMicrotask(() => this.emit({ type: 'listening_ready' }));
-                    if (message.type === 'text') queueMicrotask(() => this.emit({ type: 'user_turn', turnId: 1, mode: 'text', text: message.text }));
+                    if (message.type === 'text') queueMicrotask(() => this.emit({ type: 'user_turn', turnId: ++this.turnCount, mode: 'text', text: message.text }));
                 }
 
                 close() {
@@ -488,5 +489,14 @@ test.describe('Homepage interactions', () => {
             const socket = (window as Window & { __djinnSocket?: { sent: Array<Record<string, unknown>> } }).__djinnSocket;
             return socket?.sent.some((message) => message.type === 'playback_ack' && message.turnId === 1 && message.words === 6);
         })).toBe(true);
+
+        await page.locator('[data-djinn-keyboard]').click();
+        await page.locator('[data-djinn-input]').fill('How would that work for a museum?');
+        await page.getByRole('button', { name: 'Send question', exact: true }).click();
+        await expect(page.locator('[data-djinn-message="visitor"]')).toHaveCount(2);
+        await expect(page.locator('[data-djinn-message="assistant"]').first()).toHaveText('This is the latest Djinn response.');
+        await page.locator('[data-djinn-close]').click();
+        await expect(page.locator('[data-djinn-response]')).toBeHidden();
+        await expect(page.locator('[data-djinn-message]')).toHaveCount(0);
     });
 });

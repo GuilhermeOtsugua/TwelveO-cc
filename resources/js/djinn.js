@@ -31,6 +31,7 @@ if (control instanceof HTMLElement) {
     let packets = [];
     let responseRow = null;
     let currentTurnId = null;
+    let turnReceivedAt = 0;
     let pendingText = false;
     let pendingTimer = null;
     let revealFrame = null;
@@ -60,6 +61,7 @@ if (control instanceof HTMLElement) {
         const row = document.createElement('p');
         row.className = `djinn-message djinn-message--${role}`;
         row.dataset.djinnMessage = role;
+        row.dataset.noLocalize = '';
         row.textContent = text;
         log.append(row);
         while (log.children.length > 48) log.firstElementChild.remove();
@@ -99,7 +101,7 @@ if (control instanceof HTMLElement) {
         return Math.min(count, packet.words.length - 1);
     }
     function renderSpeech() {
-        if (responseRow) {
+        if (responseRow && packets.length) {
             responseRow.textContent = packets.map((packet) => packet.words.slice(0, heardWords(packet)).join(' ')).filter(Boolean).join(' ');
             scrollLog();
         }
@@ -154,6 +156,11 @@ if (control instanceof HTMLElement) {
         source.buffer = decoded;
         source.connect(gain);
         const start = Math.max(audio.currentTime + 0.025, nextAudioAt);
+        if (packet.start === null) {
+            const gapMs = packet.sequence > 0 ? Math.max(0, (start - nextAudioAt) * 1000) : 0;
+            afterPlayback(() => send({ type: 'playback_metric', turnId: packet.turnId, sequence: packet.sequence,
+                requestToAudioMs: Math.round(performance.now() - turnReceivedAt), gapMs: Math.round(gapMs) }), start);
+        }
         packet.start ??= start;
         packet.duration = start + decoded.duration - packet.start;
         nextAudioAt = start + decoded.duration;
@@ -210,6 +217,7 @@ if (control instanceof HTMLElement) {
         if (message.type === 'user_turn') {
             stopPlayback();
             currentTurnId = message.turnId;
+            turnReceivedAt = performance.now();
             appendMessage('visitor', message.text);
             responseRow = appendMessage('assistant', '');
             if (message.mode === 'text') { input.value = ''; clearPending(); }
@@ -240,7 +248,11 @@ if (control instanceof HTMLElement) {
                 sayStatus(mode === 'voice' ? 'Listening...' : 'Type a question for Djinn.');
             });
         }
-        if (message.type === 'playback_stopped') { stopPlayback(); state(mode === 'voice' ? 'listening' : 'ready'); }
+        if (message.type === 'playback_stopped') {
+            stopPlayback();
+            if (message.token != null) send({ type: 'playback_stopped_ack', token: message.token });
+            state(mode === 'voice' ? 'listening' : 'ready');
+        }
         if (message.type === 'input_rejected') { clearPending(); sayStatus('Please wait a moment, then try again.'); }
         if (['audio_unavailable', 'stt_unavailable'].includes(message.type)) {
             stopPlayback(); stopCapture(); clearPending(); state('error'); sayStatus('Djinn needs a moment. Please try again.');
@@ -317,7 +329,7 @@ if (control instanceof HTMLElement) {
                         const message = JSON.parse(event.data);
                         if (message.type === 'ready') { finish(); return; }
                     }
-                    if (version === sessionVersion) receive(event);
+                    if (version === sessionVersion && socket === candidate) receive(event);
                 };
                 candidate.onerror = () => finish(new Error('connection_failed'));
                 candidate.onclose = () => {
@@ -340,6 +352,7 @@ if (control instanceof HTMLElement) {
         return connection;
     }
     async function useMicrophone() {
+        const version = sessionVersion;
         openPanel();
         if (mode === 'voice') {
             mode = 'text'; form.hidden = false; stopCapture(); send({ type: 'mode', mode });
@@ -347,8 +360,15 @@ if (control instanceof HTMLElement) {
             return;
         }
         mode = 'voice'; form.hidden = true;
-        try { await connect(); await startCapture(); }
-        catch { stopCapture(); mode = 'text'; form.hidden = false; sayStatus('Microphone unavailable, or Djinn is offline. You can try typing instead.'); }
+        try {
+            await ensureAudio();
+            await connect();
+            if (version === sessionVersion && mode === 'voice') await startCapture();
+        } catch {
+            if (version !== sessionVersion || mode !== 'voice') return;
+            stopCapture(); mode = 'text'; form.hidden = false;
+            sayStatus('Microphone unavailable, or Djinn is offline. You can try typing instead.');
+        }
     }
     function useKeyboard() {
         mode = 'text'; stopCapture(); send({ type: 'mode', mode });
@@ -376,12 +396,14 @@ if (control instanceof HTMLElement) {
         try {
             await ensureAudio();
             await connect();
-            if (version !== sessionVersion || mode !== 'text') { clearPending(); return; }
+            if (version !== sessionVersion) return;
+            if (mode !== 'text') { clearPending(); return; }
             stopPlayback();
+            currentTurnId = null;
             send({ type: 'mode', mode: 'text' });
             send({ type: 'text', text });
             pendingTimer = setTimeout(() => { clearPending(); sayStatus('Please wait a moment, then try again.'); }, 7000);
-        } catch { clearPending(); }
+        } catch { if (version === sessionVersion) clearPending(); }
     });
     volume.addEventListener('input', () => {
         level = Number(volume.value); applyVolume();

@@ -112,6 +112,7 @@
         [data-home-header] .nav-link--projects { display: none; }
         [data-home-header] .nav-link.nav-link--djinn { padding-inline: 0.45rem; font-size: 0.68rem; gap: 0.35rem; }
         .djinn-keyboard { padding-inline: 0.45rem; }
+        .djinn-form input { font-size: 16px; }
         .djinn-response { position: fixed; top: 4.75rem; left: 1rem; right: 1rem; width: auto; max-height: calc(100dvh - 6rem); }
     }
     @media (prefers-reduced-motion: reduce) {
