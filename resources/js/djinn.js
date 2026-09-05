@@ -18,6 +18,7 @@ if (control instanceof HTMLElement) {
             ? 'http://127.0.0.1:8080' : 'https://voice.otsugua.dev';
     let mode = 'text';
     let socket = null;
+    let hasConnected = false;
     let connection = null;
     let connectAbort = null;
     let sessionVersion = 0;
@@ -49,15 +50,33 @@ if (control instanceof HTMLElement) {
     const sayStatus = (text) => { status.textContent = translate(text); };
     const state = (value) => {
         control.dataset.state = value;
+        status.classList.toggle('djinn-activity', ['connecting', 'thinking', 'listening'].includes(value));
         for (const button of [microphone, composerMicrophone]) button.setAttribute('aria-pressed', String(mode === 'voice' && Boolean(capture)));
         keyboard.setAttribute('aria-pressed', String(mode === 'text' && !panel.hidden));
     };
     const openPanel = () => {
         panel.hidden = false;
+        document.documentElement.classList.add('djinn-open');
+        positionPanel();
         microphone.setAttribute('aria-expanded', 'true');
         keyboard.setAttribute('aria-expanded', 'true');
         state(control.dataset.state ?? 'idle');
     };
+    function positionPanel() {
+        if (panel.hidden) return;
+        const anchor = control.getBoundingClientRect();
+        const mobile = window.matchMedia('(max-width: 639px)').matches;
+        const left = mobile ? 16 - anchor.left : Math.min(0, window.innerWidth - 16 - anchor.left - panel.offsetWidth);
+        panel.style.left = `${left}px`;
+        const button = microphone.getBoundingClientRect();
+        panel.style.setProperty('--djinn-tail-left', `${Math.max(12, Math.min(panel.offsetWidth - 24, button.left + button.width / 2 - anchor.left - left - 6))}px`);
+        const viewport = window.visualViewport;
+        const available = (viewport?.height ?? window.innerHeight) + (viewport?.offsetTop ?? 0) - panel.getBoundingClientRect().top - 16;
+        panel.style.setProperty('--djinn-available-height', `${Math.max(120, available)}px`);
+    }
+    window.addEventListener('resize', positionPanel);
+    window.visualViewport?.addEventListener('resize', positionPanel);
+    new ResizeObserver(positionPanel).observe(control);
     const nearBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 24;
     const scrollLog = (follow) => { if (follow) log.scrollTop = log.scrollHeight; };
     function appendMessage(role, text) {
@@ -74,6 +93,7 @@ if (control instanceof HTMLElement) {
     }
     function applyVolume() {
         volume.value = String(level);
+        volume.style.setProperty('--djinn-volume-level', `${level}%`);
         volume.setAttribute('aria-valuetext', `${level}%`);
         if (gain) gain.gain.setTargetAtTime(level / 100, audio.currentTime, 0.012);
     }
@@ -124,6 +144,7 @@ if (control instanceof HTMLElement) {
     }
     function stopPlayback() {
         renderSpeech();
+        responseRow?.classList.remove('djinn-message--active');
         packets.forEach(acknowledge);
         for (const timer of completionTimers) clearTimeout(timer);
         completionTimers.clear();
@@ -202,7 +223,7 @@ if (control instanceof HTMLElement) {
         };
         captureSource.connect(processor); processor.connect(captureGain); captureGain.connect(audio.destination);
         send({ type: 'mode', mode: 'voice' });
-        state('listening'); sayStatus('Listening. You can interrupt Djinn at any time.');
+        state('listening'); sayStatus('Listening...');
     }
     function clearPending() {
         pendingText = false;
@@ -229,6 +250,7 @@ if (control instanceof HTMLElement) {
                 ? message.speechWeights : words.map((word) => Math.max(3, word.length));
             activePacket = { turnId: message.turnId, sequence: message.sequence, words, weights, sampleRate: message.sampleRate, start: null, duration: 0, ended: false, remainder: new Uint8Array(0) };
             packets.push(activePacket);
+            responseRow?.classList.add('djinn-message--active');
             state('speaking'); sayStatus('Djinn is speaking.');
         }
         if (message.type === 'audio_end' && message.turnId === currentTurnId) {
@@ -242,6 +264,7 @@ if (control instanceof HTMLElement) {
                 renderSpeech();
                 if (revealFrame !== null) cancelAnimationFrame(revealFrame);
                 revealFrame = null;
+                responseRow?.classList.remove('djinn-message--active');
                 send({ type: 'playback_complete', turnId: message.turnId });
                 state(mode === 'voice' ? 'listening' : 'ready');
                 sayStatus(mode === 'voice' ? 'Listening...' : 'Type a question for Djinn.');
@@ -341,6 +364,8 @@ if (control instanceof HTMLElement) {
             });
             signal.throwIfAborted();
             send({ type: 'mode', mode: 'text' });
+            if (hasConnected) appendMessage('notice', translate('New session — earlier messages are display-only.'));
+            hasConnected = true;
             state('ready');
         })().catch((error) => {
             if (version === sessionVersion) {
@@ -412,8 +437,10 @@ if (control instanceof HTMLElement) {
         send({ type: 'end' });
         const old = socket; socket = null; old?.close();
         panel.hidden = true; mode = 'text'; state('idle');
+        document.documentElement.classList.remove('djinn-open');
+        sayStatus('Session ended. Ask Djinn to start again.');
         microphone.setAttribute('aria-expanded', 'false'); keyboard.setAttribute('aria-expanded', 'false');
-        log.replaceChildren(); responseRow = null; currentTurnId = null;
+        responseRow = null; currentTurnId = null;
     }
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -442,7 +469,9 @@ if (control instanceof HTMLElement) {
     keyboard.addEventListener('click', useKeyboard);
     composerMicrophone.addEventListener('click', () => { void useMicrophone(); });
     input.addEventListener('focus', () => { if (mode !== 'text') useKeyboard(); });
-    control.querySelector('[data-djinn-close]').addEventListener('click', () => { closeSession(); keyboard.focus(); });
+    document.addEventListener('pointerdown', (event) => {
+        if (!panel.hidden && event.target instanceof Node && !control.contains(event.target)) closeSession();
+    });
     panel.addEventListener('keydown', (event) => { if (event.key === 'Escape') { closeSession(); keyboard.focus(); } });
     window.addEventListener('pagehide', closeSession);
     state('idle');

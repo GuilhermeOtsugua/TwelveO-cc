@@ -46,7 +46,7 @@
         width: min(27rem, calc(100vw - 2rem));
         display: flex;
         flex-direction: column;
-        max-height: min(19rem, calc(100dvh - 7rem));
+        max-height: min(19rem, var(--djinn-available-height, calc(100dvh - 7rem)));
         border: 1px solid var(--line-strong);
         border-radius: 3px;
         background: var(--djinn-response-bg);
@@ -58,13 +58,24 @@
         animation: djinn-arrive 150ms ease-out;
     }
     html[data-theme-effective='dark'] .djinn-response { --djinn-response-bg: #172127; }
-    .djinn-response__heading {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--line-strong);
-        flex: none;
+    .djinn-response::before {
+        content: ''; position: absolute; top: -7px; left: var(--djinn-tail-left, 2rem);
+        width: 12px; height: 12px; background: var(--djinn-response-bg);
+        border-left: 1px solid var(--line-strong); border-top: 1px solid var(--line-strong);
+        transform: rotate(45deg); pointer-events: none;
     }
-    .djinn-response__heading button {
-        width: 2rem; height: 2rem; font-size: 1.3rem; cursor: pointer;
+    html.djinn-open [data-home-header] { transform: none; z-index: 220; }
+    .djinn-activity::after, .djinn-message--active::after {
+        content: ''; display: inline-block; width: 9px; height: 9px; margin-left: 0.4em;
+        background-image: linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+        background-position: 0 0, 100% 0, 100% 100%, 0 100%; background-repeat: no-repeat;
+        background-size: 4px 4px, 0 0, 4px 4px, 4px 4px;
+        animation: djinn-squares 800ms steps(1, end) infinite;
+    }
+    @keyframes djinn-squares {
+        25% { background-size: 4px 4px, 4px 4px, 0 0, 4px 4px; }
+        50% { background-size: 4px 4px, 4px 4px, 4px 4px, 0 0; }
+        75% { background-size: 0 0, 4px 4px, 4px 4px, 4px 4px; }
     }
     .djinn-log {
         display: flex; flex-direction: column; gap: 0.85rem;
@@ -75,6 +86,7 @@
     .djinn-log:empty { display: none; }
     .djinn-message { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-weight: 400; }
     .djinn-message:empty { display: none; }
+    .djinn-message--notice { color: var(--ink-body); font-size: 0.68rem; border-top: 1px solid var(--line); padding-top: 0.5rem; }
     .djinn-message--assistant { align-self: flex-start; max-width: 95%; }
     .djinn-message--visitor {
         align-self: flex-end;
@@ -109,18 +121,24 @@
     .djinn-volume svg { grid-column: 1; justify-self: center; color: var(--green-900); }
     .djinn-volume__range {
         grid-column: 2; width: 100%; min-width: 0; margin: 0;
-        height: 1.5rem; accent-color: var(--green-900); cursor: pointer;
+        height: 2rem; appearance: none; background: transparent; cursor: pointer;
+        --djinn-track: linear-gradient(to right, var(--green-900) var(--djinn-volume-level, 100%), var(--line-strong) var(--djinn-volume-level, 100%));
     }
+    .djinn-volume__range::-webkit-slider-runnable-track { height: 6px; border: 0; background: var(--djinn-track); }
+    .djinn-volume__range::-moz-range-track { height: 6px; border: 0; background: var(--djinn-track); }
+    .djinn-volume__range::-moz-range-progress { background: transparent; }
+    .djinn-volume__range::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; margin-top: -3px; border: 0; border-radius: 0; background: var(--green-900); box-shadow: none; }
+    .djinn-volume__range::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 0; background: var(--green-900); box-shadow: none; }
     @keyframes djinn-arrive { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
     @media (max-width: 639px) {
         [data-home-header] .nav-link--projects { display: none; }
         [data-home-header] .nav-link.nav-link--djinn { padding-inline: 0.45rem; font-size: 0.68rem; gap: 0.35rem; }
         .djinn-keyboard { padding-inline: 0.45rem; }
         .djinn-form input { font-size: 16px; }
-        .djinn-response { position: fixed; top: 4.75rem; left: 1rem; right: 1rem; width: auto; max-height: min(24rem, calc((100dvh - 6rem) / 2)); }
+        .djinn-response { width: calc(100vw - 2rem); max-height: min(24rem, calc((100dvh - 6rem) / 2), var(--djinn-available-height, 100dvh)); }
     }
     @media (prefers-reduced-motion: reduce) {
-        .djinn-response, .djinn-message--visitor { animation: none; }
+        .djinn-response, .djinn-message--visitor, .djinn-activity::after, .djinn-message--active::after { animation: none; }
         .nav-link.nav-link--djinn, .djinn-keyboard { transition: none; }
     }
 }

@@ -453,6 +453,7 @@ test.describe('Homepage interactions', () => {
         const wordsAheadOfSpeech = (await answer.textContent())?.split(/\s+/).filter(Boolean).length ?? 0;
         expect(wordsAheadOfSpeech).toBeLessThanOrEqual(2);
         await expect(answer).not.toHaveText('This is the latest Djinn response.');
+        await expect(answer).toHaveClass(/djinn-message--active/);
 
         await page.evaluate(() => {
             const browserWindow = window as Window & {
@@ -464,6 +465,7 @@ test.describe('Homepage interactions', () => {
             browserWindow.__djinnSocket?.emit({ type: 'turn_complete', turnId: 1, text: 'This is the latest Djinn response.' });
         });
         await expect(answer).toHaveText('This is the latest Djinn response.');
+        await expect(answer).not.toHaveClass(/djinn-message--active/);
         if (process.env.DJINN_SCREENSHOTS) {
             await page.screenshot({ path: testInfo.outputPath('djinn-chat.png') });
         }
@@ -495,8 +497,10 @@ test.describe('Homepage interactions', () => {
         await page.locator('[data-djinn-input]').press('Enter');
         await expect(page.locator('[data-djinn-message="visitor"]')).toHaveCount(2);
         await expect(page.locator('[data-djinn-message="assistant"]').first()).toHaveText('This is the latest Djinn response.');
-        await page.locator('[data-djinn-close]').click();
+        await page.locator('[data-djinn-input]').press('Escape');
         await expect(page.locator('[data-djinn-response]')).toBeHidden();
-        await expect(page.locator('[data-djinn-message]')).toHaveCount(0);
+        await expect(page.locator('[data-djinn-message="visitor"]')).toHaveCount(2);
+        await page.locator('[data-djinn-keyboard]').click();
+        await expect(page.locator('[data-djinn-message="visitor"]')).toHaveCount(2);
     });
 });

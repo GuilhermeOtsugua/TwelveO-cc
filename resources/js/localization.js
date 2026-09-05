@@ -13,6 +13,7 @@ const ptBR = {
     Projects: 'Projetos',
     Contact: 'Contato',
     'Ask Djinn!': 'Pergunte ao Djinn!',
+    'New session — earlier messages are display-only.': 'Nova sessão — as mensagens anteriores ficam apenas para consulta.',
     'Ask Djinn': 'Pergunte ao Djinn',
     'Djinn voice volume': 'Volume da voz do Djinn',
     'Ask Djinn with microphone': 'Pergunte ao Djinn pelo microfone',

@@ -55,6 +55,7 @@ test('HTTPS exposes native microphone capture and forwards PCM over the voice pr
     await expect.poll(() => binaryFrames).toBeGreaterThan(0);
     expect(captureVerified).toBe(true);
     expect(voiceStarted).toBe(true);
+    await expect(page.locator('[data-djinn-status]')).toHaveClass(/djinn-activity/);
     await expect(page.locator('[data-djinn-form]')).toBeVisible();
     await expect(page.locator('[data-djinn-compose-microphone]')).toHaveAttribute('aria-pressed', 'true');
     await page.locator('[data-djinn-input]').focus();
@@ -62,6 +63,9 @@ test('HTTPS exposes native microphone capture and forwards PCM over the voice pr
     await expect(page.locator('[data-djinn-form]')).toBeVisible();
     await page.locator('[data-djinn-compose-microphone]').click();
     await expect(page.locator('[data-djinn-compose-microphone]')).toHaveAttribute('aria-pressed', 'true');
+    await page.locator('[data-home-header] .nav-brand').dispatchEvent('pointerdown');
+    await expect(page.locator('[data-djinn-response]')).toBeHidden();
+    await expect.poll(async () => page.evaluate(() => (window as any).__nativeTracks.every((track: MediaStreamTrack) => track.readyState === 'ended'))).toBe(true);
 });
 
 for (const [error, expected] of [
@@ -153,6 +157,13 @@ test('compact conversation scrolls without a scrollbar and aligns its volume end
         };
     });
     expect(geometry.height).toBeLessThanOrEqual(geometry.cap + 1);
+    await page.evaluate(() => window.scrollTo(0, 900));
+    await expect.poll(async () => page.locator('[data-home-header]').evaluate((header) => Math.round(header.getBoundingClientRect().top))).toBe(0);
+    const placement = await page.locator('[data-djinn-response]').evaluate((panel) => ({ top: panel.getBoundingClientRect().top, left: panel.getBoundingClientRect().left, right: panel.getBoundingClientRect().right }));
+    expect(placement.top).toBeGreaterThan(30);
+    expect(placement.left).toBeGreaterThanOrEqual(0);
+    expect(placement.right).toBeLessThanOrEqual(page.viewportSize()!.width);
+    await expect(page.locator('[data-djinn-close]')).toHaveCount(0);
     expect(geometry.overflows).toBe(true);
     expect(geometry.scrollbar).toBe('none');
     expect(geometry.endpointDifference).toBeLessThan(2);

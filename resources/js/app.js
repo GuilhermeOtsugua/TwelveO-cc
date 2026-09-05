@@ -173,7 +173,7 @@ function initializeMobileHeaderScroll() {
         const scrollDelta = currentScrollY - lastScrollY;
         const scrollThresholds = getScrollThresholds();
 
-        if (!hasSyncedInitialPosition || !hasUserScrollIntent) {
+        if (document.documentElement.classList.contains('djinn-open') || !hasSyncedInitialPosition || !hasUserScrollIntent) {
             showHeader();
             resetScrollTracking(currentScrollY);
             hasSyncedInitialPosition = true;
