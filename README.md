@@ -71,6 +71,8 @@ Approve local certificate trust if Windows prompts. Start Djinn on port 8080 and
 
 Microphone permission and device acquisition happen before any paid provider connection. The browser tests include native media capture with a synthetic input device, as well as insecure-origin and permission/device failure cases.
 
+The chat grows to its responsive height cap and keeps the composer and volume controls visible. Manual scrolling gently settles near message starts when moving upward and message ends when moving downward. Long or actively growing messages remain freely scrollable. Live replies follow the bottom only while the visitor is not reading history or selecting text; reduced-motion preferences disable animated settling.
+
 ## Verification
 
 ```bash

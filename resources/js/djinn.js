@@ -1,4 +1,5 @@
 import { translateValue } from './localization';
+import { createChatScroller } from './djinn-scroll';
 
 const control = document.querySelector('[data-djinn-control]');
 if (control instanceof HTMLElement) {
@@ -6,6 +7,7 @@ if (control instanceof HTMLElement) {
     const keyboard = control.querySelector('[data-djinn-keyboard]');
     const panel = control.querySelector('[data-djinn-response]');
     const log = control.querySelector('[data-djinn-log]');
+    const scroller = createChatScroller(log);
     const status = control.querySelector('[data-djinn-status]');
     const form = control.querySelector('[data-djinn-form]');
     const input = control.querySelector('[data-djinn-input]');
@@ -77,18 +79,16 @@ if (control instanceof HTMLElement) {
     window.addEventListener('resize', positionPanel);
     window.visualViewport?.addEventListener('resize', positionPanel);
     new ResizeObserver(positionPanel).observe(control);
-    const nearBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 24;
-    const scrollLog = (follow) => { if (follow) log.scrollTop = log.scrollHeight; };
     function appendMessage(role, text) {
-        const follow = nearBottom();
         const row = document.createElement('p');
         row.className = `djinn-message djinn-message--${role}`;
         row.dataset.djinnMessage = role;
         row.dataset.noLocalize = '';
         row.textContent = text;
-        log.append(row);
-        while (log.children.length > 48) log.firstElementChild.remove();
-        scrollLog(follow);
+        scroller.update(() => {
+            log.append(row);
+            while (log.children.length > 48) log.firstElementChild.remove();
+        });
         return row;
     }
     function applyVolume() {
@@ -126,9 +126,9 @@ if (control instanceof HTMLElement) {
     }
     function renderSpeech() {
         if (responseRow && packets.length) {
-            const follow = nearBottom();
-            responseRow.textContent = packets.map((packet) => packet.words.slice(0, heardWords(packet)).join(' ')).filter(Boolean).join(' ');
-            scrollLog(follow);
+            scroller.update(() => {
+                responseRow.textContent = packets.map((packet) => packet.words.slice(0, heardWords(packet)).join(' ')).filter(Boolean).join(' ');
+            });
         }
     }
     function tick() {
@@ -431,6 +431,7 @@ if (control instanceof HTMLElement) {
         void ensureAudio().catch(() => sayStatus('Audio is unavailable in this browser.'));
     }
     function closeSession() {
+        scroller.cancel();
         sessionVersion++;
         cancelChallenge?.(); connectAbort?.abort(); connectAbort = null; connection = null;
         stopPlayback(); stopCapture(); clearPending();

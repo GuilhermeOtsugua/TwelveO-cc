@@ -46,7 +46,7 @@
         width: min(27rem, calc(100vw - 2rem));
         display: flex;
         flex-direction: column;
-        max-height: min(19rem, var(--djinn-available-height, calc(100dvh - 7rem)));
+        max-height: min(22.8rem, var(--djinn-available-height, calc(100dvh - 7rem)));
         border: 1px solid var(--line-strong);
         border-radius: 3px;
         background: var(--djinn-response-bg);
@@ -135,7 +135,7 @@
         [data-home-header] .nav-link.nav-link--djinn { padding-inline: 0.45rem; font-size: 0.68rem; gap: 0.35rem; }
         .djinn-keyboard { padding-inline: 0.45rem; }
         .djinn-form input { font-size: 16px; }
-        .djinn-response { width: calc(100vw - 2rem); max-height: min(24rem, calc((100dvh - 6rem) / 2), var(--djinn-available-height, 100dvh)); }
+        .djinn-response { width: calc(100vw - 2rem); max-height: min(28.8rem, calc((100dvh - 6rem) * 0.6), var(--djinn-available-height, 100dvh)); }
     }
     @media (prefers-reduced-motion: reduce) {
         .djinn-response, .djinn-message--visitor, .djinn-activity::after, .djinn-message--active::after { animation: none; }
