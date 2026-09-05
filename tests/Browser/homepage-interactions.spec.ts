@@ -315,10 +315,10 @@ test.describe('Homepage interactions', () => {
         await page.addInitScript(() => {
             const originalFetch = window.fetch.bind(window);
             window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
-                if (String(input).includes('127.0.0.1:8080/browser/session')) {
+                if (/^(?:http:\/\/127\.0\.0\.1:8080|https:\/\/djinn-voice\.test)\/browser\/session/.test(String(input))) {
                     return Promise.resolve(new Response(JSON.stringify({ ticket: 'test-ticket' }), { status: 200 }));
                 }
-                if (String(input).includes('127.0.0.1:8080/health')) {
+                if (/^(?:http:\/\/127\.0\.0\.1:8080|https:\/\/djinn-voice\.test)\/health/.test(String(input))) {
                     return Promise.resolve(new Response(JSON.stringify({ status: 'ok', demo: true }), {
                         status: 200,
                         headers: { 'Content-Type': 'application/json' },

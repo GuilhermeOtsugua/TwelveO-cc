@@ -77,7 +77,11 @@
                                     </svg>
                                 </button>
                                 <button type="button" class="djinn-keyboard" data-djinn-keyboard aria-label="Ask Djinn with keyboard" aria-pressed="false" aria-expanded="false" aria-controls="djinn-chat">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="1" /><path d="M5 9h1m3 0h1m3 0h1m3 0h1M5 12h1m3 0h1m3 0h1m3 0h1M6 15h12" /></svg>
+                                    <!-- Lucide Keyboard (ISC); license: /licenses/lucide.txt -->
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M10 8h.01M12 12h.01M14 8h.01M16 12h.01M18 8h.01M6 8h.01M7 16h10M8 12h.01" />
+                                        <rect width="20" height="16" x="2" y="4" rx="2" />
+                                    </svg>
                                 </button>
                             </div>
                             <section id="djinn-chat" class="djinn-response" data-djinn-response aria-label="Djinn conversation" hidden>

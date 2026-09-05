@@ -60,11 +60,16 @@ For local frontend development:
 npm run dev
 ```
 
-With Laravel Herd, open:
+For Djinn microphone QA, secure the local site and proxy its companion server:
 
-```text
-http://twelveo-cc.test
+```bash
+herd secure twelveo-cc
+herd proxy djinn-voice http://127.0.0.1:8080 --secure
 ```
+
+Approve local certificate trust if Windows prompts. Start Djinn on port 8080 and open **https://twelveo-cc.test**. The client uses HTTPS/WSS through `djinn-voice.test`; HTTP `.test` pages cannot capture a microphone. Djinn must allow the HTTPS webfolio origin.
+
+Microphone permission and device acquisition happen before any paid provider connection. The browser tests include native media capture with a synthetic input device, as well as insecure-origin and permission/device failure cases.
 
 ## Verification
 
@@ -81,3 +86,5 @@ Copyright (c) 2026 Guilherme Otsugua. All rights reserved.
 This repository is provided for viewing and evaluation only. No license is
 granted to copy, modify, distribute, sublicense, or use this code in another
 project without prior written permission.
+
+The embedded Lucide Keyboard icon is separately licensed under ISC; its notice is included in `public/licenses/lucide.txt` and copied into the static export.

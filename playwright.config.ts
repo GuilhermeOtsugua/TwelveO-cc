@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://twelveo-cc.test';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'https://twelveo-cc.test';
 const isWindows = process.platform === 'win32';
 
 export default defineConfig({

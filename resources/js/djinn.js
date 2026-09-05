@@ -12,8 +12,10 @@ if (control instanceof HTMLElement) {
     const submit = form.querySelector('button');
     const volume = control.querySelector('[data-djinn-volume]');
     const challenge = control.querySelector('[data-djinn-challenge]');
-    const endpoint = ['twelveo-cc.test', '127.0.0.1', 'localhost'].includes(location.hostname)
-        ? 'http://127.0.0.1:8080' : 'https://voice.otsugua.dev';
+    const endpoint = location.hostname === 'twelveo-cc.test'
+        ? 'https://djinn-voice.test'
+        : ['127.0.0.1', 'localhost'].includes(location.hostname)
+            ? 'http://127.0.0.1:8080' : 'https://voice.otsugua.dev';
     let mode = 'text';
     let socket = null;
     let connection = null;
@@ -176,15 +178,9 @@ if (control instanceof HTMLElement) {
         captureGain?.disconnect(); captureGain = null;
         capture?.getTracks().forEach((track) => track.stop()); capture = null;
     }
-    async function startCapture() {
-        if (capture || mode !== 'voice' || panel.hidden) return;
-        const version = ++captureVersion;
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
-        if (version !== captureVersion || mode !== 'voice' || panel.hidden || socket?.readyState !== WebSocket.OPEN) {
-            stream.getTracks().forEach((track) => track.stop()); return;
-        }
-        capture = stream;
-        captureSource = audio.createMediaStreamSource(stream);
+    function startCapture() {
+        if (!capture || mode !== 'voice' || panel.hidden || socket?.readyState !== WebSocket.OPEN) return;
+        captureSource = audio.createMediaStreamSource(capture);
         processor = audio.createScriptProcessor(4096, 1, 1);
         captureGain = audio.createGain(); captureGain.gain.value = 0;
         processor.onaudioprocess = (event) => {
@@ -336,6 +332,7 @@ if (control instanceof HTMLElement) {
                     finish(new Error('closed'));
                     if (socket !== candidate) return;
                     socket = null; stopPlayback(); stopCapture(); clearPending();
+                    mode = 'text'; form.hidden = false;
                     state('idle'); sayStatus('Session ended. Ask Djinn to start again.');
                 };
             });
@@ -345,7 +342,8 @@ if (control instanceof HTMLElement) {
         })().catch((error) => {
             if (version === sessionVersion) {
                 socket?.close(); socket = null;
-                state('error'); sayStatus('Djinn is taking a short pause. Please try again later.');
+                stopCapture(); mode = 'text'; form.hidden = false;
+                state('error'); sayStatus('Djinn is offline or unavailable. Please try again later.');
             }
             throw error;
         }).finally(() => { if (version === sessionVersion) { connection = null; connectAbort = null; } });
@@ -360,14 +358,41 @@ if (control instanceof HTMLElement) {
             return;
         }
         mode = 'voice'; form.hidden = true;
+        const request = ++captureVersion;
+        let stage = 'capture';
         try {
+            if (!window.isSecureContext) throw Object.assign(new Error(), { name: 'InsecureContextError' });
+            if (typeof navigator.mediaDevices?.getUserMedia !== 'function') throw Object.assign(new Error(), { name: 'UnsupportedCaptureError' });
+            sayStatus('Allow microphone access to talk to Djinn.');
+            // Acquire permission and a real input before spending on a provider session.
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+            if (version !== sessionVersion || request !== captureVersion || mode !== 'voice' || panel.hidden) {
+                stream.getTracks().forEach((track) => track.stop()); return;
+            }
+            capture = stream;
+            stage = 'audio';
             await ensureAudio();
+            if (version !== sessionVersion || request !== captureVersion || mode !== 'voice') return;
+            stage = 'connection';
             await connect();
-            if (version === sessionVersion && mode === 'voice') await startCapture();
-        } catch {
-            if (version !== sessionVersion || mode !== 'voice') return;
-            stopCapture(); mode = 'text'; form.hidden = false;
-            sayStatus('Microphone unavailable, or Djinn is offline. You can try typing instead.');
+            stage = 'capture';
+            if (version === sessionVersion && request === captureVersion && mode === 'voice') startCapture();
+        } catch (error) {
+            if (version !== sessionVersion || request !== captureVersion || mode !== 'voice') return;
+            stopCapture(); mode = 'text'; form.hidden = false; state('error');
+            const failures = {
+                InsecureContextError: 'Microphone access requires HTTPS. Open the secure version of this site, or use keyboard mode.',
+                UnsupportedCaptureError: 'This browser does not support microphone capture. Please use keyboard mode.',
+                NotAllowedError: 'Microphone permission is blocked. Allow it in your browser’s site settings, then try again.',
+                NotFoundError: 'No microphone was found. Connect an input device, or use keyboard mode.',
+                NotReadableError: 'The microphone could not be opened. Check your device or other apps using it, then try again.',
+                AbortError: 'Microphone capture was interrupted. Please try again.',
+                OverconstrainedError: 'This microphone does not support the requested audio settings. Try another input device.',
+                SecurityError: 'Microphone capture is disabled by browser policy. Please use keyboard mode.',
+            };
+            sayStatus(stage === 'connection' ? 'Djinn is offline or unavailable. Please try again later.'
+                : stage === 'audio' ? 'Audio is unavailable in this browser.'
+                    : failures[error?.name] ?? 'The microphone could not be started. Please try again or use keyboard mode.');
         }
     }
     function useKeyboard() {

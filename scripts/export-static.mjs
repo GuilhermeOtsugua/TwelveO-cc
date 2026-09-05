@@ -14,6 +14,7 @@ await emptyDir(outputDir);
 await copyPublicAsset('build');
 await copyPublicAsset('flags');
 await copyPublicAsset('files');
+await copyPublicAsset('licenses');
 await copyPublicFile('apple-touch-icon.png');
 await copyPublicFile('favicon.ico');
 await copyPublicFile('favicon-32.png');
