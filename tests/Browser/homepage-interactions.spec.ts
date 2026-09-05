@@ -328,13 +328,22 @@ test.describe('Homepage interactions', () => {
                 state = 'running';
                 currentTime = 0;
                 destination = {};
+                gains: Array<{ connect(): void; gain: { value: number; setTargetAtTime(value: number): void } }> = [];
                 constructor() {
                     (window as Window & { __djinnAudioContext?: FakeAudioContext }).__djinnAudioContext = this;
                 }
                 resume = async () => {};
                 createMediaStreamSource = () => ({ connect() {} });
                 createScriptProcessor = () => ({ connect() {}, disconnect() {}, onaudioprocess: null });
-                createGain = () => ({ connect() {}, gain: { value: 1 } });
+                createGain = () => {
+                    const gain = {
+                        value: 1,
+                        setTargetAtTime(value: number) { this.value = value; },
+                    };
+                    const node = { connect() {}, gain };
+                    this.gains.push(node);
+                    return node;
+                };
                 createBuffer = (_channels: number, length: number, rate: number) => ({
                     duration: length / rate,
                     getChannelData: () => new Float32Array(length),
@@ -395,8 +404,22 @@ test.describe('Homepage interactions', () => {
 
         const trigger = page.locator('[data-djinn-open]');
         const answer = page.locator('[data-djinn-answer]');
+        const volume = page.locator('[data-djinn-volume]');
+        await expect(volume).toHaveValue('100');
+        await volume.evaluate((element) => {
+            const input = element as HTMLInputElement;
+            input.value = '35';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        await expect.poll(async () => page.evaluate(() => window.localStorage.getItem('djinn:voice-volume'))).toBe('35');
         await trigger.click();
         await expect(answer).toHaveText('Listening...');
+        await expect.poll(async () => page.evaluate(() => {
+            const context = (window as Window & {
+                __djinnAudioContext?: { gains: Array<{ gain: { value: number } }> };
+            }).__djinnAudioContext;
+            return context?.gains[0]?.gain.value;
+        })).toBe(0.35);
 
         await page.evaluate(() => {
             const socket = (window as Window & {
@@ -412,6 +435,8 @@ test.describe('Homepage interactions', () => {
             if (context) context.currentTime = 0.35;
         });
         await expect.poll(async () => (await answer.textContent())?.split(/\s+/).filter(Boolean).length ?? 0).toBeGreaterThan(0);
+        const wordsAheadOfSpeech = (await answer.textContent())?.split(/\s+/).filter(Boolean).length ?? 0;
+        expect(wordsAheadOfSpeech).toBeLessThanOrEqual(2);
         await expect(answer).not.toHaveText('This is the latest Djinn response.');
 
         await page.evaluate(() => {

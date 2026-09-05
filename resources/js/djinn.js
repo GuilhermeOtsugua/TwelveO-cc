@@ -8,12 +8,15 @@ if (control instanceof HTMLElement) {
     const response = control.querySelector('[data-djinn-response]');
     const answer = control.querySelector('[data-djinn-answer]');
     const activity = control.querySelector('[data-djinn-activity]');
+    const volume = control.querySelector('[data-djinn-volume]');
+    const volumeVisual = volume?.closest('.djinn-volume');
     const endpoint = ['twelveo-cc.test', '127.0.0.1', 'localhost'].includes(window.location.hostname)
         ? 'http://127.0.0.1:8080'
         : 'https://voice.otsugua.dev';
     let socket = null;
     let stream = null;
     let audioContext = null;
+    let outputGain = null;
     let processor = null;
     let currentState = 'idle';
     let currentAudioSampleRate = 24000;
@@ -23,7 +26,7 @@ if (control instanceof HTMLElement) {
     let revealFrame = null;
     let revealSegments = [];
     let activeRevealSequence = null;
-    let estimatedSpeechUnitsPerSecond = 12;
+    let estimatedSpeechUnitsPerSecond = 9;
     let desiredActive = false;
     let connectingPromise = null;
     let connectionAbort = null;
@@ -39,6 +42,16 @@ if (control instanceof HTMLElement) {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let activityFrame = 0;
     let activityTimer = null;
+    const volumeStorageKey = 'djinn:voice-volume';
+    const revealLagMs = 140;
+    let outputVolume = (() => {
+        try {
+            const stored = Number.parseInt(window.localStorage.getItem(volumeStorageKey) ?? '100', 10);
+            return Number.isFinite(stored) ? Math.max(0, Math.min(100, stored)) : 100;
+        } catch {
+            return 100;
+        }
+    })();
 
     const drawActivity = () => {
         if (!(activity instanceof HTMLCanvasElement)) return;
@@ -79,6 +92,27 @@ if (control instanceof HTMLElement) {
     };
 
     const locale = () => document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en';
+
+    const applyOutputVolume = ({ persist = false } = {}) => {
+        if (volume instanceof HTMLInputElement) {
+            volume.value = String(outputVolume);
+            volume.setAttribute('aria-valuetext', `${outputVolume} percent`);
+        }
+        if (volumeVisual instanceof HTMLElement) {
+            volumeVisual.style.setProperty('--djinn-volume-position', `${100 - outputVolume}%`);
+        }
+        if (outputGain) {
+            const value = outputVolume / 100;
+            if (typeof outputGain.gain.setTargetAtTime === 'function' && audioContext) {
+                outputGain.gain.setTargetAtTime(value, audioContext.currentTime, 0.012);
+            } else {
+                outputGain.gain.value = value;
+            }
+        }
+        if (persist) {
+            try { window.localStorage.setItem(volumeStorageKey, String(outputVolume)); } catch {}
+        }
+    };
 
     const setStatus = (message) => {
         const translated = translateValue(message, locale());
@@ -163,17 +197,20 @@ if (control instanceof HTMLElement) {
 
     const targetRevealedWords = (segment) => {
         if (!audioContext || segment.startsAt === null || audioContext.currentTime < segment.startsAt) return 0;
-        const elapsedMs = Math.max(0, (audioContext.currentTime - segment.startsAt) * 1000);
+        const elapsedMs = Math.max(0, ((audioContext.currentTime - segment.startsAt) * 1000) - revealLagMs);
         const totalWeight = segment.weights.reduce((total, weight) => total + weight, 0);
-        const millisecondsPerUnit = segment.complete && segment.audioDurationMs > 0 && totalWeight > 0
-            ? segment.audioDurationMs / totalWeight
-            : 1000 / estimatedSpeechUnitsPerSecond;
-        let thresholdMs = 0;
+        if (!totalWeight) return 0;
+        const estimatedDurationMs = (totalWeight / estimatedSpeechUnitsPerSecond) * 1000;
+        const projectedDurationMs = segment.complete && segment.audioDurationMs > 0
+            ? segment.audioDurationMs
+            : Math.max(estimatedDurationMs, segment.audioDurationMs);
+        const targetWeight = Math.min(totalWeight, (elapsedMs / Math.max(1, projectedDurationMs)) * totalWeight);
+        let consumedWeight = 0;
         let target = 0;
         for (let index = 0; index < segment.words.length; index += 1) {
-            if (elapsedMs + 45 < thresholdMs) break;
+            if (index > 0 && consumedWeight > targetWeight) break;
             target = index + 1;
-            thresholdMs += segment.weights[index] * millisecondsPerUnit;
+            consumedWeight += segment.weights[index];
         }
         return target;
     };
@@ -199,7 +236,11 @@ if (control instanceof HTMLElement) {
         if (revealFrame === null) revealFrame = window.requestAnimationFrame(revealTick);
     };
 
-    const beginWordRevealWithPlayback = (text, sequence = 0) => {
+    const timingWeights = (words, supplied = []) => supplied.length === words.length && supplied.every((weight) => Number.isFinite(weight) && weight > 0)
+        ? supplied
+        : words.map(speechWeight);
+
+    const beginWordRevealWithPlayback = (text, sequence = 0, suppliedWeights = []) => {
         clearTimeout(responseTimer);
         responseTimer = null;
         if (sequence === 0) stopWordReveal();
@@ -208,7 +249,7 @@ if (control instanceof HTMLElement) {
         const segment = {
             sequence,
             words,
-            weights: words.map(speechWeight),
+            weights: timingWeights(words, suppliedWeights),
             revealed: 0,
             startsAt: null,
             audioDurationMs: 0,
@@ -219,12 +260,12 @@ if (control instanceof HTMLElement) {
         scheduleWordReveal();
     };
 
-    const appendWordReveal = (text) => {
+    const appendWordReveal = (text, suppliedWeights = []) => {
         const words = String(text ?? '').trim().split(/\s+/).filter(Boolean);
         const segment = revealSegments.at(-1);
         if (!segment || !words.length) return;
         segment.words.push(...words);
-        segment.weights.push(...words.map(speechWeight));
+        segment.weights.push(...timingWeights(words, suppliedWeights));
         scheduleWordReveal();
     };
 
@@ -235,8 +276,8 @@ if (control instanceof HTMLElement) {
         const totalWeight = segment.weights.reduce((total, weight) => total + weight, 0);
         if (segment.audioDurationMs > 0 && totalWeight > 0) {
             const observedRate = totalWeight / (segment.audioDurationMs / 1000);
-            if (observedRate >= 6 && observedRate <= 24) {
-                estimatedSpeechUnitsPerSecond = (estimatedSpeechUnitsPerSecond * 0.7) + (observedRate * 0.3);
+            if (observedRate >= 6 && observedRate <= 18) {
+                estimatedSpeechUnitsPerSecond = (estimatedSpeechUnitsPerSecond * 0.6) + (observedRate * 0.4);
             }
         }
         scheduleWordReveal();
@@ -256,7 +297,15 @@ if (control instanceof HTMLElement) {
     };
 
     const ensureAudioContext = async () => {
-        if (!audioContext || audioContext.state === 'closed') audioContext = new AudioContext();
+        if (!audioContext || audioContext.state === 'closed') {
+            audioContext = new AudioContext();
+            outputGain = null;
+        }
+        if (!outputGain) {
+            outputGain = audioContext.createGain();
+            outputGain.connect(audioContext.destination);
+            applyOutputVolume();
+        }
         if (audioContext.state === 'suspended') await audioContext.resume();
         return audioContext;
     };
@@ -314,7 +363,7 @@ if (control instanceof HTMLElement) {
 
         const source = context.createBufferSource();
         source.buffer = audioBuffer;
-        source.connect(context.destination);
+        source.connect(outputGain ?? context.destination);
         const startsAt = Math.max(context.currentTime + 0.025, nextPlaybackTime);
         const durationMs = audioBuffer.duration * 1000;
         const revealSegment = revealSegments.find((segment) => segment.sequence === activeRevealSequence);
@@ -458,10 +507,10 @@ if (control instanceof HTMLElement) {
         }
         if (message.type === 'audio_start') {
             currentAudioSampleRate = message.sampleRate ?? 24000;
-            beginWordRevealWithPlayback(message.text, message.sequence);
+            beginWordRevealWithPlayback(message.text, message.sequence, message.speechWeights);
             setState('speaking', 'Djinn is speaking.');
         }
-        if (message.type === 'answer_append') appendWordReveal(message.text);
+        if (message.type === 'answer_append') appendWordReveal(message.text, message.speechWeights);
         if (message.type === 'audio_end') {
             completeWordRevealSegment(message.sequence);
             activeRevealSequence = null;
@@ -616,6 +665,14 @@ if (control instanceof HTMLElement) {
         socket = null;
         setState('idle', 'Ask Djinn');
     };
+
+    if (volume instanceof HTMLInputElement) {
+        volume.addEventListener('input', () => {
+            outputVolume = Math.max(0, Math.min(100, Number.parseInt(volume.value, 10) || 0));
+            applyOutputVolume({ persist: true });
+        });
+    }
+    applyOutputVolume();
 
     reducedMotion.addEventListener?.('change', startActivity);
     new MutationObserver(drawActivity).observe(document.documentElement, {

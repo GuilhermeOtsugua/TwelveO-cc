@@ -1,6 +1,86 @@
 @layer components {
     .djinn-control {
+        --djinn-volume-gap: 0.52rem;
+        --djinn-volume-width: 0.72rem;
+
         position: relative;
+    }
+
+    .djinn-control__actions {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--djinn-volume-gap);
+    }
+
+    .djinn-volume {
+        --djinn-volume-position: 0%;
+
+        position: relative;
+        display: block;
+        width: var(--djinn-volume-width);
+        height: 2.375rem;
+        flex: none;
+    }
+
+    .djinn-volume::before,
+    .djinn-volume::after {
+        position: absolute;
+        left: 50%;
+        z-index: 0;
+        display: block;
+        pointer-events: none;
+        content: '';
+    }
+
+    .djinn-volume::before {
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background: #aeb3b0;
+        transform: translateX(-50%) scaleX(1.1);
+    }
+
+    .djinn-volume::after {
+        top: var(--djinn-volume-position);
+        width: 10px;
+        height: 2px;
+        background: var(--green-900);
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .djinn-volume > span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .djinn-volume__range {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 1;
+        width: 2.375rem;
+        height: var(--djinn-volume-width);
+        margin: 0;
+        padding: 0;
+        opacity: 0;
+        cursor: pointer;
+        transform: translate(-50%, -50%) rotate(-90deg);
+        transform-origin: center;
+    }
+
+    .djinn-volume:has(.djinn-volume__range:focus-visible) {
+        outline: 1px solid color-mix(in srgb, var(--green-900) 62%, transparent);
+        outline-offset: 0.2rem;
+    }
+
+    .djinn-volume__range:focus-visible {
+        outline: none;
     }
 
     .nav-link--djinn {
@@ -50,7 +130,7 @@
         position: absolute;
         top: calc(100% + 0.9rem);
         right: auto;
-        left: 0;
+        left: calc(var(--djinn-volume-width) + var(--djinn-volume-gap));
         z-index: 210;
         width: min(25rem, calc(100vw - 2rem));
         padding: 0.9rem 1rem;
@@ -136,6 +216,19 @@
             width: 0.8rem;
             height: 0.8rem;
             margin-right: -0.18rem;
+        }
+
+        .djinn-control {
+            --djinn-volume-gap: 0.38rem;
+            --djinn-volume-width: 0.62rem;
+        }
+
+        .djinn-volume {
+            height: 1.9rem;
+        }
+
+        .djinn-volume__range {
+            width: 1.9rem;
         }
 
         .djinn-response {

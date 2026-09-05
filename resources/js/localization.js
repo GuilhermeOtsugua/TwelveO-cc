@@ -14,6 +14,7 @@ const ptBR = {
     Contact: 'Contato',
     'Ask Djinn!': 'Pergunte ao Djinn!',
     'Ask Djinn': 'Pergunte ao Djinn',
+    'Djinn voice volume': 'Volume da voz do Djinn',
     'Stop Djinn conversation': 'Encerrar conversa com Djinn',
     'Pause Djinn microphone': 'Pausar microfone do Djinn',
     'A grounded voice experiment': 'Um experimento de voz com contexto',

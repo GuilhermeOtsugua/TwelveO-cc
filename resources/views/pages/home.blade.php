@@ -67,17 +67,23 @@
 
                     <nav class="flex items-center gap-2 text-sm font-medium text-[color:var(--green-900)]">
                         <div class="djinn-control" data-djinn-control>
-                            <button type="button" class="nav-link nav-link--djinn rounded-full border border-[color:var(--line-strong)] px-4 py-2" data-djinn-open aria-pressed="false" aria-label="Ask Djinn">
-                                <span class="nav-link__label--full">Ask Djinn!</span>
-                                <span class="nav-link__label--compact">Djinn</span>
-                                <svg class="djinn-microphone" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
-                                    <path d="M5.5 11.5v.5a6.5 6.5 0 0 0 13 0v-.5M12 18.5V22M9 22h6" />
-                                </svg>
-                            </button>
-                            <div class="djinn-response" data-djinn-response data-kind="notice" role="status">
+                            <div class="djinn-control__actions">
+                                <label class="djinn-volume">
+                                    <span class="sr-only">Djinn voice volume</span>
+                                    <input class="djinn-volume__range" type="range" min="0" max="100" step="5" value="100" orient="vertical" data-djinn-volume aria-label="Djinn voice volume" aria-valuetext="100 percent">
+                                </label>
+                                <button type="button" class="nav-link nav-link--djinn rounded-full border border-[color:var(--line-strong)] px-4 py-2" data-djinn-open aria-pressed="false" aria-label="Ask Djinn">
+                                    <span class="nav-link__label--full">Ask Djinn!</span>
+                                    <span class="nav-link__label--compact">Djinn</span>
+                                    <svg class="djinn-microphone" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+                                        <path d="M5.5 11.5v.5a6.5 6.5 0 0 0 13 0v-.5M12 18.5V22M9 22h6" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="djinn-response" data-djinn-response data-kind="notice" role="status" hidden>
                                 <span class="djinn-response__line">
-                                    <strong data-djinn-answer>This message shall be removed later...</strong>
+                                    <strong data-djinn-answer></strong>
                                     <canvas class="djinn-activity" data-djinn-activity aria-hidden="true"></canvas>
                                 </span>
                             </div>

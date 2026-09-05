@@ -874,6 +874,7 @@
         border: 1px solid transparent;
         padding: 0 0.6rem;
         color: var(--ink-body);
+        cursor: pointer;
         font-size: 0.62rem;
         font-weight: 600;
         letter-spacing: 0.01em;
