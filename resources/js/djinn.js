@@ -1,694 +1,397 @@
 import { translateValue } from './localization';
 
 const control = document.querySelector('[data-djinn-control]');
-
 if (control instanceof HTMLElement) {
-    const trigger = control.querySelector('[data-djinn-open]');
+    const microphone = control.querySelector('[data-djinn-open]');
+    const keyboard = control.querySelector('[data-djinn-keyboard]');
+    const panel = control.querySelector('[data-djinn-response]');
+    const log = control.querySelector('[data-djinn-log]');
     const status = control.querySelector('[data-djinn-status]');
-    const response = control.querySelector('[data-djinn-response]');
-    const answer = control.querySelector('[data-djinn-answer]');
-    const activity = control.querySelector('[data-djinn-activity]');
+    const form = control.querySelector('[data-djinn-form]');
+    const input = control.querySelector('[data-djinn-input]');
+    const submit = form.querySelector('button');
     const volume = control.querySelector('[data-djinn-volume]');
-    const volumeVisual = volume?.closest('.djinn-volume');
-    const endpoint = ['twelveo-cc.test', '127.0.0.1', 'localhost'].includes(window.location.hostname)
-        ? 'http://127.0.0.1:8080'
-        : 'https://voice.otsugua.dev';
+    const challenge = control.querySelector('[data-djinn-challenge]');
+    const endpoint = ['twelveo-cc.test', '127.0.0.1', 'localhost'].includes(location.hostname)
+        ? 'http://127.0.0.1:8080' : 'https://voice.otsugua.dev';
+    let mode = 'text';
     let socket = null;
-    let stream = null;
-    let audioContext = null;
-    let outputGain = null;
+    let connection = null;
+    let connectAbort = null;
+    let sessionVersion = 0;
+    let audio = null;
+    let gain = null;
+    let capture = null;
     let processor = null;
-    let currentState = 'idle';
-    let currentAudioSampleRate = 24000;
-    let pcmRemainder = new Uint8Array(0);
-    let nextPlaybackTime = 0;
-    let responseTimer = null;
+    let captureSource = null;
+    let captureGain = null;
+    let captureVersion = 0;
+    let nextAudioAt = 0;
+    let activePacket = null;
+    let packets = [];
+    let responseRow = null;
+    let currentTurnId = null;
+    let pendingText = false;
+    let pendingTimer = null;
     let revealFrame = null;
-    let revealSegments = [];
-    let activeRevealSequence = null;
-    let estimatedSpeechUnitsPerSecond = 9;
-    let desiredActive = false;
-    let connectingPromise = null;
-    let connectionAbort = null;
-    let retryTimer = null;
-    let retryStartedAt = 0;
-    let retryAttempt = 0;
-    let closing = false;
-    let lastVisibleResponse = '';
-    let sessionAudioScheduledMs = 0;
-    let lastPlaybackOffsetMs = 0;
-    let playbackRanges = [];
-    const activeSources = new Set();
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let activityFrame = 0;
-    let activityTimer = null;
-    const volumeStorageKey = 'djinn:voice-volume';
-    const revealLagMs = 140;
-    let outputVolume = (() => {
-        try {
-            const stored = Number.parseInt(window.localStorage.getItem(volumeStorageKey) ?? '100', 10);
-            return Number.isFinite(stored) ? Math.max(0, Math.min(100, stored)) : 100;
-        } catch {
-            return 100;
-        }
-    })();
-
-    const drawActivity = () => {
-        if (!(activity instanceof HTMLCanvasElement)) return;
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
-        const cell = Math.max(1, Math.round(4 * dpr));
-        const gap = Math.max(1, Math.round(dpr));
-        const size = (cell * 2) + gap;
-        if (activity.width !== size || activity.height !== size) {
-            activity.width = size;
-            activity.height = size;
-            activity.style.width = `${size / dpr}px`;
-            activity.style.height = `${size / dpr}px`;
-        }
-
-        const context = activity.getContext('2d');
-        if (!context) return;
-        context.clearRect(0, 0, size, size);
-        context.fillStyle = getComputedStyle(activity).color;
-        const positions = [[0, 0], [cell + gap, 0], [0, cell + gap], [cell + gap, cell + gap]];
-        const missingByFrame = [1, 3, 2, 0];
-        const missing = missingByFrame[reducedMotion.matches ? 0 : activityFrame];
-        positions.forEach(([x, y], index) => {
-            if (index !== missing) context.fillRect(x, y, cell, cell);
-        });
+    let widget = null;
+    let cancelChallenge = null;
+    const sources = new Set();
+    const completionTimers = new Set();
+    const volumeKey = 'djinn:voice-volume';
+    let level = 100;
+    try { level = Math.max(0, Math.min(100, Number(localStorage.getItem(volumeKey) ?? 100))) || 0; } catch {}
+    const translate = (text) => translateValue(text, document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en');
+    const send = (message) => { if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message)); };
+    const sayStatus = (text) => { status.textContent = translate(text); };
+    const state = (value) => {
+        control.dataset.state = value;
+        microphone.setAttribute('aria-pressed', String(mode === 'voice' && Boolean(capture)));
+        keyboard.setAttribute('aria-pressed', String(mode === 'text' && !panel.hidden));
     };
-
-    const startActivity = () => {
-        clearInterval(activityTimer);
-        activityTimer = null;
-        activityFrame = 0;
-        drawActivity();
-        if (!reducedMotion.matches) {
-            activityTimer = window.setInterval(() => {
-                activityFrame = (activityFrame + 1) % 4;
-                drawActivity();
-            }, 200);
-        }
+    const openPanel = () => {
+        panel.hidden = false;
+        microphone.setAttribute('aria-expanded', 'true');
+        keyboard.setAttribute('aria-expanded', 'true');
+        state(control.dataset.state ?? 'idle');
     };
-
-    const locale = () => document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en';
-
-    const applyOutputVolume = ({ persist = false } = {}) => {
-        if (volume instanceof HTMLInputElement) {
-            volume.value = String(outputVolume);
-            volume.setAttribute('aria-valuetext', `${outputVolume} percent`);
+    const scrollLog = () => { log.scrollTop = log.scrollHeight; };
+    function appendMessage(role, text) {
+        const row = document.createElement('p');
+        row.className = `djinn-message djinn-message--${role}`;
+        row.dataset.djinnMessage = role;
+        row.textContent = text;
+        log.append(row);
+        while (log.children.length > 48) log.firstElementChild.remove();
+        scrollLog();
+        return row;
+    }
+    function applyVolume() {
+        volume.value = String(level);
+        volume.setAttribute('aria-valuetext', `${level}%`);
+        if (gain) gain.gain.setTargetAtTime(level / 100, audio.currentTime, 0.012);
+    }
+    async function ensureAudio() {
+        if (!audio || audio.state === 'closed') {
+            audio = new AudioContext();
+            gain = audio.createGain();
+            gain.connect(audio.destination);
+            applyVolume();
         }
-        if (volumeVisual instanceof HTMLElement) {
-            volumeVisual.style.setProperty('--djinn-volume-position', `${100 - outputVolume}%`);
+        if (audio.state === 'suspended') await audio.resume();
+    }
+    function heardWords(packet) {
+        if (!audio || packet.start == null || audio.currentTime <= packet.start) return 0;
+        const elapsed = audio.currentTime - packet.start;
+        if (packet.ended && elapsed >= packet.duration) return packet.words.length;
+        const total = packet.weights.reduce((sum, weight) => sum + weight, 0);
+        const duration = packet.ended ? packet.duration : Math.max(packet.duration, total / 12);
+        const progress = total * Math.min(1, elapsed / Math.max(0.001, duration));
+        let consumed = 0;
+        let count = 0;
+        for (const weight of packet.weights) {
+            consumed += weight;
+            if (consumed > progress) break;
+            count++;
         }
-        if (outputGain) {
-            const value = outputVolume / 100;
-            if (typeof outputGain.gain.setTargetAtTime === 'function' && audioContext) {
-                outputGain.gain.setTargetAtTime(value, audioContext.currentTime, 0.012);
-            } else {
-                outputGain.gain.value = value;
-            }
+        // Partial playback uses estimated alignment. Only a completed packet
+        // carries evidence confirmation back to the conversation engine.
+        return Math.min(count, packet.words.length - 1);
+    }
+    function renderSpeech() {
+        if (responseRow) {
+            responseRow.textContent = packets.map((packet) => packet.words.slice(0, heardWords(packet)).join(' ')).filter(Boolean).join(' ');
+            scrollLog();
         }
-        if (persist) {
-            try { window.localStorage.setItem(volumeStorageKey, String(outputVolume)); } catch {}
+    }
+    function tick() {
+        renderSpeech();
+        revealFrame = requestAnimationFrame(tick);
+    }
+    function acknowledge(packet) {
+        const words = heardWords(packet);
+        if (words > (packet.acknowledged ?? 0)) {
+            send({ type: 'playback_ack', turnId: packet.turnId, sequence: packet.sequence, words });
+            packet.acknowledged = words;
         }
-    };
-
-    const setStatus = (message) => {
-        const translated = translateValue(message, locale());
-        if (status instanceof HTMLElement) status.textContent = translated;
-        if (trigger instanceof HTMLButtonElement) trigger.title = translated;
-    };
-
-    const setState = (state, message) => {
-        currentState = state;
-        control.dataset.state = state;
-        if (trigger instanceof HTMLButtonElement) {
-            trigger.setAttribute('aria-pressed', String(['listening', 'speaking'].includes(state)));
-            trigger.setAttribute('aria-label', translateValue(
-                ['listening', 'speaking'].includes(state) ? 'Pause Djinn microphone' : 'Ask Djinn',
-                locale(),
-            ));
-        }
-        if (message) setStatus(message);
-    };
-
-    const stopWordReveal = (reset = true) => {
-        if (revealFrame !== null) window.cancelAnimationFrame(revealFrame);
+    }
+    function stopPlayback() {
+        renderSpeech();
+        packets.forEach(acknowledge);
+        for (const timer of completionTimers) clearTimeout(timer);
+        completionTimers.clear();
+        sources.forEach((source) => { try { source.stop(); } catch {} });
+        sources.clear();
+        if (revealFrame !== null) cancelAnimationFrame(revealFrame);
         revealFrame = null;
-        activeRevealSequence = null;
-        if (reset) revealSegments = [];
-    };
-
-    const hideResponse = () => {
-        clearTimeout(responseTimer);
-        responseTimer = null;
-        stopWordReveal();
-        if (response instanceof HTMLElement) response.hidden = true;
-    };
-
-    const showResponse = (message, kind = 'notice', translate = true) => {
-        clearTimeout(responseTimer);
-        responseTimer = null;
-        stopWordReveal();
-        const text = translate ? translateValue(message, locale()) : message;
-        if (answer instanceof HTMLElement) answer.textContent = text;
-        if (response instanceof HTMLElement) {
-            response.dataset.kind = kind;
-            response.setAttribute('role', kind === 'error' ? 'alert' : 'status');
-            response.hidden = false;
+        packets = [];
+        activePacket = null;
+        nextAudioAt = audio?.currentTime ?? 0;
+    }
+    function afterPlayback(callback, target = nextAudioAt) {
+        const timer = setTimeout(() => {
+            completionTimers.delete(timer);
+            if (audio && audio.currentTime < target) { afterPlayback(callback, target); return; }
+            callback();
+        }, Math.max(100, (target - (audio?.currentTime ?? 0)) * 1000) + 20);
+        completionTimers.add(timer);
+    }
+    function queueAudio(buffer) {
+        if (!audio || !activePacket) return;
+        const packet = activePacket;
+        const incoming = new Uint8Array(buffer);
+        const bytes = new Uint8Array(packet.remainder.length + incoming.length);
+        bytes.set(packet.remainder);
+        bytes.set(incoming, packet.remainder.length);
+        const usable = bytes.length - bytes.length % 2;
+        packet.remainder = bytes.slice(usable);
+        if (!usable) return;
+        const pcm = new DataView(bytes.buffer, 0, usable);
+        const decoded = audio.createBuffer(1, usable / 2, packet.sampleRate);
+        const channel = decoded.getChannelData(0);
+        for (let i = 0; i < channel.length; i++) channel[i] = pcm.getInt16(i * 2, true) / 32768;
+        const source = audio.createBufferSource();
+        source.buffer = decoded;
+        source.connect(gain);
+        const start = Math.max(audio.currentTime + 0.025, nextAudioAt);
+        packet.start ??= start;
+        packet.duration = start + decoded.duration - packet.start;
+        nextAudioAt = start + decoded.duration;
+        sources.add(source);
+        source.onended = () => sources.delete(source);
+        source.start(start);
+        if (revealFrame === null) tick();
+    }
+    function stopCapture() {
+        captureVersion++;
+        processor?.disconnect(); processor = null;
+        captureSource?.disconnect(); captureSource = null;
+        captureGain?.disconnect(); captureGain = null;
+        capture?.getTracks().forEach((track) => track.stop()); capture = null;
+    }
+    async function startCapture() {
+        if (capture || mode !== 'voice' || panel.hidden) return;
+        const version = ++captureVersion;
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+        if (version !== captureVersion || mode !== 'voice' || panel.hidden || socket?.readyState !== WebSocket.OPEN) {
+            stream.getTracks().forEach((track) => track.stop()); return;
         }
-        drawActivity();
-    };
-
-    const showListeningIndicator = () => {
-        if (lastVisibleResponse) showResponse(lastVisibleResponse, 'response', false);
-        else showResponse('Listening...', 'activity');
-    };
-
-    const showLoading = () => {
-        showResponse('Djinn loading...', 'loading');
-    };
-
-    const speechWeight = (word) => {
-        const spokenCharacters = word.match(/[\p{L}\p{N}]/gu)?.length ?? 0;
-        let weight = Math.max(2.5, spokenCharacters);
-        if (/[,]["')\]]*$/.test(word)) weight += 2;
-        if (/[;:]["')\]]*$/.test(word)) weight += 3;
-        if (/[.!?]["')\]]*$/.test(word)) weight += 4;
-        return weight;
-    };
-
-    const progressiveText = () => revealSegments
-        .flatMap((segment) => segment.words.slice(0, segment.revealed))
-        .join(' ');
-
-    const renderProgressiveResponse = () => {
-        const text = progressiveText();
-        if (text) lastVisibleResponse = text;
-        if (answer instanceof HTMLElement) answer.textContent = text;
-        if (response instanceof HTMLElement) {
-            response.dataset.kind = 'response';
-            response.setAttribute('role', 'presentation');
-            response.hidden = false;
-        }
-        drawActivity();
-    };
-
-    const targetRevealedWords = (segment) => {
-        if (!audioContext || segment.startsAt === null || audioContext.currentTime < segment.startsAt) return 0;
-        const elapsedMs = Math.max(0, ((audioContext.currentTime - segment.startsAt) * 1000) - revealLagMs);
-        const totalWeight = segment.weights.reduce((total, weight) => total + weight, 0);
-        if (!totalWeight) return 0;
-        const estimatedDurationMs = (totalWeight / estimatedSpeechUnitsPerSecond) * 1000;
-        const projectedDurationMs = segment.complete && segment.audioDurationMs > 0
-            ? segment.audioDurationMs
-            : Math.max(estimatedDurationMs, segment.audioDurationMs);
-        const targetWeight = Math.min(totalWeight, (elapsedMs / Math.max(1, projectedDurationMs)) * totalWeight);
-        let consumedWeight = 0;
-        let target = 0;
-        for (let index = 0; index < segment.words.length; index += 1) {
-            if (index > 0 && consumedWeight > targetWeight) break;
-            target = index + 1;
-            consumedWeight += segment.weights[index];
-        }
-        return target;
-    };
-
-    const revealTick = () => {
-        revealFrame = null;
-        let changed = false;
-        let pending = false;
-        for (const segment of revealSegments) {
-            const target = Math.max(segment.revealed, targetRevealedWords(segment));
-            if (target !== segment.revealed) {
-                segment.revealed = target;
-                changed = true;
-            }
-            if (segment.revealed < segment.words.length || !segment.complete) pending = true;
-            if (segment.revealed < segment.words.length) break;
-        }
-        if (changed) renderProgressiveResponse();
-        if (pending) revealFrame = window.requestAnimationFrame(revealTick);
-    };
-
-    const scheduleWordReveal = () => {
-        if (revealFrame === null) revealFrame = window.requestAnimationFrame(revealTick);
-    };
-
-    const timingWeights = (words, supplied = []) => supplied.length === words.length && supplied.every((weight) => Number.isFinite(weight) && weight > 0)
-        ? supplied
-        : words.map(speechWeight);
-
-    const beginWordRevealWithPlayback = (text, sequence = 0, suppliedWeights = []) => {
-        clearTimeout(responseTimer);
-        responseTimer = null;
-        if (sequence === 0) stopWordReveal();
-        const words = String(text ?? '').trim().split(/\s+/).filter(Boolean);
-        if (!words.length) return;
-        const segment = {
-            sequence,
-            words,
-            weights: timingWeights(words, suppliedWeights),
-            revealed: 0,
-            startsAt: null,
-            audioDurationMs: 0,
-            complete: false,
-        };
-        revealSegments.push(segment);
-        activeRevealSequence = sequence;
-        scheduleWordReveal();
-    };
-
-    const appendWordReveal = (text, suppliedWeights = []) => {
-        const words = String(text ?? '').trim().split(/\s+/).filter(Boolean);
-        const segment = revealSegments.at(-1);
-        if (!segment || !words.length) return;
-        segment.words.push(...words);
-        segment.weights.push(...timingWeights(words, suppliedWeights));
-        scheduleWordReveal();
-    };
-
-    const completeWordRevealSegment = (sequence) => {
-        const segment = revealSegments.find((candidate) => candidate.sequence === sequence);
-        if (!segment) return;
-        segment.complete = true;
-        const totalWeight = segment.weights.reduce((total, weight) => total + weight, 0);
-        if (segment.audioDurationMs > 0 && totalWeight > 0) {
-            const observedRate = totalWeight / (segment.audioDurationMs / 1000);
-            if (observedRate >= 6 && observedRate <= 18) {
-                estimatedSpeechUnitsPerSecond = (estimatedSpeechUnitsPerSecond * 0.6) + (observedRate * 0.4);
-            }
-        }
-        scheduleWordReveal();
-    };
-
-    const showResponseAfterPlayback = (text) => {
-        clearTimeout(responseTimer);
-        const remainingMs = audioContext
-            ? Math.max(0, (nextPlaybackTime - audioContext.currentTime) * 1000)
-            : 0;
-        responseTimer = window.setTimeout(() => {
-            lastVisibleResponse = String(text ?? '').trim();
-            showResponse(text, 'response', false);
-            setState('listening', 'Listening. You can interrupt Djinn at any time.');
-            setStatus(`Djinn answered: ${text}`);
-        }, remainingMs + 40);
-    };
-
-    const ensureAudioContext = async () => {
-        if (!audioContext || audioContext.state === 'closed') {
-            audioContext = new AudioContext();
-            outputGain = null;
-        }
-        if (!outputGain) {
-            outputGain = audioContext.createGain();
-            outputGain.connect(audioContext.destination);
-            applyOutputVolume();
-        }
-        if (audioContext.state === 'suspended') await audioContext.resume();
-        return audioContext;
-    };
-
-    const currentPlaybackOffsetMs = () => {
-        const now = audioContext?.currentTime ?? 0;
-        let offset = lastPlaybackOffsetMs;
-        playbackRanges.forEach((range) => {
-            if (now <= range.startsAt) return;
-            const playedMs = Math.min(range.durationMs, (now - range.startsAt) * 1000);
-            offset = Math.max(offset, range.sessionStartMs + playedMs);
-        });
-        lastPlaybackOffsetMs = Math.round(offset);
-        return lastPlaybackOffsetMs;
-    };
-
-    const stopAudio = () => {
-        const playbackOffsetMs = currentPlaybackOffsetMs();
-        activeSources.forEach((source) => {
-            try { source.stop(); } catch {}
-        });
-        activeSources.clear();
-        playbackRanges = [];
-        sessionAudioScheduledMs = playbackOffsetMs;
-        pcmRemainder = new Uint8Array(0);
-        nextPlaybackTime = audioContext?.currentTime ?? 0;
-        clearTimeout(responseTimer);
-        responseTimer = null;
-        stopWordReveal();
-        return playbackOffsetMs;
-    };
-
-    const queuePcm = (arrayBuffer) => {
-        const context = audioContext;
-        if (!context) return;
-
-        const incoming = new Uint8Array(arrayBuffer);
-        let bytes = incoming;
-        if (pcmRemainder.length) {
-            bytes = new Uint8Array(pcmRemainder.length + incoming.length);
-            bytes.set(pcmRemainder);
-            bytes.set(incoming, pcmRemainder.length);
-        }
-        const usableBytes = bytes.byteLength - (bytes.byteLength % 2);
-        pcmRemainder = bytes.slice(usableBytes);
-        if (!usableBytes) return;
-
-        const sampleCount = usableBytes / 2;
-        const samples = new DataView(bytes.buffer, bytes.byteOffset, usableBytes);
-        const audioBuffer = context.createBuffer(1, sampleCount, currentAudioSampleRate);
-        const channel = audioBuffer.getChannelData(0);
-        for (let index = 0; index < sampleCount; index += 1) {
-            channel[index] = samples.getInt16(index * 2, true) / 0x8000;
-        }
-
-        const source = context.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(outputGain ?? context.destination);
-        const startsAt = Math.max(context.currentTime + 0.025, nextPlaybackTime);
-        const durationMs = audioBuffer.duration * 1000;
-        const revealSegment = revealSegments.find((segment) => segment.sequence === activeRevealSequence);
-        if (revealSegment) {
-            revealSegment.startsAt ??= startsAt;
-            revealSegment.audioDurationMs += durationMs;
-            scheduleWordReveal();
-        }
-        playbackRanges.push({
-            startsAt,
-            durationMs,
-            sessionStartMs: sessionAudioScheduledMs,
-        });
-        sessionAudioScheduledMs += durationMs;
-        nextPlaybackTime = startsAt + audioBuffer.duration;
-        activeSources.add(source);
-        source.onended = () => activeSources.delete(source);
-        source.start(startsAt);
-    };
-
-    const stopCapture = () => {
-        processor?.disconnect();
-        processor = null;
-        stream?.getTracks().forEach((track) => track.stop());
-        stream = null;
-    };
-
-    const toPcm16 = (input, inputRate) => {
-        const targetRate = 16000;
-        const ratio = inputRate / targetRate;
-        const length = Math.floor(input.length / ratio);
-        const output = new Int16Array(length);
-        for (let index = 0; index < length; index += 1) {
-            const position = index * ratio;
-            const low = Math.floor(position);
-            const high = Math.min(Math.ceil(position), input.length - 1);
-            const sample = input[low] + ((input[high] - input[low]) * (position - low));
-            output[index] = Math.max(-1, Math.min(1, sample)) * 0x7fff;
-        }
-        return output.buffer;
-    };
-
-    const startCapture = async () => {
-        if (stream || !desiredActive) return;
-        const captured = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        });
-        if (!desiredActive) {
-            captured.getTracks().forEach((track) => track.stop());
-            return;
-        }
-
-        stream = captured;
-        const context = await ensureAudioContext();
-        const source = context.createMediaStreamSource(stream);
-        processor = context.createScriptProcessor(4096, 1, 1);
-        const silent = context.createGain();
-        silent.gain.value = 0;
+        capture = stream;
+        captureSource = audio.createMediaStreamSource(stream);
+        processor = audio.createScriptProcessor(4096, 1, 1);
+        captureGain = audio.createGain(); captureGain.gain.value = 0;
         processor.onaudioprocess = (event) => {
-            if (desiredActive && socket?.readyState === WebSocket.OPEN) {
-                socket.send(toPcm16(event.inputBuffer.getChannelData(0), context.sampleRate));
+            if (socket?.readyState !== WebSocket.OPEN || mode !== 'voice') return;
+            const samples = event.inputBuffer.getChannelData(0);
+            const ratio = audio.sampleRate / 16000;
+            const pcm = new Int16Array(Math.floor(samples.length / ratio));
+            for (let i = 0; i < pcm.length; i++) {
+                const position = i * ratio;
+                const low = Math.floor(position);
+                const high = Math.min(low + 1, samples.length - 1);
+                const sample = samples[low] + (samples[high] - samples[low]) * (position - low);
+                pcm[i] = Math.max(-1, Math.min(1, sample)) * 32767;
             }
+            if (socket.bufferedAmount < 128000) socket.send(pcm.buffer);
         };
-        source.connect(processor);
-        processor.connect(silent);
-        silent.connect(context.destination);
-        socket?.send(JSON.stringify({ type: 'start' }));
-        if (lastVisibleResponse) showListeningIndicator();
-        else showLoading();
-        setState('listening', 'Listening. You can interrupt Djinn at any time.');
-    };
-
-    const clearRetry = () => {
-        clearTimeout(retryTimer);
-        retryTimer = null;
-    };
-
-    const pause = () => {
-        desiredActive = false;
-        clearRetry();
-        if (!socket) connectionAbort?.abort();
-        stopCapture();
-        stopAudio();
-        if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'interrupt' }));
-        const pausedMessage = 'Djinn is paused. Click to resume.';
-        setState('paused', pausedMessage);
-        showResponse(pausedMessage, 'notice');
-    };
-
-    const showMicrophoneError = () => {
-        desiredActive = false;
-        const errorMessage = 'Microphone access is needed to speak with Djinn. Please allow it and try again.';
-        setState('error', errorMessage);
-        showResponse(errorMessage, 'error');
-    };
-
-    const resumeCapture = async () => {
-        try {
-            await startCapture();
-        } catch {
-            stopCapture();
-            showMicrophoneError();
+        captureSource.connect(processor); processor.connect(captureGain); captureGain.connect(audio.destination);
+        send({ type: 'mode', mode: 'voice' });
+        state('listening'); sayStatus('Listening. You can interrupt Djinn at any time.');
+    }
+    function clearPending() {
+        pendingText = false;
+        clearTimeout(pendingTimer);
+        submit.disabled = false;
+    }
+    function receive(event) {
+        if (event.data instanceof ArrayBuffer) { queueAudio(event.data); return; }
+        let message;
+        try { message = JSON.parse(event.data); } catch { return; }
+        if (message.type === 'user_turn') {
+            stopPlayback();
+            currentTurnId = message.turnId;
+            appendMessage('visitor', message.text);
+            responseRow = appendMessage('assistant', '');
+            if (message.mode === 'text') { input.value = ''; clearPending(); }
         }
-    };
-
-    const scheduleRetry = () => {
-        if (!desiredActive || retryTimer) return;
-        retryStartedAt ||= Date.now();
-        if (Date.now() - retryStartedAt >= 35000) {
-            desiredActive = false;
-            const unavailableMessage = 'Djinn is taking a short pause. Please try again later.';
-            setState('error', unavailableMessage);
-            showResponse(unavailableMessage, 'notice');
-            return;
+        if (message.type === 'thinking') { state('thinking'); sayStatus('Djinn is grounding an answer…'); }
+        if (message.type === 'listening_ready') sayStatus(mode === 'voice' ? 'Listening...' : 'Type a question for Djinn.');
+        if (message.type === 'audio_start' && message.turnId === currentTurnId) {
+            const words = message.text.trim().split(/\s+/);
+            const weights = message.speechWeights?.length === words.length && message.speechWeights.every((weight) => Number.isFinite(weight) && weight > 0)
+                ? message.speechWeights : words.map((word) => Math.max(3, word.length));
+            activePacket = { turnId: message.turnId, sequence: message.sequence, words, weights, sampleRate: message.sampleRate, start: null, duration: 0, ended: false, remainder: new Uint8Array(0) };
+            packets.push(activePacket);
+            state('speaking'); sayStatus('Djinn is speaking.');
         }
-
-        const delays = [1000, 2000, 4000, 5000];
-        const delay = delays[Math.min(retryAttempt, delays.length - 1)];
-        retryAttempt += 1;
-        const waitingMessage = 'Djinn loading...';
-        setState('connecting', waitingMessage);
-        showLoading();
-        retryTimer = window.setTimeout(() => {
-            retryTimer = null;
-            void connect();
-        }, delay);
-    };
-
-    const handleMessage = (event, ready) => {
-        if (event.data instanceof ArrayBuffer) {
-            queuePcm(event.data);
-            return;
+        if (message.type === 'audio_end' && message.turnId === currentTurnId) {
+            const packet = packets.find((item) => item.sequence === message.sequence);
+            if (packet) { packet.ended = true; afterPlayback(() => { acknowledge(packet); renderSpeech(); }); }
+            activePacket = null;
         }
-
-        const message = JSON.parse(event.data);
-        if (message.type === 'ready') ready?.();
-        if (message.type === 'listening_ready' && desiredActive) showListeningIndicator();
-        if (message.type === 'thinking') {
-            showLoading();
-            setStatus('Djinn is grounding an answer…');
+        if (message.type === 'turn_complete' && message.turnId === currentTurnId) {
+            afterPlayback(() => {
+                packets.forEach(acknowledge);
+                renderSpeech();
+                if (revealFrame !== null) cancelAnimationFrame(revealFrame);
+                revealFrame = null;
+                send({ type: 'playback_complete', turnId: message.turnId });
+                state(mode === 'voice' ? 'listening' : 'ready');
+                sayStatus(mode === 'voice' ? 'Listening...' : 'Type a question for Djinn.');
+            });
         }
-        if (message.type === 'audio_start') {
-            currentAudioSampleRate = message.sampleRate ?? 24000;
-            beginWordRevealWithPlayback(message.text, message.sequence, message.speechWeights);
-            setState('speaking', 'Djinn is speaking.');
-        }
-        if (message.type === 'answer_append') appendWordReveal(message.text, message.speechWeights);
-        if (message.type === 'audio_end') {
-            completeWordRevealSegment(message.sequence);
-            activeRevealSequence = null;
-        }
-        if (message.type === 'turn_complete') showResponseAfterPlayback(message.text);
-        if (message.type === 'playback_stopped') {
-            const playbackOffsetMs = stopAudio();
-            if (message.interruptToken && socket?.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({
-                    type: 'playback_stopped_ack',
-                    interruptToken: message.interruptToken,
-                    playbackOffsetMs,
-                }));
-            }
-            if (desiredActive) {
-                showListeningIndicator();
-                setState('listening', 'Listening. You can interrupt Djinn at any time.');
-            } else {
-                const pausedMessage = 'Djinn is paused. Click to resume.';
-                setState('paused', pausedMessage);
-                showResponse(pausedMessage, 'notice');
-            }
-        }
+        if (message.type === 'playback_stopped') { stopPlayback(); state(mode === 'voice' ? 'listening' : 'ready'); }
+        if (message.type === 'input_rejected') { clearPending(); sayStatus('Please wait a moment, then try again.'); }
         if (['audio_unavailable', 'stt_unavailable'].includes(message.type)) {
-            desiredActive = false;
-            const errorMessage = 'Djinn needs a moment. Please try again.';
-            setState('error', errorMessage);
-            showResponse(errorMessage, 'error');
+            stopPlayback(); stopCapture(); clearPending(); state('error'); sayStatus('Djinn needs a moment. Please try again.');
         }
         if (message.type === 'ended') {
-            desiredActive = false;
-            closing = true;
-            stopCapture();
-            stopAudio();
-            const unavailableMessage = 'Djinn is taking a short pause. Please try again later.';
-            setState('error', unavailableMessage);
-            showResponse(unavailableMessage, 'notice');
+            stopPlayback(); stopCapture(); clearPending(); state('idle'); sayStatus('Session ended. Ask Djinn to start again.');
         }
-    };
-
-    const connect = () => {
-        if (connectingPromise) return connectingPromise;
-        if (socket?.readyState === WebSocket.OPEN) return resumeCapture();
-
-        connectingPromise = (async () => {
-            closing = false;
-            connectionAbort = new AbortController();
-            const timeout = window.setTimeout(() => connectionAbort?.abort(), 2500);
-            let microphoneRequested = false;
-            setState('connecting', 'Djinn loading...');
-            showLoading();
-
-            try {
-                const [, health] = await Promise.all([
-                    ensureAudioContext(),
-                    fetch(`${endpoint}/health`, { signal: connectionAbort.signal }),
-                ]);
-                window.clearTimeout(timeout);
-                if (!health.ok || !(await health.json()).demo) throw new Error('unavailable');
-                if (!desiredActive) {
-                    pause();
-                    return;
-                }
-
-                const wsUrl = new URL(endpoint);
-                wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
-                wsUrl.pathname = '/browser/voice';
-                const connectingSocket = new WebSocket(wsUrl);
-                connectingSocket.binaryType = 'arraybuffer';
-                socket = connectingSocket;
-                await new Promise((resolve, reject) => {
-                    const readyTimeout = window.setTimeout(() => reject(new Error('ready_timeout')), 3500);
-                    connectingSocket.onmessage = (event) => handleMessage(event, () => {
-                        window.clearTimeout(readyTimeout);
-                        resolve();
-                    });
-                    connectingSocket.onerror = reject;
-                    connectingSocket.onclose = () => reject(new Error('closed'));
-                });
-
-                connectingSocket.onclose = () => {
-                    if (socket === connectingSocket) socket = null;
-                    stopCapture();
-                    stopAudio();
-                    if (!closing && desiredActive) scheduleRetry();
-                };
-                retryStartedAt = 0;
-                retryAttempt = 0;
-                clearRetry();
-                if (!desiredActive) {
-                    pause();
-                    return;
-                }
-
-                microphoneRequested = true;
-                await startCapture();
-            } catch {
-                window.clearTimeout(timeout);
-                if (socket?.readyState !== WebSocket.OPEN) {
-                    try { socket?.close(); } catch {}
-                    socket = null;
-                }
-                stopCapture();
-                stopAudio();
-                if (!desiredActive) {
-                    const pausedMessage = 'Djinn is paused. Click to resume.';
-                    setState('paused', pausedMessage);
-                    showResponse(pausedMessage, 'notice');
-                } else if (microphoneRequested) {
-                    showMicrophoneError();
-                } else {
-                    scheduleRetry();
-                }
-            } finally {
-                window.clearTimeout(timeout);
-                connectionAbort = null;
-                connectingPromise = null;
-            }
-        })();
-
-        return connectingPromise;
-    };
-
-    const activate = () => {
-        desiredActive = true;
-        clearRetry();
-        if (socket?.readyState === WebSocket.OPEN) {
-            setState('listening', 'Listening. You can interrupt Djinn at any time.');
-            showListeningIndicator();
-            void resumeCapture();
-            return;
-        }
-        if (connectingPromise) {
-            setState('connecting', 'Djinn loading...');
-            showLoading();
-            return;
-        }
-        retryStartedAt = Date.now();
-        retryAttempt = 0;
-        void connect();
-    };
-
-    const closeSession = () => {
-        desiredActive = false;
-        closing = true;
-        clearRetry();
-        connectionAbort?.abort();
-        stopCapture();
-        stopAudio();
-        if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'end' }));
-        try { socket?.close(); } catch {}
-        socket = null;
-        setState('idle', 'Ask Djinn');
-    };
-
-    if (volume instanceof HTMLInputElement) {
-        volume.addEventListener('input', () => {
-            outputVolume = Math.max(0, Math.min(100, Number.parseInt(volume.value, 10) || 0));
-            applyOutputVolume({ persist: true });
-        });
     }
-    applyOutputVolume();
-
-    reducedMotion.addEventListener?.('change', startActivity);
-    new MutationObserver(drawActivity).observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['data-theme-effective'],
+    async function verifyVisitor(siteKey, signal) {
+        if (!window.turnstile) {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+                script.async = true;
+                const timer = setTimeout(() => { script.remove(); reject(new Error('challenge_timeout')); }, 10000);
+                script.onload = () => { clearTimeout(timer); resolve(); };
+                script.onerror = () => { clearTimeout(timer); script.remove(); reject(new Error('challenge_load')); };
+                document.head.append(script);
+            });
+        }
+        signal.throwIfAborted();
+        challenge.hidden = false;
+        try {
+            return await new Promise((resolve, reject) => {
+                const timer = setTimeout(() => reject(new Error('challenge_timeout')), 120000);
+                const finish = (error, token) => { clearTimeout(timer); signal.removeEventListener('abort', abort); error ? reject(error) : resolve(token); };
+                const abort = () => finish(new Error('cancelled'));
+                cancelChallenge = abort;
+                signal.addEventListener('abort', abort, { once: true });
+                widget = window.turnstile.render(challenge, {
+                    sitekey: siteKey, action: 'djinn', theme: 'auto',
+                    callback: (token) => finish(null, token),
+                    'error-callback': () => finish(new Error('challenge_failed')),
+                    'expired-callback': () => finish(new Error('challenge_expired')),
+                });
+            });
+        } finally {
+            if (widget !== null) window.turnstile?.remove(widget);
+            widget = null; cancelChallenge = null; challenge.hidden = true;
+        }
+    }
+    async function connect() {
+        if (socket?.readyState === WebSocket.OPEN) return;
+        if (connection) return connection;
+        const version = sessionVersion;
+        connectAbort = new AbortController();
+        const signal = connectAbort.signal;
+        connection = (async () => {
+            state('connecting'); sayStatus('Djinn loading...');
+            await ensureAudio();
+            const health = await fetch(`${endpoint}/health`, { signal: AbortSignal.any([signal, AbortSignal.timeout(5000)]) });
+            if (!health.ok) throw new Error('unavailable');
+            const info = await health.json();
+            if (!info.demo) throw new Error('unavailable');
+            const token = info.challengeRequired ? await verifyVisitor(info.siteKey, signal) : null;
+            signal.throwIfAborted();
+            const response = await fetch(`${endpoint}/browser/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }), signal: AbortSignal.any([signal, AbortSignal.timeout(7000)]) });
+            if (!response.ok) throw new Error('unavailable');
+            const { ticket } = await response.json();
+            signal.throwIfAborted();
+            const url = new URL('/browser/voice', endpoint);
+            url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+            url.searchParams.set('ticket', ticket);
+            const candidate = new WebSocket(url);
+            candidate.binaryType = 'arraybuffer';
+            socket = candidate;
+            await new Promise((resolve, reject) => {
+                const timer = setTimeout(() => { candidate.close(); reject(new Error('connection_timeout')); }, 6000);
+                const finish = (error) => { clearTimeout(timer); signal.removeEventListener('abort', abort); error ? reject(error) : resolve(); };
+                const abort = () => { candidate.close(); finish(new Error('cancelled')); };
+                signal.addEventListener('abort', abort, { once: true });
+                candidate.onmessage = (event) => {
+                    if (typeof event.data === 'string') {
+                        const message = JSON.parse(event.data);
+                        if (message.type === 'ready') { finish(); return; }
+                    }
+                    if (version === sessionVersion) receive(event);
+                };
+                candidate.onerror = () => finish(new Error('connection_failed'));
+                candidate.onclose = () => {
+                    finish(new Error('closed'));
+                    if (socket !== candidate) return;
+                    socket = null; stopPlayback(); stopCapture(); clearPending();
+                    state('idle'); sayStatus('Session ended. Ask Djinn to start again.');
+                };
+            });
+            signal.throwIfAborted();
+            send({ type: 'mode', mode: 'text' });
+            state('ready');
+        })().catch((error) => {
+            if (version === sessionVersion) {
+                socket?.close(); socket = null;
+                state('error'); sayStatus('Djinn is taking a short pause. Please try again later.');
+            }
+            throw error;
+        }).finally(() => { if (version === sessionVersion) { connection = null; connectAbort = null; } });
+        return connection;
+    }
+    async function useMicrophone() {
+        openPanel();
+        if (mode === 'voice') {
+            mode = 'text'; form.hidden = false; stopCapture(); send({ type: 'mode', mode });
+            state('ready'); sayStatus('Djinn is paused. Click to resume.');
+            return;
+        }
+        mode = 'voice'; form.hidden = true;
+        try { await connect(); await startCapture(); }
+        catch { stopCapture(); mode = 'text'; form.hidden = false; sayStatus('Microphone unavailable, or Djinn is offline. You can try typing instead.'); }
+    }
+    function useKeyboard() {
+        mode = 'text'; stopCapture(); send({ type: 'mode', mode });
+        openPanel(); form.hidden = false;
+        state('ready'); sayStatus('Type a question for Djinn.'); input.focus();
+        // Merely opening the panel does not create a paid provider session.
+        void ensureAudio().catch(() => sayStatus('Audio is unavailable in this browser.'));
+    }
+    function closeSession() {
+        sessionVersion++;
+        cancelChallenge?.(); connectAbort?.abort(); connectAbort = null; connection = null;
+        stopPlayback(); stopCapture(); clearPending();
+        send({ type: 'end' });
+        const old = socket; socket = null; old?.close();
+        panel.hidden = true; mode = 'text'; state('idle');
+        microphone.setAttribute('aria-expanded', 'false'); keyboard.setAttribute('aria-expanded', 'false');
+        log.replaceChildren(); responseRow = null; currentTurnId = null;
+    }
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const text = input.value.trim();
+        if (!text || text.length > 1200 || pendingText) return;
+        pendingText = true; submit.disabled = true;
+        const version = sessionVersion;
+        try {
+            await ensureAudio();
+            await connect();
+            if (version !== sessionVersion || mode !== 'text') { clearPending(); return; }
+            stopPlayback();
+            send({ type: 'mode', mode: 'text' });
+            send({ type: 'text', text });
+            pendingTimer = setTimeout(() => { clearPending(); sayStatus('Please wait a moment, then try again.'); }, 7000);
+        } catch { clearPending(); }
     });
-    startActivity();
-
-    trigger?.addEventListener('click', () => {
-        if (desiredActive) pause();
-        else activate();
+    volume.addEventListener('input', () => {
+        level = Number(volume.value); applyVolume();
+        try { localStorage.setItem(volumeKey, String(level)); } catch {}
     });
-
-    window.addEventListener('pagehide', () => {
-        clearInterval(activityTimer);
-        closeSession();
-    });
-    setState('idle', 'Ask Djinn');
+    applyVolume();
+    microphone.addEventListener('click', () => { void useMicrophone(); });
+    keyboard.addEventListener('click', useKeyboard);
+    control.querySelector('[data-djinn-close]').addEventListener('click', () => { closeSession(); keyboard.focus(); });
+    panel.addEventListener('keydown', (event) => { if (event.key === 'Escape') { closeSession(); keyboard.focus(); } });
+    window.addEventListener('pagehide', closeSession);
+    state('idle');
 }

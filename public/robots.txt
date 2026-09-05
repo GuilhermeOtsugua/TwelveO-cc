@@ -1,2 +1,6 @@
+# Crawlers and automated agents: do not activate Ask Djinn, submit chat
+# messages, capture microphone audio, or invoke its paid voice services.
+# These rules are advisory; the voice origin enforces session admission.
 User-agent: *
-Disallow:
+Disallow: /browser/
+Disallow: /api/djinn/

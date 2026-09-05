@@ -309,12 +309,15 @@ test.describe('Homepage interactions', () => {
         await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
     });
 
-    test('Djinn restores its latest response after pause and resume', async ({ page, browserName }, testInfo) => {
-        test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
+    test('Djinn supports typed audio replies, volume, and microphone switching', async ({ page, browserName }, testInfo) => {
+        test.skip(browserName !== 'chromium');
 
         await page.addInitScript(() => {
             const originalFetch = window.fetch.bind(window);
             window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+                if (String(input).includes('127.0.0.1:8080/browser/session')) {
+                    return Promise.resolve(new Response(JSON.stringify({ ticket: 'test-ticket' }), { status: 200 }));
+                }
                 if (String(input).includes('127.0.0.1:8080/health')) {
                     return Promise.resolve(new Response(JSON.stringify({ status: 'ok', demo: true }), {
                         status: 200,
@@ -333,14 +336,15 @@ test.describe('Homepage interactions', () => {
                     (window as Window & { __djinnAudioContext?: FakeAudioContext }).__djinnAudioContext = this;
                 }
                 resume = async () => {};
-                createMediaStreamSource = () => ({ connect() {} });
+                sampleRate = 48000;
+                createMediaStreamSource = () => ({ connect() {}, disconnect() {} });
                 createScriptProcessor = () => ({ connect() {}, disconnect() {}, onaudioprocess: null });
                 createGain = () => {
                     const gain = {
                         value: 1,
                         setTargetAtTime(value: number) { this.value = value; },
                     };
-                    const node = { connect() {}, gain };
+                    const node = { connect() {}, disconnect() {}, gain };
                     this.gains.push(node);
                     return node;
                 };
@@ -355,6 +359,7 @@ test.describe('Homepage interactions', () => {
                 static OPEN = 1;
                 static CONNECTING = 0;
                 readyState = FakeWebSocket.CONNECTING;
+                bufferedAmount = 0;
                 binaryType = 'arraybuffer';
                 onmessage: ((event: MessageEvent) => void) | null = null;
                 onclose: (() => void) | null = null;
@@ -383,7 +388,8 @@ test.describe('Homepage interactions', () => {
                     if (typeof payload !== 'string') return;
                     const message = JSON.parse(payload);
                     this.sent.push(message);
-                    if (message.type === 'start') queueMicrotask(() => this.emit({ type: 'listening_ready' }));
+                    if (message.type === 'mode') queueMicrotask(() => this.emit({ type: 'listening_ready' }));
+                    if (message.type === 'text') queueMicrotask(() => this.emit({ type: 'user_turn', turnId: 1, mode: 'text', text: message.text }));
                 }
 
                 close() {
@@ -395,7 +401,10 @@ test.describe('Homepage interactions', () => {
             Object.defineProperty(window, 'AudioContext', { configurable: true, value: FakeAudioContext });
             Object.defineProperty(navigator, 'mediaDevices', {
                 configurable: true,
-                value: { getUserMedia: async () => ({ getTracks: () => [{ stop() {} }] }) },
+                value: { getUserMedia: async () => {
+                    (window as any).__microphoneCalls = ((window as any).__microphoneCalls ?? 0) + 1;
+                    return { getTracks: () => [{ stop() {} }] };
+                } },
             });
             Object.defineProperty(window, 'WebSocket', { configurable: true, value: FakeWebSocket });
         });
@@ -403,7 +412,10 @@ test.describe('Homepage interactions', () => {
         await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
 
         const trigger = page.locator('[data-djinn-open]');
-        const answer = page.locator('[data-djinn-answer]');
+        const answer = page.locator('[data-djinn-message="assistant"]').last();
+        await page.locator('[data-djinn-keyboard]').click();
+        await expect(page.locator('[data-djinn-form]')).toBeVisible();
+        expect(await page.evaluate(() => (window as any).__djinnSocket)).toBeUndefined();
         const volume = page.locator('[data-djinn-volume]');
         await expect(volume).toHaveValue('100');
         await volume.evaluate((element) => {
@@ -412,8 +424,10 @@ test.describe('Homepage interactions', () => {
             input.dispatchEvent(new Event('input', { bubbles: true }));
         });
         await expect.poll(async () => page.evaluate(() => window.localStorage.getItem('djinn:voice-volume'))).toBe('35');
-        await trigger.click();
-        await expect(answer).toHaveText('Listening...');
+        await page.locator('[data-djinn-input]').fill('Can it explain our refund policy?');
+        await page.getByRole('button', { name: 'Send question', exact: true }).click();
+        await expect(page.locator('[data-djinn-message="visitor"]')).toHaveText('Can it explain our refund policy?');
+        expect(await page.evaluate(() => (window as any).__microphoneCalls ?? 0)).toBe(0);
         await expect.poll(async () => page.evaluate(() => {
             const context = (window as Window & {
                 __djinnAudioContext?: { gains: Array<{ gain: { value: number } }> };
@@ -429,10 +443,10 @@ test.describe('Homepage interactions', () => {
                 };
                 __djinnAudioContext?: { currentTime: number };
             }).__djinnSocket;
-            socket?.emit({ type: 'audio_start', sequence: 0, text: 'This is the latest Djinn response.', sampleRate: 24000 });
+            socket?.emit({ type: 'audio_start', turnId: 1, sequence: 0, text: 'This is the latest Djinn response.', sampleRate: 24000 });
             socket?.emitAudio(2000);
             const context = (window as Window & { __djinnAudioContext?: { currentTime: number } }).__djinnAudioContext;
-            if (context) context.currentTime = 0.35;
+            if (context) context.currentTime = 0.65;
         });
         await expect.poll(async () => (await answer.textContent())?.split(/\s+/).filter(Boolean).length ?? 0).toBeGreaterThan(0);
         const wordsAheadOfSpeech = (await answer.textContent())?.split(/\s+/).filter(Boolean).length ?? 0;
@@ -445,14 +459,20 @@ test.describe('Homepage interactions', () => {
                 __djinnAudioContext?: { currentTime: number };
             };
             if (browserWindow.__djinnAudioContext) browserWindow.__djinnAudioContext.currentTime = 2.1;
-            browserWindow.__djinnSocket?.emit({ type: 'audio_end', sequence: 0 });
-            browserWindow.__djinnSocket?.emit({ type: 'turn_complete', text: 'This is the latest Djinn response.' });
+            browserWindow.__djinnSocket?.emit({ type: 'audio_end', turnId: 1, sequence: 0 });
+            browserWindow.__djinnSocket?.emit({ type: 'turn_complete', turnId: 1, text: 'This is the latest Djinn response.' });
         });
         await expect(answer).toHaveText('This is the latest Djinn response.');
+        if (process.env.DJINN_SCREENSHOTS) {
+            await page.screenshot({ path: testInfo.outputPath('djinn-chat.png') });
+        }
 
         await trigger.click();
-        await expect(answer).toHaveText('Djinn is paused. Click to resume.');
+        await expect(trigger).toHaveAttribute('aria-pressed', 'true');
+        expect(await page.evaluate(() => (window as any).__microphoneCalls)).toBe(1);
         await trigger.click();
+        await expect(trigger).toHaveAttribute('aria-pressed', 'false');
+        await expect(page.locator('[data-djinn-form]')).toBeVisible();
         await expect(answer).toHaveText('This is the latest Djinn response.');
 
         await page.evaluate(() => {
@@ -466,7 +486,7 @@ test.describe('Homepage interactions', () => {
         });
         await expect.poll(async () => page.evaluate(() => {
             const socket = (window as Window & { __djinnSocket?: { sent: Array<Record<string, unknown>> } }).__djinnSocket;
-            return socket?.sent.some((message) => message.type === 'playback_stopped_ack' && message.interruptToken === 'stop-1');
+            return socket?.sent.some((message) => message.type === 'playback_ack' && message.turnId === 1 && message.words === 6);
         })).toBe(true);
     });
 });

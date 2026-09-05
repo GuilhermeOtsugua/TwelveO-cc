@@ -4,6 +4,8 @@
 /public/hot
 /public/storage
 /dist
+/test-results
+/playwright-report
 /storage/*.key
 /storage/pail
 /vendor

@@ -68,28 +68,36 @@
                     <nav class="flex items-center gap-2 text-sm font-medium text-[color:var(--green-900)]">
                         <div class="djinn-control" data-djinn-control>
                             <div class="djinn-control__actions">
-                                <label class="djinn-volume">
-                                    <span class="sr-only">Djinn voice volume</span>
-                                    <input class="djinn-volume__range" type="range" min="0" max="100" step="5" value="100" orient="vertical" data-djinn-volume aria-label="Djinn voice volume" aria-valuetext="100 percent">
-                                </label>
-                                <button type="button" class="nav-link nav-link--djinn rounded-full border border-[color:var(--line-strong)] px-4 py-2" data-djinn-open aria-pressed="false" aria-label="Ask Djinn">
-                                    <span class="nav-link__label--full">Ask Djinn!</span>
+                                <button type="button" class="nav-link nav-link--djinn" data-djinn-open aria-pressed="false" aria-expanded="false" aria-controls="djinn-chat" aria-label="Ask Djinn with microphone">
+                                    <span class="nav-link__label--full">Ask Djinn</span>
                                     <span class="nav-link__label--compact">Djinn</span>
                                     <svg class="djinn-microphone" viewBox="0 0 24 24" aria-hidden="true">
                                         <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
                                         <path d="M5.5 11.5v.5a6.5 6.5 0 0 0 13 0v-.5M12 18.5V22M9 22h6" />
                                     </svg>
                                 </button>
+                                <button type="button" class="djinn-keyboard" data-djinn-keyboard aria-label="Ask Djinn with keyboard" aria-pressed="false" aria-expanded="false" aria-controls="djinn-chat">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="1" /><path d="M5 9h1m3 0h1m3 0h1m3 0h1M5 12h1m3 0h1m3 0h1m3 0h1M6 15h12" /></svg>
+                                </button>
                             </div>
-                            <div class="djinn-response" data-djinn-response data-kind="notice" role="status" hidden>
-                                <span class="djinn-response__line">
-                                    <strong data-djinn-answer></strong>
-                                    <canvas class="djinn-activity" data-djinn-activity aria-hidden="true"></canvas>
-                                </span>
-                            </div>
-                            <span class="djinn-status" data-djinn-status aria-live="polite"></span>
+                            <section id="djinn-chat" class="djinn-response" data-djinn-response aria-label="Djinn conversation" hidden>
+                                <div class="djinn-response__heading"><strong>Djinn</strong><button type="button" data-djinn-close aria-label="Close Djinn conversation">×</button></div>
+                                <div class="djinn-log" data-djinn-log role="log" aria-label="Conversation" aria-live="off"></div>
+                                <p class="djinn-status" data-djinn-status role="status" aria-live="polite"></p>
+                                <div class="djinn-challenge" data-djinn-challenge hidden></div>
+                                <form class="djinn-form" data-djinn-form hidden>
+                                    <label class="sr-only" for="djinn-question">Your question for Djinn</label>
+                                    <input id="djinn-question" data-djinn-input type="text" maxlength="1200" placeholder="Ask Djinn…" autocomplete="off" required>
+                                    <button type="submit" aria-label="Send question">↑</button>
+                                </form>
+                                <label class="djinn-volume">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H2v8h4l5 4V4Zm4 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" /></svg>
+                                    <span class="sr-only">Djinn voice volume</span>
+                                    <input class="djinn-volume__range" type="range" min="0" max="100" step="5" value="100" data-djinn-volume aria-label="Djinn voice volume" aria-valuetext="100%">
+                                </label>
+                            </section>
                         </div>
-                        <a href="#projects" class="nav-link rounded-full border border-transparent px-4 py-2">Projects</a>
+                        <a href="#projects" class="nav-link nav-link--projects rounded-full border border-transparent px-4 py-2">Projects</a>
                         <a href="#contact" class="nav-link rounded-full border border-transparent px-4 py-2">Contact</a>
                         <button
                             type="button"
