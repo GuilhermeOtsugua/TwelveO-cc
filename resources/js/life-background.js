@@ -17,6 +17,7 @@ function initializeLifeBackground(page) {
     let world;
     let next;
     let cellSize = 10;
+    let cellColor;
     let viewportWidth = 0;
     let viewportHeight = 0;
     let frame = 0;
@@ -29,10 +30,10 @@ function initializeLifeBackground(page) {
     let reseeded = false;
     const stepInterval = 1000 / 6;
     const fadeDuration = 800;
-    const isDark = () => root.dataset.themeEffective === 'dark';
-    const canAnimate = () => isDark() && !reducedMotion.matches && !document.hidden && !suspended;
+    const canAnimate = () => !reducedMotion.matches && !document.hidden && !suspended;
 
     function measure() {
+        cellColor = getComputedStyle(canvas).color;
         viewportWidth = root.clientWidth;
         viewportHeight = window.innerHeight;
         const worldHeight = Math.max(page.scrollHeight, viewportHeight);
@@ -59,7 +60,7 @@ function initializeLifeBackground(page) {
 
     function draw() {
         context.clearRect(0, 0, viewportWidth, viewportHeight);
-        context.fillStyle = '#9bb8a8';
+        context.fillStyle = cellColor;
         context.globalAlpha = fadeElapsed === null ? 1 : Math.abs(1 - fadeElapsed / (fadeDuration / 2));
         const scrollY = Math.max(0, window.scrollY);
         const firstRow = Math.floor(scrollY / cellSize);
@@ -77,7 +78,7 @@ function initializeLifeBackground(page) {
 
     function tick(now) {
         frame = 0;
-        if (!isDark() || document.hidden || suspended) return;
+        if (document.hidden || suspended) return;
         if (canAnimate()) {
             if (fadeElapsed !== null) {
                 fadeElapsed = Math.min(fadeDuration, fadeElapsed + now - lastFrame);
@@ -103,7 +104,7 @@ function initializeLifeBackground(page) {
 
     function requestDraw() {
         dirty = true;
-        if (!frame && world && isDark() && !document.hidden && !suspended) {
+        if (!frame && world && !document.hidden && !suspended) {
             frame = requestAnimationFrame(tick);
         }
     }
@@ -116,7 +117,7 @@ function initializeLifeBackground(page) {
         if (reducedMotion.matches && fadeElapsed !== null) {
             fadeElapsed = null;
         }
-        if (isDark() && !suspended) {
+        if (!suspended) {
             measure();
             requestDraw();
         }
@@ -129,7 +130,7 @@ function initializeLifeBackground(page) {
     const themeObserver = new MutationObserver(sync);
     themeObserver.observe(root, { attributes: true, attributeFilter: ['data-theme-effective'] });
     const sizeObserver = new ResizeObserver(() => {
-        if (isDark() && !suspended) {
+        if (!suspended) {
             measure();
             requestDraw();
         }

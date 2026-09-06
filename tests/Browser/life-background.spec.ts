@@ -130,12 +130,58 @@ test('desktop-mobile-desktop preserves the entire static world including the rig
     });
     expect(rightAlive).toBe(true);
     await page.locator('[data-theme-option="light"]').click();
-    await expect(page.locator('.life-background')).toBeHidden();
+    await expect(page.locator('.life-background')).toBeVisible();
+    await expect(page.locator('.life-background')).toHaveCSS('color', 'rgb(83, 108, 89)');
     await page.locator('[data-theme-option="dark"]').click();
     await page.waitForTimeout(100);
     expect(await pixels(page)).toBe(before);
     await page.waitForTimeout(400);
     expect(await pixels(page)).toBe(before);
+});
+
+test('light theme evolves in moss green and recolors without replacing the world', async ({ page }, testInfo) => {
+    await page.addInitScript(() => localStorage.setItem('otsugua.theme.preference', 'light'));
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto('/');
+    const canvas = page.locator('.life-background');
+    await expect(canvas).toBeVisible();
+    await expect(canvas).toHaveCSS('color', 'rgb(83, 108, 89)');
+    await expect(canvas).toHaveCSS('opacity', page.viewportSize()!.width < 640 ? '0.14' : '0.22');
+    const initial = await pixels(page);
+    await expect.poll(() => pixels(page)).not.toBe(initial);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.waitForTimeout(100);
+    const lightWorld = await pixels(page);
+    await page.waitForTimeout(400);
+    expect(await pixels(page)).toBe(lightWorld);
+    await page.screenshot({ path: testInfo.outputPath('life-light-top.png') });
+    await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'instant' }));
+    await page.waitForTimeout(100);
+    await page.screenshot({ path: testInfo.outputPath('life-light-body.png') });
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.locator('[data-theme-option="dark"]').click();
+    await expect(canvas).toHaveCSS('color', 'rgb(155, 184, 168)');
+    await expect.poll(() => pixels(page)).not.toBe(lightWorld);
+    await page.locator('[data-theme-option="light"]').click();
+    await expect.poll(() => pixels(page)).toBe(lightWorld);
+    expect(errors).toEqual([]);
+});
+
+test('system theme changes recolor a static world without losing it', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('otsugua.theme.preference', 'system'));
+    await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+    await page.goto('/');
+    const canvas = page.locator('.life-background');
+    await expect(canvas).toBeVisible();
+    await expect(canvas).toHaveCSS('color', 'rgb(83, 108, 89)');
+    await page.waitForTimeout(150);
+    const lightWorld = await pixels(page);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(canvas).toHaveCSS('color', 'rgb(155, 184, 168)');
+    await expect.poll(() => pixels(page)).not.toBe(lightWorld);
+    await page.emulateMedia({ colorScheme: 'light' });
+    await expect.poll(() => pixels(page)).toBe(lightWorld);
 });
 
 test('original dot size and square grid survive desktop and mobile resizing', async ({ page }) => {
