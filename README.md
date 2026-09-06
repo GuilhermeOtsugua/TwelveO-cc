@@ -75,6 +75,8 @@ The chat grows to its responsive height cap and keeps the composer and volume co
 
 Outside tap, Escape, and pressing the keyboard button while the panel is open hide it without ending its conversation. Capture stops and TTS is muted while hidden; reopening restores the chosen volume. The speaker button toggles between zero and the last nonzero volume, and the crossed-out icon also follows manual slider changes. The backend session timeout still applies; navigating away ends the connection.
 
+A compact bilingual privacy/language disclosure appears above the typing status until the first user/assistant message, and stays hidden on reopening. Admission feedback distinguishes busy, closed, daily/session-attempt limits and offline states; busy checks do not open provider sessions.
+
 The page locale initializes Djinn's English/PT-BR conversation preference. After that, the backend follows the latest substantive user prompt, retaining language for brief acknowledgements. Switching the page language does not rewrite conversation messages; assistant messages carry their own response-language attribute.
 
 ## Verification

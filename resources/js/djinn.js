@@ -9,6 +9,7 @@ if (control instanceof HTMLElement) {
     const log = control.querySelector('[data-djinn-log]');
     const scroller = createChatScroller(log);
     const status = control.querySelector('[data-djinn-status]');
+    const disclosure = control.querySelector('[data-djinn-disclosure]');
     const form = control.querySelector('[data-djinn-form]');
     const input = control.querySelector('[data-djinn-input]');
     const composerMicrophone = form.querySelector('[data-djinn-compose-microphone]');
@@ -93,6 +94,7 @@ if (control instanceof HTMLElement) {
     window.visualViewport?.addEventListener('resize', positionPanel);
     new ResizeObserver(positionPanel).observe(control);
     function appendMessage(role, text) {
+        if (text.trim() && (role === 'visitor' || role === 'assistant')) disclosure.hidden = true;
         const row = document.createElement('p');
         row.className = `djinn-message djinn-message--${role}`;
         row.dataset.djinnMessage = role;
@@ -274,6 +276,7 @@ if (control instanceof HTMLElement) {
         if (message.type === 'thinking') { state('thinking'); sayStatus('Djinn is grounding an answer…'); }
         if (message.type === 'listening_ready') sayStatus(mode === 'voice' ? 'Listening...' : 'Type a question for Djinn.');
         if (message.type === 'audio_start' && message.turnId === currentTurnId) {
+            disclosure.hidden = true;
             if (responseRow && ['en', 'pt-BR'].includes(message.language)) responseRow.lang = message.language;
             const words = message.text.trim().split(/\s+/);
             const weights = message.speechWeights?.length === words.length && message.speechWeights.every((weight) => Number.isFinite(weight) && weight > 0)
@@ -347,6 +350,12 @@ if (control instanceof HTMLElement) {
             widget = null; cancelChallenge = null; challenge.hidden = true;
         }
     }
+    const availabilityMessage = (reason) => ({
+        busy: 'Djinn is helping other visitors. Please try again shortly.',
+        closed: 'Djinn is outside its availability hours. Please try again later.',
+        daily_limit: 'Djinn has reached its session limit for today. Please try another day.',
+        rate_limit: 'Too many connection attempts. Please wait up to an hour before trying again.',
+    })[reason] ?? 'Djinn is offline or unavailable. Please try again later.';
     async function connect() {
         if (socket?.readyState === WebSocket.OPEN) return;
         if (connection) return connection;
@@ -357,13 +366,15 @@ if (control instanceof HTMLElement) {
             state('connecting'); sayStatus('Djinn loading...');
             await ensureAudio();
             const health = await fetch(`${endpoint}/health`, { signal: AbortSignal.any([signal, AbortSignal.timeout(5000)]) });
-            if (!health.ok) throw new Error('unavailable');
-            const info = await health.json();
-            if (!info.demo) throw new Error('unavailable');
+            const info = await health.json().catch(() => ({}));
+            if (!health.ok || !info.demo) throw new Error(info.reason ?? 'unavailable');
             const token = info.challengeRequired ? await verifyVisitor(info.siteKey, signal) : null;
             signal.throwIfAborted();
             const response = await fetch(`${endpoint}/browser/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }), signal: AbortSignal.any([signal, AbortSignal.timeout(7000)]) });
-            if (!response.ok) throw new Error('unavailable');
+            if (!response.ok) {
+                const failure = await response.json().catch(() => ({}));
+                throw new Error(failure.error ?? 'unavailable');
+            }
             const { ticket } = await response.json();
             signal.throwIfAborted();
             const url = new URL('/browser/voice', endpoint);
@@ -403,7 +414,7 @@ if (control instanceof HTMLElement) {
             if (version === sessionVersion) {
                 socket?.close(); socket = null;
                 stopCapture(); mode = 'text'; form.hidden = false;
-                state('error'); sayStatus('Djinn is offline or unavailable. Please try again later.');
+                state('error'); sayStatus(availabilityMessage(error.message));
             }
             throw error;
         }).finally(() => { if (version === sessionVersion) { connection = null; connectAbort = null; } });
@@ -450,7 +461,7 @@ if (control instanceof HTMLElement) {
                 OverconstrainedError: 'This microphone does not support the requested audio settings. Try another input device.',
                 SecurityError: 'Microphone capture is disabled by browser policy. Please use keyboard mode.',
             };
-            sayStatus(stage === 'connection' ? 'Djinn is offline or unavailable. Please try again later.'
+            sayStatus(stage === 'connection' ? availabilityMessage(error.message)
                 : stage === 'audio' ? 'Audio is unavailable in this browser.'
                     : failures[error?.name] ?? 'The microphone could not be started. Please try again or use keyboard mode.');
         }

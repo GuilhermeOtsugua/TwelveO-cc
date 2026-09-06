@@ -86,6 +86,7 @@
                             </div>
                             <section id="djinn-chat" class="djinn-response" data-djinn-response aria-label="Djinn conversation" hidden>
                                 <div class="djinn-log" data-djinn-log tabindex="0" role="log" aria-label="Conversation" aria-live="off"></div>
+                                <p class="djinn-status djinn-disclosure" data-djinn-disclosure>English / Português brasileiro. Djinn does not save your conversation. AI providers process your messages and audio.</p>
                                 <p class="djinn-status" data-djinn-status role="status" aria-live="polite"></p>
                                 <div class="djinn-challenge" data-djinn-challenge hidden></div>
                                 <form class="djinn-form" data-djinn-form hidden>

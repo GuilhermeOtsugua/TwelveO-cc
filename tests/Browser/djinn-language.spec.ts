@@ -28,6 +28,8 @@ test('Portuguese UI seeds a session and preserves original response language acr
     await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
     await page.locator('[data-djinn-keyboard]').click();
     await expect(page.locator('[data-djinn-input]')).toHaveAttribute('placeholder', 'Pergunte ao Djinn…');
+    await expect(page.locator('[data-djinn-disclosure]')).toBeVisible();
+    await expect(page.locator('[data-djinn-disclosure]')).toContainText('Provedores de IA');
     await page.locator('[data-djinn-input]').fill('O que o Gui desenvolve?');
     await page.locator('[data-djinn-input]').press('Enter');
     await expect(page.locator('[data-djinn-message="assistant"]')).toHaveText(answer);
@@ -41,4 +43,5 @@ test('Portuguese UI seeds a session and preserves original response language acr
     await expect(page.locator('[data-djinn-message="assistant"]')).toHaveAttribute('lang', 'pt-BR');
     await expect(page.locator('[data-djinn-message="visitor"]')).toHaveText('O que o Gui desenvolve?');
     expect(connections).toBe(1);
+    await expect(page.locator('[data-djinn-disclosure]')).toBeHidden();
 });
