@@ -133,6 +133,25 @@ test('switching to keyboard during permission acquisition releases late micropho
     expect(providerCalls).toBe(0);
 });
 
+test('keyboard toggle leaves touch-first input unfocused but preserves desktop autofocus', async ({ page }) => {
+    await page.goto('/');
+    const touchFirst = await page.evaluate(() => matchMedia('(hover: none) and (pointer: coarse)').matches);
+    const input = page.locator('[data-djinn-input]');
+    const toggle = page.locator('[data-djinn-keyboard]');
+    await toggle.click();
+    await expect(page.locator('[data-djinn-response]')).toBeVisible();
+    if (touchFirst) await expect(input).not.toBeFocused();
+    else await expect(input).toBeFocused();
+    await input.click();
+    await expect(input).toBeFocused();
+    await toggle.click();
+    await expect(page.locator('[data-djinn-response]')).toBeHidden();
+    await toggle.click();
+    await expect(page.locator('[data-djinn-response]')).toBeVisible();
+    if (touchFirst) await expect(input).not.toBeFocused();
+    else await expect(input).toBeFocused();
+});
+
 test('mute restores a saved nonzero level and survives hide/reopen', async ({ page }) => {
     await page.addInitScript(() => {
         localStorage.setItem('djinn:voice-volume', '0');

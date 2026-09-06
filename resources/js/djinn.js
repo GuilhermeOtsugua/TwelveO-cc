@@ -458,7 +458,9 @@ if (control instanceof HTMLElement) {
     function useKeyboard() {
         mode = 'text'; stopCapture(); send({ type: 'mode', mode });
         openPanel(); form.hidden = false;
-        state('ready'); sayStatus('Type a question for Djinn.'); input.focus();
+        state('ready'); sayStatus('Type a question for Djinn.');
+        // Touch-first visitors can read the chat before opening the soft keyboard.
+        if (!window.matchMedia('(hover: none) and (pointer: coarse)').matches) input.focus();
         // Merely opening the panel does not create a paid provider session.
         void ensureAudio().catch(() => sayStatus('Audio is unavailable in this browser.'));
     }
