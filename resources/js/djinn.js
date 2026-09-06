@@ -274,6 +274,7 @@ if (control instanceof HTMLElement) {
         if (message.type === 'thinking') { state('thinking'); sayStatus('Djinn is grounding an answer…'); }
         if (message.type === 'listening_ready') sayStatus(mode === 'voice' ? 'Listening...' : 'Type a question for Djinn.');
         if (message.type === 'audio_start' && message.turnId === currentTurnId) {
+            if (responseRow && ['en', 'pt-BR'].includes(message.language)) responseRow.lang = message.language;
             const words = message.text.trim().split(/\s+/);
             const weights = message.speechWeights?.length === words.length && message.speechWeights.every((weight) => Number.isFinite(weight) && weight > 0)
                 ? message.speechWeights : words.map((word) => Math.max(3, word.length));
@@ -394,6 +395,7 @@ if (control instanceof HTMLElement) {
             });
             signal.throwIfAborted();
             send({ type: 'mode', mode: 'text' });
+            send({ type: 'locale', language: document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en' });
             if (hasConnected) appendMessage('notice', translate('New session — earlier messages are display-only.'));
             hasConnected = true;
             state('ready');
@@ -505,7 +507,10 @@ if (control instanceof HTMLElement) {
     });
     volume.addEventListener('input', () => setVolume(Number(volume.value)));
     mute.addEventListener('click', () => setVolume(level === 0 ? lastVolume : 0));
-    document.addEventListener('otsugua:localechange', applyVolume);
+    document.addEventListener('otsugua:localechange', () => {
+        applyVolume();
+        send({ type: 'locale', language: document.documentElement.lang === 'pt-BR' ? 'pt-BR' : 'en' });
+    });
     applyVolume();
     microphone.addEventListener('click', () => { void useMicrophone(); });
     keyboard.addEventListener('click', () => { if (panel.hidden) useKeyboard(); else hidePanel(); });
