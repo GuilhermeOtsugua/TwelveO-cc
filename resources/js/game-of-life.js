@@ -62,7 +62,7 @@ export function stepLife(board, next, columns, rows) {
     return changed;
 }
 
-// Caller supplies only elapsed animation time, never hidden/light/reduced-motion time.
+// Both themes count animation time; hidden/suspended/reduced-motion time is excluded.
 export function createLifeActivityMonitor() {
     const graceMs = 60_000;
     const windowMs = 15_000;

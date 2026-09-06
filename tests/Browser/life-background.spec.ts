@@ -214,37 +214,47 @@ test('original dot size and square grid survive desktop and mobile resizing', as
     expect(await page.evaluate(() => (window as any).lifeGridY % 10)).toBe(0);
 });
 
-test('an empty world reseeds after grace plus low activity, with hidden time excluded', async ({ page }) => {
-    await page.clock.install();
-    // Empty first seed; subsequent seed is a normal random board.
-    await page.addInitScript(() => {
-        const random = Math.random;
-        let firstSeed = true;
-        Math.random = () => firstSeed ? 0.9 : random();
-        (window as any).allowLifePopulation = () => { firstSeed = false; };
+for (const theme of ['dark', 'light', 'light-to-dark'] as const) {
+    test(`reseeding counts active time in ${theme}, excluding hidden time`, async ({ page }) => {
+        await page.clock.install();
+        await page.addInitScript((initialTheme) => {
+            localStorage.setItem('otsugua.theme.preference', initialTheme);
+        }, theme === 'dark' ? 'dark' : 'light');
+        // Empty first seed; subsequent seed is a normal random board.
+        await page.addInitScript(() => {
+            const random = Math.random;
+            let firstSeed = true;
+            Math.random = () => firstSeed ? 0.9 : random();
+            (window as any).allowLifePopulation = () => { firstSeed = false; };
+        });
+        await page.goto('/');
+        await page.clock.runFor(200);
+        const empty = await pixels(page);
+        await page.evaluate(() => (window as any).allowLifePopulation());
+        await page.clock.fastForward(59_000);
+        expect(await pixels(page)).toBe(empty);
+        if (theme === 'light-to-dark') {
+            // Changing themes must retain the first 59 seconds, not restart grace.
+            await page.locator('[data-theme-option="dark"]').click();
+            await expect(page.locator('html')).toHaveAttribute('data-theme-effective', 'dark');
+        }
+        // A suspended document must not accumulate lifetime or reseed.
+        await page.evaluate(() => {
+            Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+            document.dispatchEvent(new Event('visibilitychange'));
+        });
+        await page.clock.fastForward(120_000);
+        expect(await pixels(page)).toBe(empty);
+        await page.evaluate(() => {
+            Object.defineProperty(document, 'hidden', { configurable: true, value: false });
+            document.dispatchEvent(new Event('visibilitychange'));
+        });
+        await page.clock.fastForward(1000);
+        expect(await pixels(page)).toBe(empty);
+        await page.clock.fastForward(14_000);
+        expect(await pixels(page)).toBe(empty);
+        await page.clock.fastForward(1500);
+        await page.clock.runFor(900);
+        expect(await pixels(page)).not.toBe(empty);
     });
-    await page.goto('/');
-    await page.clock.runFor(200);
-    const empty = await pixels(page);
-    await page.evaluate(() => (window as any).allowLifePopulation());
-    await page.clock.fastForward(59_000);
-    expect(await pixels(page)).toBe(empty);
-    // A suspended document must not accumulate lifetime or reseed.
-    await page.evaluate(() => {
-        Object.defineProperty(document, 'hidden', { configurable: true, value: true });
-        document.dispatchEvent(new Event('visibilitychange'));
-    });
-    await page.clock.fastForward(120_000);
-    expect(await pixels(page)).toBe(empty);
-    await page.evaluate(() => {
-        Object.defineProperty(document, 'hidden', { configurable: true, value: false });
-        document.dispatchEvent(new Event('visibilitychange'));
-    });
-    await page.clock.fastForward(1000);
-    expect(await pixels(page)).toBe(empty);
-    await page.clock.fastForward(14_000);
-    expect(await pixels(page)).toBe(empty);
-    await page.clock.fastForward(1500);
-    await page.clock.runFor(900);
-    expect(await pixels(page)).not.toBe(empty);
-});
+}
