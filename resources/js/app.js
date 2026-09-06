@@ -2,6 +2,7 @@ import './bootstrap';
 import './northline-learning-ops';
 import './harbor-ledger';
 import './djinn';
+import './life-background';
 import { initializeLocalization, translateValue } from './localization';
 
 const themePreferenceStorageKey = 'otsugua.theme.preference';
