@@ -23,7 +23,17 @@ class HomepageTest extends TestCase
 
         self::assertSame(1, $this->countMatches($xpath, '//*[@data-copy-email="guilhermebartolis@gmail.com"]'));
         self::assertSame(1, $this->countMatches($xpath, '//button[@data-download-cv and @data-cv-url="/files/guilherme-augusto-cv.pdf" and @data-cv-filename="guilherme-augusto-cv.pdf"]'));
-        self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://www.upwork.com/freelancers/otsugua"]'));
+        self::assertSame(0, $this->countMatches($xpath, '//a[@href="https://www.upwork.com/freelancers/otsugua"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://github.com/GuilhermeOtsugua/"]'));
+    }
+
+    public function test_static_homepage_keeps_contact_actions_without_upwork(): void
+    {
+        $xpath = $this->xpathFor(file_get_contents(resource_path('static/home.html')));
+
+        self::assertSame(0, $this->countMatches($xpath, '//a[@href="https://www.upwork.com/freelancers/otsugua"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//*[@data-copy-email="guilhermebartolis@gmail.com"]'));
+        self::assertSame(1, $this->countMatches($xpath, '//button[@data-download-cv]'));
         self::assertSame(1, $this->countMatches($xpath, '//a[@href="https://github.com/GuilhermeOtsugua/"]'));
     }
 

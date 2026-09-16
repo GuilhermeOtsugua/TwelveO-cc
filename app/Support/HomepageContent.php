@@ -57,10 +57,6 @@ class HomepageContent
             ],
             'profiles' => [
                 [
-                    'label' => 'Upwork',
-                    'href' => 'https://www.upwork.com/freelancers/otsugua',
-                ],
-                [
                     'label' => 'GitHub',
                     'href' => 'https://github.com/GuilhermeOtsugua/',
                 ],
