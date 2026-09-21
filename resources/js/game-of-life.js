@@ -1,4 +1,4 @@
-// Conway B3/S23 on a cylinder: horizontal neighbors wrap; vertical edges stay dead.
+// Conway B3/S23 on a torus: both axes wrap across the active world's edges.
 export function createLifeBoard(columns, rows, random = Math.random) {
     return Uint8Array.from({ length: columns * rows }, () => random() < 0.3 ? 1 : 0);
 }
@@ -46,8 +46,7 @@ export function stepLife(board, next, columns, rows) {
         for (let x = 0; x < columns; x++) {
             let neighbors = 0;
             for (let dy = -1; dy <= 1; dy++) {
-                const neighborY = y + dy;
-                if (neighborY < 0 || neighborY >= rows) continue;
+                const neighborY = (y + dy + rows) % rows;
                 for (let dx = -1; dx <= 1; dx++) {
                     if (!dx && !dy) continue;
                     const neighborX = (x + dx + columns) % columns;

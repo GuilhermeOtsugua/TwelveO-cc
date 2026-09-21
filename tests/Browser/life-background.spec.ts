@@ -25,13 +25,38 @@ test('Conway rules preserve blocks, oscillate blinkers, and keep empty boards de
     expect(advance(new Uint8Array(25), 5, 5)).toEqual(new Uint8Array(25));
 });
 
-test('a glider crosses the horizontal seam and top/bottom do not wrap', () => {
-    const cells = [[1, 0], [2, 1], [0, 2], [1, 2], [2, 2]];
-    let board = pattern(7, 7, cells.map(([x, y]) => [(x + 5) % 7, y]));
-    for (let i = 0; i < 4; i++) board = advance(board, 7, 7);
-    expect(board).toEqual(pattern(7, 7, cells.map(([x, y]) => [(x + 6) % 7, y + 1])));
-    const topRow = pattern(7, 7, [[1, 0], [2, 0], [3, 0]]);
-    expect(advance(topRow, 7, 7).slice(42)).toEqual(new Uint8Array(7));
+for (const [name, offsetX, offsetY] of [
+    ['horizontal seam', 7, 1],
+    ['vertical seam', 1, 5],
+    ['corner', 7, 5],
+] as const) {
+    test(`a glider crosses the ${name} in both directions`, () => {
+        const columns = 9;
+        const rows = 7;
+        const cells = [[1, 0], [2, 1], [0, 2], [1, 2], [2, 2]];
+        for (const direction of [1, -1]) {
+            const position = (shift: number) => cells.map(([x, y]) => [
+                ((direction * (x + offsetX + shift)) % columns + columns) % columns,
+                ((direction * (y + offsetY + shift)) % rows + rows) % rows,
+            ]);
+            let board = pattern(columns, rows, position(0));
+            for (let i = 0; i < 4; i++) board = advance(board, columns, rows);
+            expect(board).toEqual(pattern(columns, rows, position(1)));
+        }
+    });
+}
+
+test('edge neighbors interact across top/bottom and both corner seams', () => {
+    for (const y of [0, 6]) {
+        const horizontal = pattern(9, 7, [[3, y], [4, y], [5, y]]);
+        const vertical = pattern(9, 7, [[4, (y + 6) % 7], [4, y], [4, (y + 1) % 7]]);
+        const next = new Uint8Array(63);
+        expect(stepLife(horizontal, next, 9, 7)).toBe(4);
+        expect(next).toEqual(vertical);
+        expect(advance(vertical, 9, 7)).toEqual(horizontal);
+    }
+    const cornerBlock = pattern(9, 7, [[0, 0], [8, 0], [0, 6], [8, 6]]);
+    expect(advance(cornerBlock, 9, 7)).toEqual(cornerBlock);
 });
 
 test('resize freezes excluded cells, restores them, and retains the active generation', () => {
@@ -220,7 +245,7 @@ for (const theme of ['dark', 'light', 'light-to-dark'] as const) {
         await page.addInitScript((initialTheme) => {
             localStorage.setItem('otsugua.theme.preference', initialTheme);
         }, theme === 'dark' ? 'dark' : 'light');
-        // Empty first seed; subsequent seed is a normal random board.
+        // Keep resize-created cells empty until the expected reseed window.
         await page.addInitScript(() => {
             const random = Math.random;
             let firstSeed = true;
@@ -228,9 +253,9 @@ for (const theme of ['dark', 'light', 'light-to-dark'] as const) {
             (window as any).allowLifePopulation = () => { firstSeed = false; };
         });
         await page.goto('/');
+        await page.evaluate(() => document.fonts.ready);
         await page.clock.runFor(200);
         const empty = await pixels(page);
-        await page.evaluate(() => (window as any).allowLifePopulation());
         await page.clock.fastForward(59_000);
         expect(await pixels(page)).toBe(empty);
         if (theme === 'light-to-dark') {
@@ -253,6 +278,9 @@ for (const theme of ['dark', 'light', 'light-to-dark'] as const) {
         expect(await pixels(page)).toBe(empty);
         await page.clock.fastForward(14_000);
         expect(await pixels(page)).toBe(empty);
+        // Theme/layout changes can add rows that now wrap into the visible top.
+        // Only permit population once those resizes are over, just before reseeding.
+        await page.evaluate(() => (window as any).allowLifePopulation());
         await page.clock.fastForward(1500);
         await page.clock.runFor(900);
         expect(await pixels(page)).not.toBe(empty);
