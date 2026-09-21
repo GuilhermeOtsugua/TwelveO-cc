@@ -533,6 +533,7 @@ if (control instanceof HTMLElement) {
         if (!panel.hidden && event.target instanceof Node && !control.contains(event.target)) hidePanel();
     });
     panel.addEventListener('keydown', (event) => { if (event.key === 'Escape') { hidePanel(); keyboard.focus(); } });
+    document.addEventListener('otsugua:life-enter', closeSession);
     window.addEventListener('pagehide', closeSession);
     state('idle');
 }

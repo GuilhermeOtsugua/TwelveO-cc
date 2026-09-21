@@ -2,6 +2,7 @@
 @import 'tailwindcss';
 @import './djinn.css';
 @import './components/life-background.css';
+@import './components/life-immersion.css';
 @import './components/harbor-ledger.css';
 @import './components/northline-learning-ops.css';
 @import './components/northline-learning-ops-workspaces.css';

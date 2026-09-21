@@ -1,0 +1,63 @@
+[data-life-enter] {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    cursor: pointer;
+}
+
+[data-life-enter]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 0.12em;
+    border-radius: 0.04em;
+}
+
+/* Keep document geometry: the canvas owns a document-height Life world. */
+html.life-immersed .otsugua-page > header,
+html.life-immersed .otsugua-page > main {
+    opacity: 0;
+    pointer-events: none;
+}
+
+html.life-immersed .life-background {
+    --life-reveal: 1;
+}
+
+[data-life-exit] {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    touch-action: pan-y pinch-zoom;
+    cursor: default;
+}
+
+[data-life-exit]:focus-visible {
+    outline: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    outline-offset: -4px;
+}
+
+html.life-immersed [data-theme-toggle] {
+    opacity: 0;
+    pointer-events: none;
+    transition-duration: 240ms;
+}
+
+html.life-immersed[data-life-controls-visible] [data-theme-toggle] {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .life-background,
+    html.life-immersed [data-theme-toggle] {
+        transition: none;
+    }
+}

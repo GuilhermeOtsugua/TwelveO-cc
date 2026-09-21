@@ -4,6 +4,8 @@ const untranslatedSelector = 'script, style, svg, canvas, code, pre, [data-no-lo
 const originalAttributes = new WeakMap();
 
 const ptBR = {
+    'Otsugua — view Game of Life': 'Otsugua — ver o Jogo da Vida',
+    'Return to website. Scroll to show theme controls.': 'Voltar ao site. Role para mostrar os controles de tema.',
     'Otsugua, the portfolio of Guilherme Augusto. Full-stack Laravel work with technical notes and clean presentation.': 'Otsugua, o portfólio de Guilherme Augusto. Trabalho full-stack em Laravel com notas técnicas e apresentação limpa.',
     'Switch language to Brazilian Portuguese': 'Mudar idioma para português do Brasil',
     'Switch language to English': 'Mudar idioma para inglês',
