@@ -46,6 +46,20 @@ test('entry preserves the document, world and layout; exit restores scroll and f
         .toBe(await page.evaluate(() => (window as any).originalPixels));
 });
 
+test('immersive mode hides only the scrollbar and restores it on exit', async ({ page }) => {
+    await page.goto('/');
+    const root = page.locator('html');
+    const normalScrollbar = await root.evaluate(element => getComputedStyle(element).scrollbarWidth);
+    await page.locator(enter).click();
+    await expect(root).toHaveCSS('scrollbar-width', 'none');
+    await page.mouse.wheel(0, 500);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+    await expect(root).toHaveAttribute('data-life-controls-visible', '');
+    await page.keyboard.press('Escape');
+    await expect(root).toHaveCSS('scrollbar-width', normalScrollbar);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+});
+
 test('entry reveals controls for five seconds, and scrolling restarts their timer', async ({ page }) => {
     await page.clock.install();
     await page.emulateMedia({ reducedMotion: 'reduce' });

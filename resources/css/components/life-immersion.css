@@ -15,6 +15,15 @@
     border-radius: 0.04em;
 }
 
+/* Hide browser chrome without disabling wheel, touch or keyboard scrolling. */
+html.life-immersed {
+    scrollbar-width: none;
+}
+
+html.life-immersed::-webkit-scrollbar {
+    display: none;
+}
+
 /* Keep document geometry: the canvas owns a document-height Life world. */
 html.life-immersed .otsugua-page > header,
 html.life-immersed .otsugua-page > main {
