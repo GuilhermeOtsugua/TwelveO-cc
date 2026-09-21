@@ -1,4 +1,4 @@
-import { createLifeActivityMonitor, createLifeWorld, resizeLifeWorld, stepLife } from './game-of-life';
+import { createLifeLoopMonitor, createLifeWorld, resizeLifeWorld, stepLife } from './game-of-life';
 
 import { createLifeClock } from './life-clock';
 
@@ -27,7 +27,7 @@ function initializeLifeBackground(page) {
     let lastFrame = 0;
     let dirty = true;
     let suspended = false;
-    let activity = createLifeActivityMonitor();
+    let loop;
     let fadeElapsed = null;
     let reseeded = false;
     const clock = createLifeClock();
@@ -47,7 +47,7 @@ function initializeLifeBackground(page) {
         speedInput.value = '1';
         speedInput.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    const fadeDuration = 800;
+    const fadeDuration = 1000;
     const canAnimate = () => !reducedMotion.matches && !document.hidden && !suspended;
 
     function measure() {
@@ -61,7 +61,12 @@ function initializeLifeBackground(page) {
         const rows = Math.ceil(worldHeight / cellSize);
         const previousWorld = world;
         world = world ? resizeLifeWorld(world, columns, rows) : createLifeWorld(columns, rows);
-        if (world !== previousWorld) next = new Uint8Array(world.board.length);
+        if (world !== previousWorld) {
+            next = new Uint8Array(world.board.length);
+            loop = createLifeLoopMonitor(world.board);
+            fadeElapsed = null;
+            reseeded = false;
+        }
         const ratio = Math.min(window.devicePixelRatio || 1, 2);
         canvas.width = Math.round(viewportWidth * ratio);
         canvas.height = Math.round(viewportHeight * ratio);
@@ -72,7 +77,7 @@ function initializeLifeBackground(page) {
     function reseed() {
         // Discard the previous seed's stored edges too, so they cannot reappear later.
         world = createLifeWorld(world.columns, world.rows);
-        activity = createLifeActivityMonitor();
+        loop = createLifeLoopMonitor(world.board);
         reseeded = true;
     }
 
@@ -106,9 +111,9 @@ function initializeLifeBackground(page) {
                 clock.reset(now);
                 dirty = true;
             } else if (clock.advance(now)) {
-                const changed = stepLife(world.board, next, world.columns, world.rows);
+                stepLife(world.board, next, world.columns, world.rows);
                 [world.board, next] = [next, world.board];
-                if (activity.record(changed, world.board.length, now - lastStep)) {
+                if (loop.record(world.board, now - lastStep)) {
                     fadeElapsed = 0;
                     reseeded = false;
                 }

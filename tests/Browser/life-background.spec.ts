@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { createLifeActivityMonitor, createLifeBoard, createLifeWorld, resizeLifeWorld, stepLife } from '../../resources/js/game-of-life.js';
+import { createLifeLoopMonitor, createLifeBoard, createLifeWorld, resizeLifeWorld, stepLife } from '../../resources/js/game-of-life.js';
 
 function advance(board: Uint8Array, columns: number, rows: number) {
     const next = new Uint8Array(board.length);
@@ -91,24 +91,59 @@ test('a fresh seed does not restore cached cells from the previous world', () =>
     expect(world.board).toEqual(new Uint8Array(35));
 });
 
-test('random initialization and low-activity grace/window contracts', () => {
+test('empty and still-life boards require four states followed by 30 active seconds', () => {
     expect(createLifeBoard(2, 2, () => 0)).toEqual(new Uint8Array([1, 1, 1, 1]));
-    expect(createLifeBoard(2, 2, () => 0.9)).toEqual(new Uint8Array(4));
-    const activity = createLifeActivityMonitor();
-    for (let seconds = 1; seconds <= 74; seconds++) {
-        expect(activity.record(0, 10000, 1000)).toBe(false);
+    for (const board of [new Uint8Array(25), pattern(5, 5, [[1, 1], [2, 1], [1, 2], [2, 2]])]) {
+        const monitor = createLifeLoopMonitor(board);
+        for (let i = 0; i < 3; i++) expect(monitor.record(board, 60_000)).toBe(false);
+        expect(monitor.record(board, 29_999)).toBe(false);
+        expect(monitor.record(board, 1)).toBe(true);
+        expect(createLifeLoopMonitor(board).record(board, 60_000)).toBe(false);
     }
-    expect(activity.record(0, 10000, 1000)).toBe(true);
-    // Each new seed starts its own grace period, regardless of prior inactivity.
-    expect(createLifeActivityMonitor().record(0, 10000, 60000)).toBe(false);
 });
 
-test('rolling activity distinguishes static populations from a sufficiently active world', () => {
-    const activity = createLifeActivityMonitor();
-    activity.record(0, 10000, 60000);
-    for (let i = 0; i < 30; i++) expect(activity.record(100, 10000, 1000)).toBe(false);
-    for (let i = 0; i < 14; i++) expect(activity.record(0, 10000, 1000)).toBe(false);
-    expect(activity.record(0, 10000, 1000)).toBe(true);
+test('a real blinker loops for 30 seconds at every speed, including mid-loop changes', () => {
+    for (const speeds of [[0.5], [1], [4], [0.5, 4, 1.137, 2.718]]) {
+        let board = pattern(7, 7, [[2, 3], [3, 3], [4, 3]]);
+        let next = new Uint8Array(49);
+        const monitor = createLifeLoopMonitor(board);
+        let elapsed = 0;
+        for (let generation = 1; generation < 1000; generation++) {
+            const delta = 1000 / (6 * speeds[generation % speeds.length]);
+            stepLife(board, next, 7, 7);
+            [board, next] = [next, board];
+            if (generation > 3) elapsed += delta;
+            const reseed = monitor.record(board, delta);
+            expect(reseed).toBe(elapsed >= 30_000);
+            if (reseed) break;
+        }
+        expect(elapsed).toBeGreaterThanOrEqual(30_000);
+    }
+});
+
+test('equal populations, moving gliders and longer-period cycles are not two-state loops', () => {
+    let glider = pattern(31, 31, [[1, 0], [2, 1], [0, 2], [1, 2], [2, 2]]);
+    const monitor = createLifeLoopMonitor(glider);
+    for (let i = 0; i < 200; i++) {
+        glider = advance(glider, 31, 31);
+        expect(monitor.record(glider, 1000)).toBe(false);
+    }
+    const states = [[1, 0, 0], [0, 1, 0], [0, 0, 1]].map(values => Uint8Array.from(values));
+    const longerCycle = createLifeLoopMonitor(states[0]);
+    for (let i = 1; i <= 100; i++) expect(longerCycle.record(states[i % 3], 1000)).toBe(false);
+});
+
+test('a changed cell anywhere breaks the loop and resets the full confirmation window', () => {
+    const board = new Uint8Array(180_000);
+    const monitor = createLifeLoopMonitor(board);
+    for (let i = 0; i < 3; i++) monitor.record(board, 1000);
+    expect(monitor.record(board, 29_999)).toBe(false);
+    board[board.length - 1] = 1;
+    expect(monitor.record(board, 1000)).toBe(false);
+    board[board.length - 1] = 0;
+    for (let i = 0; i < 4; i++) expect(monitor.record(board, 1000)).toBe(false);
+    expect(monitor.record(board, 29_999)).toBe(false);
+    expect(monitor.record(board, 1)).toBe(true);
 });
 
 test.beforeEach(async ({ page }) => {
@@ -239,8 +274,8 @@ test('original dot size and square grid survive desktop and mobile resizing', as
     expect(await page.evaluate(() => (window as any).lifeGridY % 10)).toBe(0);
 });
 
-for (const theme of ['dark', 'light', 'light-to-dark'] as const) {
-    test(`reseeding counts active time in ${theme}, excluding hidden time`, async ({ page }) => {
+for (const [theme, speed] of [['dark', 0.5], ['light', 4], ['light-to-dark', 1]] as const) {
+    test(`reseeding counts active time in ${theme} at ${speed}x, excluding hidden time`, async ({ page }) => {
         await page.clock.install();
         await page.addInitScript((initialTheme) => {
             localStorage.setItem('otsugua.theme.preference', initialTheme);
@@ -253,13 +288,25 @@ for (const theme of ['dark', 'light', 'light-to-dark'] as const) {
             (window as any).allowLifePopulation = () => { firstSeed = false; };
         });
         await page.goto('/');
-        await page.evaluate(() => document.fonts.ready);
-        await page.clock.runFor(200);
+        await page.evaluate(async () => {
+            await document.fonts.ready;
+            const world = document.querySelector('.otsugua-page')!;
+            const height = world.scrollHeight;
+            // Isolate timing from native-control/layout rounding across themes.
+            // Actual world-bound changes intentionally reset loop detection.
+            Object.defineProperty(world, 'scrollHeight', { get: () => height });
+        });
+        await page.evaluate(value => {
+            const slider = document.querySelector('[data-life-speed]') as HTMLInputElement;
+            slider.value = String(value);
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+        }, speed);
+        await page.clock.runFor(1500); // Establish all four loop states first.
         const empty = await pixels(page);
-        await page.clock.fastForward(59_000);
+        await page.clock.fastForward(18_000);
         expect(await pixels(page)).toBe(empty);
         if (theme === 'light-to-dark') {
-            // Changing themes must retain the first 59 seconds, not restart grace.
+            // A palette change must not restart the confirmed loop timer.
             await page.locator('[data-theme-option="dark"]').click();
             await expect(page.locator('html')).toHaveAttribute('data-theme-effective', 'dark');
         }
@@ -276,13 +323,13 @@ for (const theme of ['dark', 'light', 'light-to-dark'] as const) {
         });
         await page.clock.fastForward(1000);
         expect(await pixels(page)).toBe(empty);
-        await page.clock.fastForward(14_000);
+        await page.clock.fastForward(8000);
         expect(await pixels(page)).toBe(empty);
         // Theme/layout changes can add rows that now wrap into the visible top.
         // Only permit population once those resizes are over, just before reseeding.
         await page.evaluate(() => (window as any).allowLifePopulation());
-        await page.clock.fastForward(1500);
-        await page.clock.runFor(900);
+        await page.clock.fastForward(4000);
+        await page.clock.runFor(1100);
         expect(await pixels(page)).not.toBe(empty);
     });
 }
