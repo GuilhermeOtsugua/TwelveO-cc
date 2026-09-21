@@ -31,7 +31,7 @@ test('entry preserves the document, world and layout; exit restores scroll and f
     await expect(page.locator('.life-background')).toHaveCSS('--life-reveal', '1');
     await expect(page.locator('.otsugua-page > main')).toHaveJSProperty('inert', true);
     await expect(page.locator('[data-home-header]')).toHaveJSProperty('inert', true);
-    await expect(page.locator(themes)).toHaveJSProperty('inert', true);
+    await expect(page.locator(themes)).toHaveJSProperty('inert', false);
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(height);
     await page.evaluate(() => window.scrollTo({ top: 700, behavior: 'instant' }));
     await expect.poll(() => page.evaluate(() => scrollY)).toBe(700);
@@ -46,12 +46,22 @@ test('entry preserves the document, world and layout; exit restores scroll and f
         .toBe(await page.evaluate(() => (window as any).originalPixels));
 });
 
-test('scroll reveals themes for five seconds, subsequent scroll resets the timer', async ({ page }) => {
+test('entry reveals controls for five seconds, and scrolling restarts their timer', async ({ page }) => {
     await page.clock.install();
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
     await page.locator(enter).click();
+    await expect(page.locator(themes)).toHaveCSS('opacity', '1');
+    await expect(page.locator('[data-life-speed]')).toBeVisible();
+    await page.clock.runFor(4900);
+    await expect(page.locator(themes)).toHaveJSProperty('inert', false);
+    await page.clock.runFor(101);
+    await expect(page.locator(themes)).toHaveJSProperty('inert', true);
     await expect(page.locator(themes)).toHaveCSS('opacity', '0');
+    await page.keyboard.press('Escape');
+    await page.locator(enter).click();
+    await expect(page.locator(themes)).toHaveCSS('opacity', '1');
+    await expect(page.locator(themes)).toHaveJSProperty('inert', false);
     await page.evaluate(() => window.dispatchEvent(new WheelEvent('wheel', { deltaY: -30 })));
     await expect(page.locator(themes)).toHaveJSProperty('inert', false);
     await page.clock.runFor(4900);
@@ -62,6 +72,24 @@ test('scroll reveals themes for five seconds, subsequent scroll resets the timer
     await page.clock.runFor(101);
     await expect(page.locator(themes)).toHaveJSProperty('inert', true);
     await expect(page.locator(themes)).toHaveCSS('opacity', '0');
+});
+
+test('mobile theme options stay vertically centered when selected, hovered or focused', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'Mobile pill alignment');
+    await page.goto('/');
+    for (const immersed of [false, true]) {
+        if (immersed) await page.locator(enter).click();
+        for (const theme of ['system', 'dark', 'light']) {
+            const button = page.locator(`[data-theme-option="${theme}"]`);
+            await button.click();
+            await button.press('ArrowRight'); // Exercise keyboard focus styling too.
+            await expect.poll(() => button.evaluate(element => {
+                const pill = element.closest('[data-theme-toggle]')!.getBoundingClientRect();
+                const option = element.getBoundingClientRect();
+                return Math.abs((option.top - pill.top) - (pill.bottom - option.bottom));
+            })).toBeLessThan(0.02);
+        }
+    }
 });
 
 test('themes remain usable without exiting; keyboard focus survives the timer', async ({ page }) => {

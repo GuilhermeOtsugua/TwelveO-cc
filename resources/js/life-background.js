@@ -1,5 +1,7 @@
 import { createLifeActivityMonitor, createLifeWorld, resizeLifeWorld, stepLife } from './game-of-life';
 
+import { createLifeClock } from './life-clock';
+
 const page = document.querySelector('.otsugua-page');
 
 if (page) initializeLifeBackground(page);
@@ -28,7 +30,23 @@ function initializeLifeBackground(page) {
     let activity = createLifeActivityMonitor();
     let fadeElapsed = null;
     let reseeded = false;
-    const stepInterval = 1000 / 6;
+    const clock = createLifeClock();
+    const speedInput = page.querySelector('[data-life-speed]');
+    const speedValue = page.querySelector('[data-life-speed-value]');
+    speedInput?.addEventListener('input', () => {
+        const speed = speedInput.valueAsNumber;
+        const now = performance.now();
+        clock.setSpeed(speed, now);
+        if (!canAnimate()) clock.reset(now);
+        const label = `${speed.toFixed(2)}×`;
+        speedValue.textContent = label;
+        speedInput.setAttribute('aria-valuetext', label);
+        speedInput.style.setProperty('--life-speed-level', `${(speed - 0.5) / 3.5 * 100}%`);
+    });
+    page.querySelector('[data-life-speed-reset]')?.addEventListener('click', () => {
+        speedInput.value = '1';
+        speedInput.dispatchEvent(new Event('input', { bubbles: true }));
+    });
     const fadeDuration = 800;
     const canAnimate = () => !reducedMotion.matches && !document.hidden && !suspended;
 
@@ -85,8 +103,9 @@ function initializeLifeBackground(page) {
                 if (fadeElapsed >= fadeDuration / 2 && !reseeded) reseed();
                 if (fadeElapsed >= fadeDuration) fadeElapsed = null;
                 lastStep = now;
+                clock.reset(now);
                 dirty = true;
-            } else if (now - lastStep >= stepInterval) {
+            } else if (clock.advance(now)) {
                 const changed = stepLife(world.board, next, world.columns, world.rows);
                 [world.board, next] = [next, world.board];
                 if (activity.record(changed, world.board.length, now - lastStep)) {
@@ -113,6 +132,7 @@ function initializeLifeBackground(page) {
         cancelAnimationFrame(frame);
         frame = 0;
         lastStep = lastFrame = performance.now();
+        clock.reset(lastFrame);
         // Reduced motion never leaves a partially faded canvas or runs a transition.
         if (reducedMotion.matches && fadeElapsed !== null) {
             fadeElapsed = null;
@@ -127,7 +147,11 @@ function initializeLifeBackground(page) {
     window.addEventListener('resize', sync, { passive: true });
     document.addEventListener('visibilitychange', sync);
     reducedMotion.addEventListener('change', sync);
-    const themeObserver = new MutationObserver(sync);
+    // A palette change must not restart the generation clock or clear/resize the canvas.
+    const themeObserver = new MutationObserver(() => {
+        cellColor = getComputedStyle(canvas).color;
+        requestDraw();
+    });
     themeObserver.observe(root, { attributes: true, attributeFilter: ['data-theme-effective'] });
     const sizeObserver = new ResizeObserver(() => {
         if (!suspended) {

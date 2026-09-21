@@ -433,6 +433,10 @@
                 role="group"
                 aria-label="Theme preference"
             >
+                <div class="life-speed" data-life-speed-control hidden>
+                    <button type="button" data-life-speed-reset aria-label="Reset simulation speed"><span data-life-speed-value data-no-localize>1.00×</span></button>
+                    <input type="range" min="0.5" max="4" step="any" value="1" data-life-speed aria-label="Simulation speed" aria-valuetext="1.00×">
+                </div>
                 <button type="button" class="theme-toggle__option" data-theme-option="system" aria-pressed="true">
                     <svg viewBox="0 0 24 24" class="theme-toggle__icon" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="3.5" y="4.5" width="17" height="11.5" rx="2.4" />

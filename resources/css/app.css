@@ -1273,6 +1273,11 @@
         padding: 0;
     }
 
+    .theme-toggle__option:hover,
+    .theme-toggle__option:focus-visible {
+        transform: none;
+    }
+
     .theme-toggle__option-label {
         position: absolute;
         width: 1px;

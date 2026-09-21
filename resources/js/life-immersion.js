@@ -17,13 +17,16 @@ function initializeLifeImmersion() {
     let hideTimer;
     let pointerStart;
     let dragged = false;
+    let adjustingSpeed = false;
+    const speedControl = themes.querySelector('[data-life-speed-control]');
+    const speedInput = themes.querySelector('[data-life-speed]');
 
     function keyboardInThemes() {
         return themes.contains(document.activeElement) && document.activeElement.matches(':focus-visible');
     }
 
     function hideThemes() {
-        if (!active || keyboardInThemes()) return;
+        if (!active || adjustingSpeed || keyboardInThemes()) return;
         root.removeAttribute('data-life-controls-visible');
         themes.inert = true;
     }
@@ -51,6 +54,8 @@ function initializeLifeImmersion() {
         trigger.setAttribute('aria-pressed', String(active));
         exit.hidden = !active;
         themes.inert = active;
+        if (speedControl) speedControl.hidden = !active;
+        adjustingSpeed = false;
         content.forEach((element, index) => {
             element.inert = active;
             fades.get(element)?.cancel();
@@ -64,6 +69,7 @@ function initializeLifeImmersion() {
         dragged = false;
         if (active) {
             exit.focus({ preventScroll: true });
+            revealThemes();
         } else {
             window.scrollTo({ top: entryScroll, behavior: 'instant' });
             if (restoreFocus) trigger.focus({ preventScroll: true });
@@ -89,6 +95,20 @@ function initializeLifeImmersion() {
     // Also work at the world's top/bottom, where scroll intent may not move the document.
     window.addEventListener('wheel', revealThemes, { passive: true });
     exit.addEventListener('touchmove', revealThemes, { passive: true });
+    speedInput?.addEventListener('pointerdown', event => {
+        adjustingSpeed = true;
+        speedInput.setPointerCapture(event.pointerId);
+        revealThemes();
+    });
+    function finishSpeedAdjustment() {
+        if (!adjustingSpeed) return;
+        adjustingSpeed = false;
+        revealThemes();
+    }
+    speedInput?.addEventListener('pointerup', finishSpeedAdjustment);
+    speedInput?.addEventListener('pointercancel', finishSpeedAdjustment);
+    speedInput?.addEventListener('lostpointercapture', finishSpeedAdjustment);
+    speedInput?.addEventListener('input', revealThemes);
     themes.addEventListener('click', revealThemes);
     themes.addEventListener('focusin', revealThemes);
     themes.addEventListener('focusout', () => {
