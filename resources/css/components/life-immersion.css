@@ -116,6 +116,9 @@ html.life-immersed[data-life-controls-visible] [data-theme-toggle] {
         grid-template-columns: minmax(0, 1fr);
         gap: 0;
     }
+
+    /* Move only the indicator; keep the track and both touch areas in place. */
+    [data-life-speed-value] { position: relative; top: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
