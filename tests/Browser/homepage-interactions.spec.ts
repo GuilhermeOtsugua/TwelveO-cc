@@ -91,34 +91,45 @@ test.describe('Homepage interactions', () => {
         test.skip(browserName !== 'chromium' || testInfo.project.name !== 'desktop-chromium');
 
         await page.evaluate(() => window.localStorage.removeItem('otsugua.locale.preference'));
+        await page.addInitScript(() => {
+            const copied: string[] = [];
+            Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (text: string) => { copied.push(text); } } });
+            (window as Window & { copiedEmails: string[] }).copiedEmails = copied;
+        });
         await page.goto('/?ref=upwork#contact');
         await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
 
         const emailButton = page.locator('[data-copy-email]').first();
         const feedback = page.locator('[data-copy-email-feedback]');
 
+        const activateRestrictedEmail = async () => {
+            await expect(emailButton).toHaveAttribute('aria-disabled', 'true');
+            // aria-disabled explains a restriction without disabling native keyboard activation.
+            await emailButton.press('Enter');
+            expect(await page.evaluate(() => (window as Window & { copiedEmails: string[] }).copiedEmails)).toEqual([]);
+        };
         await emailButton.scrollIntoViewIfNeeded();
-        await emailButton.click();
+        await activateRestrictedEmail();
 
         await expect(feedback).toHaveText('Temporarily disabled.');
         await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'error');
 
         await page.locator('[data-locale-toggle]').click();
-        await emailButton.click();
+        await activateRestrictedEmail();
 
         await expect(feedback).toHaveText('Temporariamente indisponível.');
         await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'error');
 
         await page.goto('/#contact');
         await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
-        await emailButton.click();
+        await activateRestrictedEmail();
 
         await expect(feedback).toHaveText('Temporariamente indisponível.');
         await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'error');
 
         await page.goto('/?source=direct#contact');
         await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
-        await emailButton.click();
+        await activateRestrictedEmail();
 
         await expect(feedback).toHaveText('Temporariamente indisponível.');
         await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'error');
@@ -127,6 +138,8 @@ test.describe('Homepage interactions', () => {
         await expect(page.getByRole('heading', { name: 'Harbor Ledger' })).toBeVisible();
         await emailButton.click();
 
+        expect(await page.evaluate(() => (window as Window & { copiedEmails: string[] }).copiedEmails))
+            .toEqual([await emailButton.getAttribute('data-copy-email')]);
         await expect(feedback).toHaveText('Copiado!');
         await expect(feedback).toHaveAttribute('data-copy-email-feedback-state', 'success');
     });
