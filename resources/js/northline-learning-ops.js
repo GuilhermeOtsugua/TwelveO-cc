@@ -1,9 +1,5 @@
 import {
-    northlineAutoDemoEnabled,
-    northlineDemoDelay,
-    northlineDemoStepDelay,
     northlineStudentsFilterCycle,
-    northlineStudentsFilterLabels,
     northlineViewMeta,
 } from './northline/config';
 import { initializeNorthlineRollingText } from './northline/rolling-text';
@@ -22,17 +18,11 @@ import {
 } from './northline/renderers';
 
 let northlineCheckInRotationTimer = null;
-let northlineCheckInResizeHandler = null;
 
 function stopNorthlineCheckInRotation() {
     if (northlineCheckInRotationTimer !== null) {
         window.clearInterval(northlineCheckInRotationTimer);
         northlineCheckInRotationTimer = null;
-    }
-
-    if (northlineCheckInResizeHandler !== null) {
-        window.removeEventListener('resize', northlineCheckInResizeHandler);
-        northlineCheckInResizeHandler = null;
     }
 }
 
@@ -140,8 +130,6 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
     const gradingOverlay = slice.querySelector('[data-northline-overlay="grading"]');
     const messageOverlay = slice.querySelector('[data-northline-overlay="message"]');
 
-    let resumeTimer = null;
-    let demoTimer = null;
     let rollingTextFrame = null;
 
     const state = {
@@ -159,7 +147,6 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         messageSubject: '',
         messageBody: '',
         messageDraftLocale: null,
-        demoStep: 0,
     };
 
     const getCurrentClassroom = () => classrooms.find((item) => item.id === state.selectedClassId) ?? classrooms[0];
@@ -260,43 +247,6 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         state.messageSubject = '';
         state.messageBody = '';
     };
-    const pauseDemo = () => {
-        if (resumeTimer) {
-            window.clearTimeout(resumeTimer);
-            resumeTimer = null;
-        }
-
-        if (demoTimer) {
-            window.clearTimeout(demoTimer);
-            demoTimer = null;
-        }
-    };
-    const scheduleDemo = () => {
-        pauseDemo();
-
-        if (!northlineAutoDemoEnabled) {
-            return;
-        }
-
-        if (state.overlay !== null || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            return;
-        }
-
-        resumeTimer = window.setTimeout(() => {
-            const steps = [
-                () => { const currentIndex = classrooms.findIndex((item) => item.id === state.selectedClassId); state.selectedClassId = classrooms[(currentIndex + 1) % classrooms.length].id; resetSelections(); },
-                () => { state.view = 'documents'; state.examsFilter = null; state.studentsFilter = null; },
-                () => { state.view = 'students'; state.studentsFilter = 'alerts'; },
-                () => { state.view = 'exams'; state.examsFilter = 'next-24h'; state.studentsFilter = null; },
-                () => { state.view = 'dashboard'; state.examsFilter = null; state.studentsFilter = null; },
-            ];
-
-            steps[state.demoStep % steps.length]();
-            state.demoStep += 1;
-            render();
-            demoTimer = window.setTimeout(scheduleDemo, northlineDemoStepDelay);
-        }, northlineDemoDelay);
-    };
     const findAssignmentByStudentId = (studentId) => getCurrentClassroom().gradingQueue.find((assignment) => assignment.students.some((student) => student.id === studentId)) ?? getCurrentClassroom().gradingQueue[0] ?? null;
     const openGradingWorkbench = (assignmentId = null) => {
         const fallbackAssignment = getCurrentClassroom().gradingQueue[0] ?? null;
@@ -318,7 +268,6 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
         render();
     };
     const resetWorkspace = () => {
-        pauseDemo();
         state.view = 'dashboard';
         state.overlay = null;
         state.studentsFilter = null;
@@ -337,12 +286,6 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
             initializeNorthlineRollingText(slice);
             rollingTextFrame = null;
         });
-    };
-    const setView = (view, options = {}) => {
-        state.view = view;
-        state.studentsFilter = options.studentsFilter ?? (view === 'students' ? state.studentsFilter : null);
-        state.examsFilter = options.examsFilter ?? (view === 'exams' ? state.examsFilter : null);
-        render();
     };
     const render = () => {
         const classroom = getCurrentClassroom();
@@ -447,7 +390,6 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
 
     resetSelections();
     render();
-    scheduleDemo();
     window.addEventListener('resize', scheduleRollingTextRefresh);
 
     if (document.fonts?.ready) {
@@ -456,13 +398,6 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
 
     document.addEventListener('otsugua:localechange', (event) => {
         syncMessageDraftLocale(event.detail?.locale ?? getCurrentLocale());
-    });
-
-    ['pointerdown', 'pointerenter', 'focusin', 'keydown', 'touchstart'].forEach((eventName) => {
-        slice.addEventListener(eventName, () => {
-            pauseDemo();
-            scheduleDemo();
-        }, { passive: eventName !== 'keydown' });
     });
 
     document.addEventListener('click', (event) => {

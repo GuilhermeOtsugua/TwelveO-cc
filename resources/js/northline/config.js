@@ -1,7 +1,3 @@
-export const northlineDemoDelay = 2800;
-export const northlineDemoStepDelay = 3600;
-export const northlineAutoDemoEnabled = false;
-
 export const northlineIconMap = {
     upload: 'upload_file',
     quiz: 'quiz',
