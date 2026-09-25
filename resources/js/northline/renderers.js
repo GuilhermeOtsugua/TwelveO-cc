@@ -4,14 +4,9 @@ import {
     northlineStudentsFilterLabels,
 } from './config';
 
-export function escapeNorthlineHtml(value) {
-    return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-}
+import { escapeHtml as escapeNorthlineHtml } from '../html';
+
+export { escapeNorthlineHtml };
 
 
 

@@ -1,3 +1,5 @@
+import { escapeHtml } from './html';
+
 document.querySelectorAll('[data-harbor-system-trace-root]').forEach((root) => {
     const toggle = root.querySelector('[data-harbor-system-trace-toggle]');
 
@@ -39,13 +41,6 @@ document.querySelectorAll('[data-harbor-ledger-slice]').forEach((slice) => {
     const summaryPanel = slice.querySelector('[data-harbor-panel="summary"]');
     const panelToggles = Array.from(slice.querySelectorAll('[data-harbor-panel-toggle]'));
     const resetControl = slice.querySelector('[data-harbor-reset]');
-
-    const escapeHtml = (value) => String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
 
     const renderComment = (comment) => {
         if (comment.type === 'system') {
