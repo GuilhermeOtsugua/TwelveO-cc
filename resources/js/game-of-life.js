@@ -61,35 +61,40 @@ export function stepLife(board, next, columns, rows) {
     return changed;
 }
 
-// Two consecutive matches against two generations ago establish A-B-A-B.
-// Callers supply active elapsed time only and replace the monitor on world resize.
+// Exact two/six-generation comparisons cover periods 1, 2, 3 and 6, not 4 or 5.
+// Confirm two complete lag-length sequences before counting 30 active seconds.
+// Callers exclude inactive time and replace the monitor on resize/repopulation.
 export function createLifeLoopMonitor(initialBoard) {
-    const history = [initialBoard.slice(), new Uint8Array(initialBoard.length)];
+    const history = Array.from({ length: 6 }, () => new Uint8Array(initialBoard.length));
+    history[0].set(initialBoard);
+    const checks = [2, 6].map(period => ({ period, matches: 0, elapsed: 0 }));
     let slot = 1;
     let samples = 1;
-    let matches = 0;
-    let loopMs = 0;
 
     return {
         record(board, elapsedMs) {
-            const previous = history[slot];
-            let equal = samples >= 2;
-            for (let i = 0; equal && i < board.length; i++) {
-                if (board[i] !== previous[i]) equal = false;
+            let reseed = false;
+            for (const check of checks) {
+                const previous = history[(slot + history.length - check.period) % history.length];
+                let equal = samples >= check.period;
+                for (let i = 0; equal && i < board.length; i++) {
+                    if (board[i] !== previous[i]) equal = false;
+                }
+                if (equal) {
+                    // Independent timers preserve the original four-state fast path.
+                    if (check.matches === check.period) check.elapsed += elapsedMs;
+                    check.matches = Math.min(check.period, check.matches + 1);
+                } else {
+                    check.matches = 0;
+                    check.elapsed = 0;
+                }
+                reseed ||= check.elapsed >= 30_000;
             }
-            if (equal) {
-                // Start timing only after all four states have confirmed the loop.
-                if (matches === 2) loopMs += elapsedMs;
-                matches = Math.min(2, matches + 1);
-            } else {
-                matches = 0;
-                loopMs = 0;
-            }
-            // The simulation reuses its buffers, so retain owned snapshots, not references.
-            previous.set(board);
-            slot = 1 - slot;
-            samples = Math.min(2, samples + 1);
-            return loopMs >= 30_000;
+            // Both checks read before overwriting; the simulation reuses its buffers.
+            history[slot].set(board);
+            slot = (slot + 1) % history.length;
+            samples = Math.min(history.length, samples + 1);
+            return reseed;
         },
     };
 }

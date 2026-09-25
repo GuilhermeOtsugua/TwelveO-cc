@@ -121,16 +121,16 @@ test('a real blinker loops for 30 seconds at every speed, including mid-loop cha
     }
 });
 
-test('equal populations, moving gliders and longer-period cycles are not two-state loops', () => {
+test('equal populations, moving gliders and period-five cycles do not trigger reseeding', () => {
     let glider = pattern(31, 31, [[1, 0], [2, 1], [0, 2], [1, 2], [2, 2]]);
     const monitor = createLifeLoopMonitor(glider);
     for (let i = 0; i < 200; i++) {
         glider = advance(glider, 31, 31);
         expect(monitor.record(glider, 1000)).toBe(false);
     }
-    const states = [[1, 0, 0], [0, 1, 0], [0, 0, 1]].map(values => Uint8Array.from(values));
+    const states = Array.from({ length: 5 }, (_, i) => Uint8Array.from({ length: 5 }, (_, j) => Number(i === j)));
     const longerCycle = createLifeLoopMonitor(states[0]);
-    for (let i = 1; i <= 100; i++) expect(longerCycle.record(states[i % 3], 1000)).toBe(false);
+    for (let i = 1; i <= 100; i++) expect(longerCycle.record(states[i % 5], 1000)).toBe(false);
 });
 
 test('a changed cell anywhere breaks the loop and resets the full confirmation window', () => {

@@ -54,6 +54,62 @@ Immersive mode preserves scrolling and offers theme controls and a 0.5×–4× s
 slider. Select the speed value to reset it to 1×. Reduced-motion preferences are
 respected. Entering immersion ends any active Djinn session.
 
+### Repopulation policy
+
+The simulation compares exact whole-board states two and six generations apart.
+This detects periods **1, 2, 3 and 6**, not every period up to six: periods four
+and five are deliberately outside the policy. A blinker and a pulsar together
+produce a whole-board period of `LCM(2, 3) = 6`.
+
+The original two-generation check confirms four observed states; the six-generation
+check confirms twelve. Each independently requires another **30 active seconds**
+of matching phases before the existing one-second fade and repopulation. Hidden,
+suspended and reduced-motion time is excluded. Speed/theme changes preserve
+progress; world resizing resets detection. Six reusable snapshots support at most
+two full-board comparisons and one snapshot copy per generation, without hashing.
+
+### Mathematical assessment
+
+A September 2026 offline study sampled 2,048 worlds for each of two measured page
+geometries. Every cell was independently initialized alive with probability 0.3,
+using reproducible SplitMix64 draws, then evolved with the application's B3/S23
+rules and toroidal wrapping. A configuration with `k` live cells among `N` has
+probability `0.3^k × 0.7^(N-k)`; counting all configurations equally would model a
+different initializer. Expected density after the first generation is 34.3064%,
+but subsequent spatial correlations prevent using that density formula to predict
+cycle frequencies.
+
+| Eventual whole-board period | Desktop: 144 × 417 | Narrow: 39 × 416 |
+| --- | ---: | ---: |
+| 2 | 2,000 | 2,031 |
+| 6 | 48 | 16 |
+| 156 | 0 | 1 |
+
+Periods 1/2 covered **98.413%** of these 4,096 worlds. Adding period-six comparisons
+raised observed coverage to **99.976%**; searching every period through 32 added
+zero further hits. Under independent-sample assumptions, zero extra hits gives a
+one-sided 95% upper bound of approximately **0.073 percentage points** on additional
+coverage for the equally weighted two-layout population—not a universal guarantee.
+
+The primary observation budget was 20,000 generations with exact-repeat searches
+through period 128. Both unresolved cases were followed using Brent cycle detection
+and verified with 512-state history: one desktop world reached period two at
+generation 20,536; the narrow exception had period 156. The optimized offline kernel
+matched production JavaScript in 144 exact-board checks across eight geometries;
+known patterns and sixteen separate cycle cross-checks also passed. Reproduction
+used desktop seeds 1000001–1002048 and narrow seeds 2000001–2002048, taking the upper
+53 bits of each SplitMix64 draw divided by `2^53` and comparing with 0.3.
+
+The exception (seed 2001965, 39 × 416) contains a spaceship moving two cells
+horizontally every four generations. Its return period is
+`4 × 39 / gcd(39, 2) = 156`, verified again with production JavaScript. It illustrates
+why a repeating shape is not necessarily a short-period whole-board cycle. No
+special seed, lottery, or experimental preview is included in the application.
+
+These measurements concern fixed-size fresh worlds, not every viewport, resize
+sequence, local oscillator, or possible initial configuration. They are cycle
+frequency measurements, not a browser performance benchmark.
+
 ## Local setup
 
 Requirements:
@@ -97,6 +153,16 @@ The static target uses `resources/static/home.html`; Laravel uses
 both templates. The export does not include the separate Djinn backend.
 The exporter stages the new output before replacing `dist/`, preserving the last
 successful export if preparation fails and attempting rollback if publication fails.
+
+## Private device QA
+
+The general `tailscale-preview` workflow can forward a loopback HTTP instance of
+this same Laravel application for private phone and multi-device QA. It preserves
+the original templates, assets, fonts and controls without injected notices or
+content restrictions. When comparing with the local Laravel site, do not substitute
+the separate static export. HTTP over a VPN is transport-encrypted but is not a
+browser secure context; browser API and origin-dependent behavior can still differ.
+The application's source and production configuration are not rewritten for sharing.
 
 ## Verification
 
