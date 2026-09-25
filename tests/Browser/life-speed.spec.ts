@@ -218,7 +218,16 @@ test('rapid theme switches keep the same world evolving without clock resets', a
         await page.evaluate(() => document.fonts.ready);
         await page.locator('[data-life-enter]').click();
         await page.clock.runFor(200);
+        await page.evaluate(() => {
+            (window as any).lifeMotionReady = false;
+            matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => {
+                (window as any).lifeMotionReady = true;
+            }, { once: true });
+        });
         await page.emulateMedia({ reducedMotion: 'no-preference' });
+        // Chromium delivers media changes asynchronously. Wait for the lifecycle
+        // reset before advancing the measured clock, not midway through sampling.
+        await expect.poll(() => page.evaluate(() => (window as any).lifeMotionReady)).toBe(true);
         const states: string[] = [];
         for (let i = 0; i < 20; i++) {
             if (switchThemes) await page.locator(`[data-theme-option="${i % 2 ? 'dark' : 'light'}"]`).dispatchEvent('click');
