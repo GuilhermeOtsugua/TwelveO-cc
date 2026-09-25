@@ -8,8 +8,6 @@ import {
     renderNorthlineContextChip,
     renderNorthlineActionButton,
     renderNorthlineDashboard,
-    renderNorthlineCheckInSection,
-    renderNorthlineReachCard,
     renderNorthlineDocumentsView,
     renderNorthlineExamsView,
     renderNorthlineStudentsView,
@@ -336,17 +334,7 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
 
         if (panels.dashboard instanceof HTMLElement) {
             panels.dashboard.innerHTML = renderNorthlineDashboard(classroom, workflowActions);
-            panels.dashboard.querySelector('[data-northline-critical-command]')?.replaceChildren();
-            panels.dashboard.querySelector('[data-northline-reach-card]')?.replaceChildren();
-            const checkIns = panels.dashboard.querySelector('[data-northline-critical-command]');
-            const reachCard = panels.dashboard.querySelector('[data-northline-reach-card]');
-            if (checkIns instanceof HTMLElement) {
-                checkIns.innerHTML = renderNorthlineCheckInSection(classroom);
-                initializeNorthlineCheckInRotation(checkIns);
-            }
-            if (reachCard instanceof HTMLElement) {
-                reachCard.innerHTML = renderNorthlineReachCard(classroom);
-            }
+            initializeNorthlineCheckInRotation(panels.dashboard);
         }
 
         if (panels.documents instanceof HTMLElement) {

@@ -377,8 +377,8 @@ export function renderNorthlineDashboard(classroom, workflowActions) {
                             </section>
                         </div>
                         <aside class="grid min-h-0 grid-rows-[minmax(0,1fr)_9.55rem] gap-2.5">
-                            <section class="northline-panel flex min-h-0 flex-col px-4.25 pt-3 pb-2" data-northline-critical-command></section>
-                            <section class="northline-reach-card" data-northline-reach-card></section>
+                            <section class="northline-panel flex min-h-0 flex-col px-4.25 pt-3 pb-2" data-northline-critical-command>${renderNorthlineCheckInSection(classroom)}</section>
+                            <section class="northline-reach-card" data-northline-reach-card>${renderNorthlineReachCard(classroom)}</section>
                         </aside>
                     </div>
                 </div>
