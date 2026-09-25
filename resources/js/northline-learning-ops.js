@@ -3,6 +3,7 @@ import {
     northlineViewMeta,
 } from './northline/config';
 import { initializeNorthlineRollingText } from './northline/rolling-text';
+import { translateValue } from './localization';
 import {
     escapeNorthlineHtml,
     renderNorthlineContextChip,
@@ -167,23 +168,9 @@ document.querySelectorAll('[data-northline-slice]').forEach((slice) => {
     };
     const getSelectedStudent = () => getVisibleStudents().find((item) => item.id === state.selectedStudentId) ?? getVisibleStudents()[0] ?? null;
     const getCurrentLocale = () => document.documentElement.dataset.locale ?? document.documentElement.lang ?? 'en';
-    const getLocalizedClassroomDraftLabel = (value, locale = getCurrentLocale()) => {
-        if (locale !== 'pt-BR') {
-            return value;
-        }
-
-        return {
-            'Class A': 'Turma A',
-            'Class B': 'Turma B',
-            'Class C': 'Turma C',
-            'World History Seminar': 'Seminário de História Mundial',
-            'Modern European History': 'História Europeia Moderna',
-            'Civic Thought & Revolutions': 'Pensamento Cívico & Revoluções',
-        }[value] ?? value;
-    };
     const formatMessageDraft = (classroom, locale = getCurrentLocale()) => {
-        const label = getLocalizedClassroomDraftLabel(classroom.label, locale);
-        const name = getLocalizedClassroomDraftLabel(classroom.name, locale);
+        const label = translateValue(classroom.label, locale);
+        const name = translateValue(classroom.name, locale);
 
         if (locale === 'pt-BR') {
             return {
