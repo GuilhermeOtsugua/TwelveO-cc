@@ -163,6 +163,8 @@ content restrictions. When comparing with the local Laravel site, do not substit
 the separate static export. HTTP over a VPN is transport-encrypted but is not a
 browser secure context; browser API and origin-dependent behavior can still differ.
 The application's source and production configuration are not rewritten for sharing.
+QA shares expire after ten minutes by default. Explicitly requested extensions are
+limited to two hours; QA servers launched by the workflow expire with their share.
 
 ## Verification
 
