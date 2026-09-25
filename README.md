@@ -8,7 +8,7 @@
 <p align="center">
   <img alt="Laravel 13" src="https://img.shields.io/badge/Laravel-13-ff2d20?logo=laravel&logoColor=white">
   <img alt="Blade and Tailwind CSS 4" src="https://img.shields.io/badge/Blade_%2B_Tailwind_CSS-4-38bdf8?logo=tailwindcss&logoColor=white">
-  <img alt="Playwright visual QA" src="https://img.shields.io/badge/visual_QA-Playwright-45ba4b?logo=playwright&logoColor=white">
+  <img alt="Playwright browser checks" src="https://img.shields.io/badge/browser_checks-Playwright-45ba4b?logo=playwright&logoColor=white">
   <img alt="Portfolio application" src="https://img.shields.io/badge/portfolio-application-e8e0d2">
 </p>
 
@@ -26,9 +26,10 @@ interaction design, frontend craft, and implementation discipline.
 
 - A responsive, bilingual Laravel/Blade portfolio surface with light and dark themes.
 - Product-oriented interface design rather than static marketing mockups.
-- Visual QA with Playwright alongside Laravel feature and structural checks.
+- Browser interaction checks with Playwright alongside Laravel feature tests and manual visual review.
 - Three fictional but plausible product slices that each express a different
   engineering/product capability.
+- An interactive Game of Life background with an optional immersive mode.
 
 ## Project slices
 
@@ -38,11 +39,26 @@ interaction design, frontend craft, and implementation discipline.
 | Northline Learning Ops | DDD-oriented learning operations and operational clarity. |
 | Studio Current | A design-for-impact client portal surface. |
 
+## Djinn
+
+The portfolio includes a voice agent experience called Djinn, which answers
+questions about Guilherme and itself in English and Brazilian Portuguese.
+Visitors can speak or type. Djinn is maintained separately in a private repository;
+its backend is not included here, and its availability is independent of the portfolio.
+
+## Game of Life
+
+The background runs Conway's Game of Life. Select the Otsugua name in the hero
+to enter immersive mode; click or tap the background, or press Escape, to return.
+Immersive mode preserves scrolling and offers theme controls and a 0.5×–4× speed
+slider. Select the speed value to reset it to 1×. Reduced-motion preferences are
+respected. Entering immersion ends any active Djinn session.
+
 ## Local setup
 
 Requirements:
 
-- PHP 8.3+
+- PHP 8.4+ (required by the locked dependencies)
 - Composer
 - Node/npm
 
@@ -60,32 +76,39 @@ For local frontend development:
 npm run dev
 ```
 
-For Djinn microphone QA, secure the local site and proxy its companion server:
+With Laravel Herd, the local site is `http://twelveo-cc.test`.
+For HTTPS and the browser tests' default URL:
 
 ```bash
 herd secure twelveo-cc
-herd proxy djinn-voice http://127.0.0.1:8080 --secure
 ```
 
-Approve local certificate trust if Windows prompts. Start Djinn on port 8080 and open **https://twelveo-cc.test**. The client uses HTTPS/WSS through `djinn-voice.test`; HTTP `.test` pages cannot capture a microphone. Djinn must allow the HTTPS webfolio origin.
+Approve local certificate trust if prompted, then open **https://twelveo-cc.test**.
 
-Microphone permission and device acquisition happen before any paid provider connection. The browser tests include native media capture with a synthetic input device, as well as insecure-origin and permission/device failure cases.
+## Static export
 
-The chat grows to its responsive height cap and keeps the composer and volume controls visible. Manual scrolling gently settles near message starts when moving upward and message ends when moving downward, using an interruptible 280ms eased movement. Settling only continues in the gesture direction to reveal a partially clipped message; it never reverses to align an already visible message. Long or actively growing messages remain freely scrollable. Live replies follow the bottom only while the visitor is not reading history or selecting text; reduced-motion preferences disable animated settling.
+```bash
+npm run build:static
+```
 
-Outside tap, Escape, and pressing the keyboard button while the panel is open hide it without ending its conversation. Capture stops and TTS is muted while hidden; reopening restores the chosen volume. The speaker button toggles between zero and the last nonzero volume, and the crossed-out icon also follows manual slider changes. The backend session timeout still applies; navigating away ends the connection.
-
-A compact bilingual privacy/language disclosure appears above the typing status until the first user/assistant message, and stays hidden on reopening. Admission feedback distinguishes busy, closed, daily/session-attempt limits and offline states; busy checks do not open provider sessions.
-
-The page locale initializes Djinn's English/PT-BR conversation preference. After that, the backend follows the latest substantive user prompt, retaining language for brief acknowledgements. Switching the page language does not rewrite conversation messages; assistant messages carry their own response-language attribute.
+This builds the frontend and exports the standalone portfolio to `dist/`.
+The static target uses `resources/static/home.html`; Laravel uses
+`resources/views/pages/home.blade.php`. Keep shared markup changes aligned across
+both templates. The export does not include the separate Djinn backend.
 
 ## Verification
 
 ```bash
 php artisan test --compact
 npm run test:browser
-npm run build
+npm run build:static
 ```
+
+Browser tests use `https://twelveo-cc.test` by default; override with
+`PLAYWRIGHT_BASE_URL` when needed. Djinn client tests use simulated service
+responses rather than requiring access to its private backend. Routine verification
+focuses on interaction behavior and manual visual review; the full-page visual
+snapshot suite is not part of the default browser command.
 
 ## License and use
 
