@@ -326,9 +326,7 @@ function initializeStudioCurrentTopbarScroll() {
                     return;
                 }
 
-                const focalElement = target.matches('.studio-current-feature')
-                    ? target.querySelector('.studio-current-feature__copy')
-                    : target.querySelector('.studio-current-feature__copy');
+                const focalElement = target.querySelector('.studio-current-feature__copy');
                 const scrollTarget = focalElement ?? target;
                 const viewportRect = viewport.getBoundingClientRect();
                 const targetRect = scrollTarget.getBoundingClientRect();
