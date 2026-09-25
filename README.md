@@ -95,11 +95,14 @@ This builds the frontend and exports the standalone portfolio to `dist/`.
 The static target uses `resources/static/home.html`; Laravel uses
 `resources/views/pages/home.blade.php`. Keep shared markup changes aligned across
 both templates. The export does not include the separate Djinn backend.
+The exporter stages the new output before replacing `dist/`, preserving the last
+successful export if preparation fails and attempting rollback if publication fails.
 
 ## Verification
 
 ```bash
 php artisan test --compact
+npm run test:unit
 npm run test:browser
 npm run build:static
 ```
