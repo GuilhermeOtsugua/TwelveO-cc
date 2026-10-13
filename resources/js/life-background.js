@@ -22,6 +22,7 @@ function initializeLifeBackground(page) {
     let originX = 0;
     let originY = 0;
     let immersed = false;
+    let generationPaintPending = false;
     let transition = null;
     let currentSpeed = 1;
     let entrySpeed = 1;
@@ -170,6 +171,7 @@ function initializeLifeBackground(page) {
             }
         }
         dirty = false;
+        generationPaintPending = false;
     }
 
     function tick(now) {
@@ -178,8 +180,10 @@ function initializeLifeBackground(page) {
         let stepped = false;
         // At 4x there are 24 generations/s. Paint a pending generation on the
         // following frame so calculation and dense canvas drawing do not share
-        // one frame's budget. Zooms/fades still redraw immediately each frame.
-        const paintFrame = immersed && canAnimate() && dirty && !transition && fadeElapsed === null;
+        // one frame's budget. Only a pending generation reserves a paint-only
+        // frame; scroll/theme redraws must not starve simulation updates.
+        // Zooms/fades still redraw immediately each frame.
+        const paintFrame = immersed && canAnimate() && dirty && generationPaintPending && !transition && fadeElapsed === null;
         if (paintFrame) draw();
         if (canAnimate()) {
             if (transition) {
@@ -203,6 +207,7 @@ function initializeLifeBackground(page) {
                 dirty = true;
             } else if (!paintFrame && clock.advance(now)) {
                 stepped = true;
+                generationPaintPending = true;
                 stepLife(world.board, next, world.columns, world.rows);
                 [world.board, next] = [next, world.board];
                 if (loop.record(world.board, now - lastStep)) {
