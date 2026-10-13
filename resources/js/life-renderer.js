@@ -64,6 +64,7 @@ export function createLifeRenderer(context) {
     let width = 0;
     let height = 0;
     let ratio = 1;
+    let rasterRatio = 1;
     let color;
     let colorValue;
     let cachedScroll = null;
@@ -111,11 +112,12 @@ export function createLifeRenderer(context) {
             height = viewHeight;
             ratio = viewRatio;
             overscan = nextOverscan;
-            // The tiny Life squares use CSS-pixel coverage; the compositor
-            // scales the bitmap on HiDPI displays. Cell spacing, simulation
-            // density and the rest of the website's resolution are unchanged.
-            const pixelsWide = Math.round(width);
-            const pixelsHigh = Math.round(height + overscan * 2);
+            // HiDPI phones need finer edge coverage for the tiny stars. An
+            // integer 2x scale preserves the reusable stamp's integer pitch;
+            // desktop and 1x displays retain the cheaper CSS-pixel bitmap.
+            rasterRatio = layoutWidth <= 639 && ratio > 1 ? 2 : 1;
+            const pixelsWide = Math.round(width * rasterRatio);
+            const pixelsHigh = Math.round((height + overscan * 2) * rasterRatio);
             if (pixelsWide * pixelsHigh > maxPixels) {
                 release();
                 return;
@@ -146,7 +148,7 @@ export function createLifeRenderer(context) {
                 surfaceExpanded = true;
             }
             rasterizeLife(pixels, image.width, image.height, world,
-                pitch, originX, originY - scrollY + overscan, color);
+                pitch * rasterRatio, originX * rasterRatio, (originY - scrollY + overscan) * rasterRatio, color);
             context.putImageData(image, 0, 0);
             cachedScroll = scrollY;
             return present(scrollY);

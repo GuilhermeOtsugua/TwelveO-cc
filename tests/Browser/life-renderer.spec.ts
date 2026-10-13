@@ -71,6 +71,14 @@ test('cache preserves palettes and restores native canvas dimensions on exit', a
         return { color, width: canvas.width, height: canvas.height };
     });
     const dark = await pixels();
+    const resolution = await page.locator('canvas.life-background').evaluate((canvas: HTMLCanvasElement) => ({
+        scale: canvas.width / document.documentElement.clientWidth,
+        expectedScale: innerWidth <= 639 && devicePixelRatio > 1 ? 2 : 1,
+        cssWidth: canvas.getBoundingClientRect().width,
+        expectedWidth: document.documentElement.clientWidth,
+    }));
+    expect(resolution.scale).toBe(resolution.expectedScale);
+    expect(resolution.cssWidth).toBe(resolution.expectedWidth);
     await page.locator('[data-theme-option="light"]').dispatchEvent('click');
     await page.clock.runFor(34);
     const light = await pixels();
@@ -143,10 +151,39 @@ test('mobile cache margin follows the 639px breakpoint and desktop resizing rest
     });
     expect(states).toEqual([
         { width: 640, height: 208, top: '-64px', canMove80: false },
-        { width: 639, height: 592, top: '-256px', canMove80: true },
-        { width: 390, height: 592, top: '-256px', canMove80: true },
-        { width: 625, height: 592, top: '-256px', canMove80: true },
+        { width: 1278, height: 1184, top: '-256px', canMove80: true },
+        { width: 780, height: 1184, top: '-256px', canMove80: true },
+        { width: 1250, height: 1184, top: '-256px', canMove80: true },
         { width: 625, height: 208, top: '-64px', canMove80: false },
         { width: 640, height: 208, top: '-64px', canMove80: false },
     ]);
+});
+
+test('HiDPI mobile raster has finer edge coverage without changing CSS geometry or exceeding the memory bound', async ({ page }) => {
+    const source = await readFile(new URL('../../resources/js/life-renderer.js', import.meta.url), 'utf8');
+    await page.route('**/__test-life-renderer.js', route => route.fulfill({ contentType: 'application/javascript', body: source }));
+    await page.goto('/');
+    const result = await page.evaluate(async () => {
+        const { createLifeRenderer } = await import('/__test-life-renderer.js');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d')!;
+        const renderer = createLifeRenderer(context);
+        const world = { columns: 1, rows: 1, board: Uint8Array.of(1) };
+        renderer.setColor('rgb(155, 184, 168)');
+        const resolutions = [1, 1.25, 2, 3].map(ratio => {
+            renderer.resize(40, 20, ratio, 390);
+            renderer.draw(world, 3, 0.25, 0.25, 0);
+            // At 2x, a 1.74 CSS-pixel square starts at physical pixel 0.5
+            // and ends at 3.98: only its outer physical pixels are partial.
+            const data = ratio > 1 ? context.getImageData(0, 512, 5, 2).data : null;
+            return { width: canvas.width, height: canvas.height, cssHeight: canvas.style.height,
+                alpha: data ? [data[3], data[27], data[35], data[39]] : null };
+        });
+        renderer.resize(639, 5000, 2, 639);
+        return { resolutions, tooLarge: renderer.draw(world, 3, 0, 0, 0) };
+    });
+    expect(result).toEqual({ resolutions: [
+        { width: 40, height: 532, cssHeight: '532px', alpha: null },
+        ...Array.from({ length: 3 }, () => ({ width: 80, height: 1064, cssHeight: '532px', alpha: [64, 255, 250, 0] })),
+    ], tooLarge: false });
 });

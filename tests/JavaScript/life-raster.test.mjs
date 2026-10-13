@@ -27,7 +27,7 @@ function reference(width, height, world, pitch, originX, originY, color) {
     return data;
 }
 
-for (const pitch of [3, 4, 10]) {
+for (const pitch of [3, 4, 6, 8, 10, 20]) {
     for (const [originX, originY] of [[0, 0], [0.25, 0.75], [-9.5, -13.25], [51.75, 46.5]]) {
         test(`raster matches independent pixel coverage at pitch ${pitch}, origin ${originX},${originY}`, () => {
             const width = 41;
