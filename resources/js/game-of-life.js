@@ -43,19 +43,24 @@ export function resizeLifeWorld(world, columns, rows, random = Math.random) {
 export function stepLife(board, next, columns, rows) {
     let changed = 0;
     for (let y = 0; y < rows; y++) {
+        const row = y * columns;
+        const above = (y === 0 ? rows - 1 : y - 1) * columns;
+        const below = (y === rows - 1 ? 0 : y + 1) * columns;
+        // Slide three vertical sums across the row: each new column needs
+        // only three neighbor reads, with no modulo or scratch allocations.
+        const last = columns - 1;
+        let leftSum = board[above + last] + board[row + last] + board[below + last];
+        let centerSum = board[above] + board[row] + board[below];
         for (let x = 0; x < columns; x++) {
-            let neighbors = 0;
-            for (let dy = -1; dy <= 1; dy++) {
-                const neighborY = (y + dy + rows) % rows;
-                for (let dx = -1; dx <= 1; dx++) {
-                    if (!dx && !dy) continue;
-                    const neighborX = (x + dx + columns) % columns;
-                    neighbors += board[neighborY * columns + neighborX];
-                }
-            }
-            const index = y * columns + x;
-            next[index] = neighbors === 3 || (board[index] === 1 && neighbors === 2) ? 1 : 0;
-            changed += next[index] !== board[index] ? 1 : 0;
+            const right = x === last ? 0 : x + 1;
+            const rightSum = board[above + right] + board[row + right] + board[below + right];
+            const index = row + x;
+            const alive = board[index];
+            const neighbors = leftSum + centerSum + rightSum - alive;
+            next[index] = neighbors === 3 || (alive === 1 && neighbors === 2) ? 1 : 0;
+            changed += next[index] !== alive ? 1 : 0;
+            leftSum = centerSum;
+            centerSum = rightSum;
         }
     }
     return changed;

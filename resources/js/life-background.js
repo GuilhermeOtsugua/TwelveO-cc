@@ -175,6 +175,12 @@ function initializeLifeBackground(page) {
     function tick(now) {
         frame = 0;
         if (document.hidden || suspended) return;
+        let stepped = false;
+        // At 4x there are 24 generations/s. Paint a pending generation on the
+        // following frame so calculation and dense canvas drawing do not share
+        // one frame's budget. Zooms/fades still redraw immediately each frame.
+        const paintFrame = immersed && canAnimate() && dirty && !transition && fadeElapsed === null;
+        if (paintFrame) draw();
         if (canAnimate()) {
             if (transition) {
                 transition.elapsed = Math.min(4000, transition.elapsed + Math.max(0, now - lastFrame));
@@ -195,7 +201,8 @@ function initializeLifeBackground(page) {
                 lastStep = now;
                 clock.reset(now);
                 dirty = true;
-            } else if (clock.advance(now)) {
+            } else if (!paintFrame && clock.advance(now)) {
+                stepped = true;
                 stepLife(world.board, next, world.columns, world.rows);
                 [world.board, next] = [next, world.board];
                 if (loop.record(world.board, now - lastStep)) {
@@ -207,7 +214,7 @@ function initializeLifeBackground(page) {
             }
         }
         lastFrame = now;
-        if (dirty) draw();
+        if (dirty && !(stepped && immersed && !transition && fadeElapsed === null)) draw();
         if (canAnimate()) frame = requestAnimationFrame(tick);
     }
 
