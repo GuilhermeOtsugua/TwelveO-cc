@@ -55,7 +55,7 @@ export function createLifeRenderer(context) {
     colorCanvas.width = colorCanvas.height = 1;
     const colorContext = colorCanvas.getContext('2d', { willReadFrequently: true });
     if (!colorContext) return null;
-    const overscan = 64;
+    let overscan = 64;
     // At most 48 MB of reusable pixel storage, independent of document height.
     // Fall back to fillRect on exceptionally large CSS-sized viewports.
     const maxPixels = 12_000_000;
@@ -101,10 +101,16 @@ export function createLifeRenderer(context) {
     }
 
     return {
-        resize(viewWidth, viewHeight, viewRatio) {
+        resize(viewWidth, viewHeight, viewRatio, layoutWidth = viewWidth) {
+            // Match the CSS breakpoint, including any reserved scrollbar.
+            // Fast mobile scrolling needs more travel between Life paints;
+            // desktop retains its smaller buffer and rasterization workload.
+            const nextOverscan = layoutWidth <= 639 ? 256 : 64;
+            if (width !== viewWidth || height !== viewHeight || ratio !== viewRatio || overscan !== nextOverscan) restoreSurface();
             width = viewWidth;
             height = viewHeight;
             ratio = viewRatio;
+            overscan = nextOverscan;
             // The tiny Life squares use CSS-pixel coverage; the compositor
             // scales the bitmap on HiDPI displays. Cell spacing, simulation
             // density and the rest of the website's resolution are unchanged.

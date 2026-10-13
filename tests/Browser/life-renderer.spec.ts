@@ -113,7 +113,7 @@ test('renderer bounds memory, refuses uncovered scroll and restores native DPI',
         const palette = [[...before.slice(0, 3)], [...after.slice(0, 3)]];
         const within = renderer.present(132);
         const shifted = canvas.style.transform;
-        const uncovered = renderer.present(200);
+        const uncovered = renderer.present(400);
         const unchanged = canvas.style.transform === shifted;
         renderer.release();
         const restored = [canvas.width, canvas.height, canvas.style.height, canvas.style.transform];
@@ -123,4 +123,30 @@ test('renderer bounds memory, refuses uncovered scroll and restores native DPI',
     });
     expect(result).toEqual({ painted: true, within: true, uncovered: false, unchanged: true, restored: [64, 48, '', ''], tooLarge: false,
         sameAlpha: true, palette: [[155, 184, 168], [83, 108, 89]] });
+});
+
+test('mobile cache margin follows the 639px breakpoint and desktop resizing restores its smaller buffer', async ({ page }) => {
+    const source = await readFile(new URL('../../resources/js/life-renderer.js', import.meta.url), 'utf8');
+    await page.route('**/__test-life-renderer.js', route => route.fulfill({ contentType: 'application/javascript', body: source }));
+    await page.goto('/');
+    const states = await page.evaluate(async () => {
+        const { createLifeRenderer } = await import('/__test-life-renderer.js');
+        const canvas = document.createElement('canvas');
+        const renderer = createLifeRenderer(canvas.getContext('2d')!);
+        const world = { columns: 1, rows: 1, board: Uint8Array.of(1) };
+        renderer.setColor('rgb(155, 184, 168)');
+        return [[640, 640], [639, 639], [390, 390], [625, 639], [625, 640], [640, 640]].map(([width, layoutWidth]) => {
+            renderer.resize(width, 80, 2, layoutWidth);
+            renderer.draw(world, 3, 0, 0, 100);
+            return { width: canvas.width, height: canvas.height, top: canvas.style.top, canMove80: renderer.present(180) };
+        });
+    });
+    expect(states).toEqual([
+        { width: 640, height: 208, top: '-64px', canMove80: false },
+        { width: 639, height: 592, top: '-256px', canMove80: true },
+        { width: 390, height: 592, top: '-256px', canMove80: true },
+        { width: 625, height: 592, top: '-256px', canMove80: true },
+        { width: 625, height: 208, top: '-64px', canMove80: false },
+        { width: 640, height: 208, top: '-64px', canMove80: false },
+    ]);
 });

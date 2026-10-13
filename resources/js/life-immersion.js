@@ -50,7 +50,7 @@ function initializeLifeImmersion() {
         active = value;
         clearTimeout(hideTimer);
         root.classList.toggle('life-immersed', active);
-        document.dispatchEvent(new CustomEvent('otsugua:life-mode', { detail: { active } }));
+        document.dispatchEvent(new CustomEvent('otsugua:life-mode', { detail: { active, entryScroll } }));
         root.removeAttribute('data-life-controls-visible');
         trigger.setAttribute('aria-pressed', String(active));
         exit.hidden = !active;

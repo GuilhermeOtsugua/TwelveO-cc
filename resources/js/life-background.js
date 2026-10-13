@@ -102,7 +102,7 @@ function initializeLifeBackground(page) {
         canvas.height = Math.round(viewportHeight * ratio);
         context.setTransform(ratio, 0, 0, ratio, 0, 0);
         renderer?.invalidate();
-        if (immersed && !reducedMotion.matches) renderer?.resize(viewportWidth, viewportHeight, ratio);
+        if (immersed && !reducedMotion.matches) renderer?.resize(viewportWidth, viewportHeight, ratio, window.innerWidth);
         else renderer?.release();
         renderer?.setColor(cellColor);
         dirty = true;

@@ -161,6 +161,11 @@ function initializeMobileHeaderScroll() {
     const syncHeaderVisibility = () => {
         ticking = false;
 
+        if (themeRoot.classList.contains('life-immersed')) {
+            resetScrollTracking();
+            return;
+        }
+
         if (!mobileHeaderMediaQuery.matches) {
             showHeader();
             resetScrollTracking();
@@ -232,6 +237,7 @@ function initializeMobileHeaderScroll() {
     };
 
     const requestHeaderVisibilitySync = () => {
+        if (themeRoot.classList.contains('life-immersed')) return;
         if (ticking) {
             return;
         }
@@ -241,8 +247,16 @@ function initializeMobileHeaderScroll() {
     };
 
     const recordUserScrollIntent = () => {
-        hasUserScrollIntent = true;
+        if (!themeRoot.classList.contains('life-immersed')) hasUserScrollIntent = true;
     };
+
+    document.addEventListener('otsugua:life-mode', ({ detail }) => {
+        releaseTransitionLock();
+        // Rebase to the saved website position, not the background scroll,
+        // before immersion restores it. Returning must not look like a swipe.
+        resetScrollTracking(detail.entryScroll);
+        if (!detail.active) requestHeaderVisibilitySync();
+    });
 
     window.addEventListener('wheel', recordUserScrollIntent, { passive: true });
     window.addEventListener('touchmove', recordUserScrollIntent, { passive: true });
