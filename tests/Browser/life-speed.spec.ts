@@ -71,7 +71,7 @@ test('slider is immersive-only, continuous, keyboard accessible and visit-scoped
     await expect(slider).toBeHidden();
     await page.locator('[data-life-enter]').click();
     await page.keyboard.press('Tab');
-    await expect(slider).toHaveValue('4');
+    await expect(slider).toHaveValue('0.5');
     await page.reload();
     await expect(page.locator('[data-life-speed]')).toHaveValue('1');
 });
@@ -108,6 +108,11 @@ test('live canvas cadence follows speed and resumes without catching up', async 
     await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
     await page.addInitScript(() => {
         (window as any).lifePaints = 0;
+        const put = CanvasRenderingContext2D.prototype.putImageData;
+        CanvasRenderingContext2D.prototype.putImageData = function (...args) {
+            if (this.canvas.classList.contains('life-background')) (window as any).lifePaints++;
+            return put.apply(this, args);
+        };
         const clear = CanvasRenderingContext2D.prototype.clearRect;
         CanvasRenderingContext2D.prototype.clearRect = function (...args) {
             if (this.canvas.classList.contains('life-background')) (window as any).lifePaints++;

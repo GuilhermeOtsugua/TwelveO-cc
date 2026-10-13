@@ -1,6 +1,7 @@
 import { createLifeLoopMonitor, createLifeWorld, resizeLifeWorld, stepLife } from './game-of-life';
 
 import { createLifeClock } from './life-clock';
+import { createLifeRenderer } from './life-renderer.js';
 
 const page = document.querySelector('.otsugua-page');
 
@@ -13,6 +14,7 @@ function initializeLifeBackground(page) {
     canvas.className = 'life-background';
     canvas.setAttribute('aria-hidden', 'true');
     page.prepend(canvas);
+    const renderer = createLifeRenderer(context);
 
     const root = document.documentElement;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -25,6 +27,7 @@ function initializeLifeBackground(page) {
     let generationPaintPending = false;
     let transition = null;
     let currentSpeed = 1;
+    let userOwnsSpeed = false;
     let entrySpeed = 1;
     let worldPitch = Infinity;
     let cellColor;
@@ -40,10 +43,19 @@ function initializeLifeBackground(page) {
     let reseeded = false;
     const clock = createLifeClock();
     const speedInput = page.querySelector('[data-life-speed]');
+    const speedControl = page.querySelector('[data-life-speed-control]');
     const speedValue = page.querySelector('[data-life-speed-value]');
-    speedInput?.addEventListener('input', () => {
-        const speed = speedInput.valueAsNumber;
+    function claimSpeed() {
+        userOwnsSpeed = true;
         if (transition) transition.rampSpeed = false;
+    }
+    // Ownership lasts for this page visit, including subsequent entry/exit.
+    for (const event of ['pointerdown', 'keydown', 'focusin']) {
+        speedControl?.addEventListener(event, claimSpeed);
+    }
+    speedInput?.addEventListener('input', () => {
+        claimSpeed();
+        const speed = speedInput.valueAsNumber;
         const now = performance.now();
         currentSpeed = speed;
         clock.setSpeed(speed, now);
@@ -61,6 +73,7 @@ function initializeLifeBackground(page) {
     const canAnimate = () => !reducedMotion.matches && !document.hidden && !suspended;
 
     function measure() {
+        renderer?.restoreSurface();
         cellColor = getComputedStyle(canvas).color;
         viewportWidth = root.clientWidth;
         viewportHeight = window.innerHeight;
@@ -88,6 +101,10 @@ function initializeLifeBackground(page) {
         canvas.width = Math.round(viewportWidth * ratio);
         canvas.height = Math.round(viewportHeight * ratio);
         context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        renderer?.invalidate();
+        if (immersed && !reducedMotion.matches) renderer?.resize(viewportWidth, viewportHeight, ratio);
+        else renderer?.release();
+        renderer?.setColor(cellColor);
         dirty = true;
     }
 
@@ -110,6 +127,7 @@ function initializeLifeBackground(page) {
     document.addEventListener('otsugua:life-mode', ({ detail }) => {
         immersed = detail.active;
         if (immersed) entrySpeed = currentSpeed;
+        else renderer?.release();
         const fromSize = cellSize;
         const fromSpeed = currentSpeed;
         // Expand the world once, not on every animation frame.
@@ -124,12 +142,12 @@ function initializeLifeBackground(page) {
             fromOriginX: originX, fromOriginY: originY,
             anchorX: viewportWidth / 2,
             anchorY: Math.max(0, window.scrollY) + viewportHeight / 2,
-            elapsed: 0, rampSpeed: true,
+            elapsed: 0, rampSpeed: !userOwnsSpeed,
         };
         lastFrame = performance.now();
         if (reducedMotion.matches) {
             applyZoom(toSize);
-            updateSpeed(transition.toSpeed, lastFrame);
+            if (transition.rampSpeed) updateSpeed(transition.toSpeed, lastFrame);
             transition = null;
             measure();
         }
@@ -151,6 +169,13 @@ function initializeLifeBackground(page) {
     }
 
     function draw() {
+        if (immersed && !transition && fadeElapsed === null && canAnimate()
+            && renderer?.draw(world, cellSize, originX, originY, Math.max(0, window.scrollY))) {
+            dirty = false;
+            generationPaintPending = false;
+            return;
+        }
+        renderer?.restoreSurface();
         context.clearRect(0, 0, viewportWidth, viewportHeight);
         context.fillStyle = cellColor;
         context.globalAlpha = fadeElapsed === null ? 1 : Math.abs(1 - fadeElapsed / (fadeDuration / 2));
@@ -178,6 +203,10 @@ function initializeLifeBackground(page) {
         frame = 0;
         if (document.hidden || suspended) return;
         let stepped = false;
+        // Move the cached field even on calculation frames. Only rebuilding its
+        // pixels is deferred; scrolling no longer waits for a full Life paint.
+        if (immersed && !transition && fadeElapsed === null && canAnimate()
+            && !generationPaintPending && renderer?.present(Math.max(0, window.scrollY))) dirty = false;
         // At 4x there are 24 generations/s. Paint a pending generation on the
         // following frame so calculation and dense canvas drawing do not share
         // one frame's budget. Only a pending generation reserves a paint-only
@@ -190,7 +219,8 @@ function initializeLifeBackground(page) {
                 transition.elapsed = Math.min(4000, transition.elapsed + Math.max(0, now - lastFrame));
                 const progress = transition.elapsed / 4000;
                 const eased = progress * progress * (3 - 2 * progress);
-                applyZoom(transition.fromSize + (transition.toSize - transition.fromSize) * eased);
+                applyZoom(progress === 1 ? transition.toSize
+                    : transition.fromSize + (transition.toSize - transition.fromSize) * eased);
                 if (transition.rampSpeed) updateSpeed(transition.fromSpeed + (transition.toSpeed - transition.fromSpeed) * eased, now);
                 dirty = true;
                 if (progress === 1) {
@@ -257,6 +287,7 @@ function initializeLifeBackground(page) {
     // A palette change must not restart the generation clock or clear/resize the canvas.
     const themeObserver = new MutationObserver(() => {
         cellColor = getComputedStyle(canvas).color;
+        renderer?.setColor(cellColor);
         requestDraw();
     });
     themeObserver.observe(root, { attributes: true, attributeFilter: ['data-theme-effective'] });

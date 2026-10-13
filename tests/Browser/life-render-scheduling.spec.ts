@@ -24,6 +24,13 @@ for (const scrolling of [false, true]) {
                 }
                 return set.call(this, source, offset);
             };
+            const put = CanvasRenderingContext2D.prototype.putImageData;
+            CanvasRenderingContext2D.prototype.putImageData = function (...args) {
+                if (this.canvas.classList.contains('life-background')) {
+                    (window as any).lifeFrameWork.paint.push(frameTime);
+                }
+                return put.apply(this, args);
+            };
             const clear = CanvasRenderingContext2D.prototype.clearRect;
             CanvasRenderingContext2D.prototype.clearRect = function (...args) {
                 if (this.canvas.classList.contains('life-background')) {
