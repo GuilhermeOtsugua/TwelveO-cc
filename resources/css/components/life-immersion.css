@@ -15,13 +15,16 @@
     border-radius: 0.04em;
 }
 
-/* Hide browser chrome without disabling wheel, touch or keyboard scrolling. */
+/* Keep the scrollbar's layout space: removing it reflows the hidden website
+   and can change its height (and therefore the background's scroll range). */
 html.life-immersed {
-    scrollbar-width: none;
+    scrollbar-color: transparent transparent;
 }
 
-html.life-immersed::-webkit-scrollbar {
-    display: none;
+html.life-immersed::-webkit-scrollbar,
+html.life-immersed::-webkit-scrollbar-track,
+html.life-immersed::-webkit-scrollbar-thumb {
+    background: transparent;
 }
 
 /* Keep document geometry: the canvas owns a document-height Life world. */

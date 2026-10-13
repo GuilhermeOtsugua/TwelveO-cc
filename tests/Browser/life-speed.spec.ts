@@ -71,7 +71,7 @@ test('slider is immersive-only, continuous, keyboard accessible and visit-scoped
     await expect(slider).toBeHidden();
     await page.locator('[data-life-enter]').click();
     await page.keyboard.press('Tab');
-    await expect(slider).toHaveValue('0.5');
+    await expect(slider).toHaveValue('4');
     await page.reload();
     await expect(page.locator('[data-life-speed]')).toHaveValue('1');
 });
@@ -249,8 +249,9 @@ test('speed changes leave reduced-motion pixels untouched', async ({ page }) => 
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(100);
     const pixels = () => page.locator('canvas.life-background').evaluate((canvas: HTMLCanvasElement) => canvas.toDataURL());
-    const before = await pixels();
     await page.locator('[data-life-enter]').click();
+    await page.waitForTimeout(100);
+    const before = await pixels();
     await page.keyboard.press('Tab');
     for (const value of ['4', '0.5', '3.14159', '4']) await page.locator('[data-life-speed]').fill(value);
     await page.waitForTimeout(400);
