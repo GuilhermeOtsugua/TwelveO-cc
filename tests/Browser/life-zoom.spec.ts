@@ -6,6 +6,7 @@ test('background mode eases to four times speed over four seconds and restores o
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
+    await page.clock.runFor(4100); // Assess manual entry from the settled page, not the startup intro.
     await page.locator('[data-life-enter]').click();
     const speed = page.locator('[data-life-speed]');
     await page.clock.runFor(2000);
@@ -47,6 +48,7 @@ test('zoom keeps the viewport center on the same grid coordinate, including afte
     });
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
+    await page.clock.runFor(4100);
     await page.evaluate(() => {
         window.scrollTo({ top: 337, behavior: 'instant' });
         window.dispatchEvent(new Event('scroll'));

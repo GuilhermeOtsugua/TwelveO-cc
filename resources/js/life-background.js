@@ -18,6 +18,8 @@ function initializeLifeBackground(page) {
 
     const root = document.documentElement;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let introPending = !reducedMotion.matches;
+    let introReveal = null;
     let world;
     let next;
     let cellSize = 10;
@@ -78,7 +80,7 @@ function initializeLifeBackground(page) {
         viewportWidth = root.clientWidth;
         viewportHeight = window.innerHeight;
         const worldHeight = Math.max(page.scrollHeight, viewportHeight);
-        const pitch = targetPitch(worldHeight);
+        const pitch = targetPitch(worldHeight, introPending || immersed);
         if (!transition) cellSize = pitch;
         // Keep the expanded simulation on exit. Cropping it changes toroidal edge
         // coordinates and replaces visible cells at the end of the zoom-in.
@@ -108,9 +110,9 @@ function initializeLifeBackground(page) {
         dirty = true;
     }
 
-    function targetPitch(worldHeight) {
-        const cellBudget = immersed ? 2_000_000 : 180_000;
-        return Math.max(immersed ? 3 : 10, Math.ceil(Math.sqrt(viewportWidth * worldHeight / cellBudget)));
+    function targetPitch(worldHeight, expanded = immersed) {
+        const cellBudget = expanded ? 2_000_000 : 180_000;
+        return Math.max(expanded ? 3 : 10, Math.ceil(Math.sqrt(viewportWidth * worldHeight / cellBudget)));
     }
 
     function updateSpeed(speed, now) {
@@ -125,34 +127,57 @@ function initializeLifeBackground(page) {
     }
 
     document.addEventListener('otsugua:life-mode', ({ detail }) => {
+        introPending = false;
+        introReveal?.cancel();
+        introReveal = null;
         immersed = detail.active;
-        if (immersed) entrySpeed = currentSpeed;
-        else renderer?.release();
+        // An automatic return (including the intro) must not become the next
+        // entry's saved speed. Explicit user choices still take precedence.
+        if (immersed && (!transition || userOwnsSpeed)) entrySpeed = currentSpeed;
+        if (!immersed) renderer?.release();
         const fromSize = cellSize;
-        const fromSpeed = currentSpeed;
         // Expand the world once, not on every animation frame.
         if (immersed) {
             transition = { fromSize };
             measure();
         }
         const worldHeight = Math.max(page.scrollHeight, viewportHeight);
-        const toSize = targetPitch(worldHeight);
-        transition = {
-            fromSize, toSize, fromSpeed, toSpeed: immersed ? 4 : entrySpeed,
-            fromOriginX: originX, fromOriginY: originY,
-            anchorX: viewportWidth / 2,
-            anchorY: Math.max(0, window.scrollY) + viewportHeight / 2,
-            elapsed: 0, rampSpeed: !userOwnsSpeed,
-        };
-        lastFrame = performance.now();
+        startTransition(targetPitch(worldHeight), immersed ? 4 : entrySpeed);
         if (reducedMotion.matches) {
-            applyZoom(toSize);
+            applyZoom(transition.toSize);
             if (transition.rampSpeed) updateSpeed(transition.toSpeed, lastFrame);
             transition = null;
             measure();
         }
         requestDraw();
     });
+
+    function startTransition(toSize, toSpeed, now = performance.now()) {
+        transition = {
+            fromSize: cellSize, toSize, fromSpeed: currentSpeed, toSpeed,
+            fromOriginX: originX, fromOriginY: originY,
+            anchorX: viewportWidth / 2,
+            anchorY: Math.max(0, window.scrollY) + viewportHeight / 2,
+            elapsed: 0, rampSpeed: !userOwnsSpeed,
+        };
+        lastFrame = now;
+    }
+
+    function startIntro(now) {
+        introPending = false;
+        const toSize = targetPitch(Math.max(page.scrollHeight, viewportHeight));
+        // Invert the centered entry zoom so this return ends at the ordinary
+        // grid origin. Read scroll here, not during module initialization.
+        const scale = cellSize / toSize;
+        originX = viewportWidth / 2 * (1 - scale);
+        originY = (Math.max(0, window.scrollY) + viewportHeight / 2) * (1 - scale);
+        clock.reset(now);
+        lastStep = now;
+        if (!userOwnsSpeed) updateSpeed(4, now);
+        startTransition(toSize, 1, now);
+        introReveal = canvas.animate({ '--life-reveal': ['1', '0'] }, { duration: 400, easing: 'ease' });
+        introReveal.onfinish = () => { introReveal = null; };
+    }
 
     function applyZoom(size) {
         const scale = size / transition.fromSize;
@@ -202,6 +227,13 @@ function initializeLifeBackground(page) {
     function tick(now) {
         frame = 0;
         if (document.hidden || suspended) return;
+        // Observe motion changes in-frame too: query change events can arrive
+        // after a queued animation frame has already seen the new preference.
+        if (reducedMotion.matches && (introPending || transition || fadeElapsed !== null)) {
+            sync();
+            return;
+        }
+        if (introPending && canAnimate()) startIntro(now);
         let stepped = false;
         // Move the cached field even on calculation frames. Only rebuilding its
         // pixels is deferred; scrolling no longer waits for a full Life paint.
@@ -267,6 +299,9 @@ function initializeLifeBackground(page) {
         clock.reset(lastFrame);
         // Reduced motion never leaves a partially faded canvas or runs a transition.
         if (reducedMotion.matches) {
+            introPending = false;
+            introReveal?.cancel();
+            introReveal = null;
             fadeElapsed = null;
             if (transition) {
                 applyZoom(transition.toSize);
@@ -274,6 +309,8 @@ function initializeLifeBackground(page) {
                 transition = null;
             }
         }
+        if (introReveal?.playState === 'running' && !canAnimate()) introReveal.pause();
+        else if (introReveal?.playState === 'paused' && canAnimate()) introReveal.play();
         if (!suspended) {
             measure();
             requestDraw();
@@ -300,6 +337,7 @@ function initializeLifeBackground(page) {
     sizeObserver.observe(page);
     window.addEventListener('pagehide', () => {
         suspended = true;
+        if (introReveal?.playState === 'running') introReveal.pause();
         cancelAnimationFrame(frame);
         frame = 0;
     });
