@@ -296,6 +296,9 @@ for (const [theme, speed] of [['dark', 0.5], ['light', 4], ['light-to-dark', 1]]
             // Actual world-bound changes intentionally reset loop detection.
             Object.defineProperty(world, 'scrollHeight', { get: () => height });
         });
+        // Completing the intro changes the active topology and deliberately
+        // restarts loop confirmation. Measure reseeding from the settled world.
+        await page.clock.runFor(4100);
         await page.evaluate(value => {
             const slider = document.querySelector('[data-life-speed]') as HTMLInputElement;
             slider.value = String(value);

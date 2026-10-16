@@ -1,6 +1,7 @@
 import { createLifeLoopMonitor, createLifeWorld, resizeLifeWorld, stepLife } from './game-of-life';
 
 import { createLifeClock } from './life-clock';
+import { fitLifeWidth } from './life-layout.js';
 import { createLifeRenderer } from './life-renderer.js';
 
 const page = document.querySelector('.otsugua-page');
@@ -23,6 +24,7 @@ function initializeLifeBackground(page) {
     let world;
     let next;
     let cellSize = 10;
+    let columnPitch = 10;
     let originX = 0;
     let originY = 0;
     let immersed = false;
@@ -31,7 +33,7 @@ function initializeLifeBackground(page) {
     let currentSpeed = 1;
     let userOwnsSpeed = false;
     let entrySpeed = 1;
-    let worldPitch = Infinity;
+    let rowPitch = Infinity;
     let cellColor;
     let viewportWidth = 0;
     let viewportHeight = 0;
@@ -82,17 +84,30 @@ function initializeLifeBackground(page) {
         const worldHeight = Math.max(page.scrollHeight, viewportHeight);
         const pitch = targetPitch(worldHeight, introPending || immersed);
         if (!transition) cellSize = pitch;
-        // Keep the expanded simulation on exit. Cropping it changes toroidal edge
-        // coordinates and replaces visible cells at the end of the zoom-in.
-        // Only viewport/page resizes may change its bounds; retain a size safeguard.
-        worldPitch = Math.max(
-            Math.min(worldPitch, pitch),
+        // Keep the document-height vertical world. Horizontal bounds instead
+        // follow each settled mode; excluded columns are stored, not stepped.
+        rowPitch = Math.max(
+            Math.min(rowPitch, pitch),
             Math.ceil(Math.sqrt(viewportWidth * worldHeight / 2_000_000)),
         );
-        const columns = Math.ceil(viewportWidth / worldPitch);
-        const rows = Math.ceil(worldHeight / worldPitch);
+        // Use the dense window throughout a zoom, then hand off only once at
+        // completion. Absolute column identities prevent the old crop/remap snap.
+        const windowSize = transition || introPending ? rowPitch : pitch;
+        const fittedPitch = viewportWidth / Math.ceil(viewportWidth / windowSize);
+        let centerColumn;
+        if (introPending) centerColumn = Math.ceil(viewportWidth / targetPitch(worldHeight, false)) / 2;
+        else if (transition) centerColumn = (viewportWidth / 2 - originX) / columnPitch;
+        else centerColumn = viewportWidth / (2 * fittedPitch) - originX / columnPitch;
+        const layout = fitLifeWidth(viewportWidth, windowSize, centerColumn);
+        if (!transition) {
+            columnPitch = layout.pitch;
+            originX = layout.originX;
+        }
+        const rows = Math.ceil(worldHeight / rowPitch);
         const previousWorld = world;
-        world = world ? resizeLifeWorld(world, columns, rows) : createLifeWorld(columns, rows);
+        world = world
+            ? resizeLifeWorld(world, layout.columns, rows, Math.random, layout.firstColumn)
+            : createLifeWorld(layout.columns, rows, Math.random, layout.firstColumn);
         if (world !== previousWorld) {
             next = new Uint8Array(world.board.length);
             loop = createLifeLoopMonitor(world.board);
@@ -155,6 +170,7 @@ function initializeLifeBackground(page) {
     function startTransition(toSize, toSpeed, now = performance.now()) {
         transition = {
             fromSize: cellSize, toSize, fromSpeed: currentSpeed, toSpeed,
+            fromColumnPitch: columnPitch, toColumnPitch: fitLifeWidth(viewportWidth, toSize).pitch,
             fromOriginX: originX, fromOriginY: originY,
             anchorX: viewportWidth / 2,
             anchorY: Math.max(0, window.scrollY) + viewportHeight / 2,
@@ -169,7 +185,8 @@ function initializeLifeBackground(page) {
         // Invert the centered entry zoom so this return ends at the ordinary
         // grid origin. Read scroll here, not during module initialization.
         const scale = cellSize / toSize;
-        originX = viewportWidth / 2 * (1 - scale);
+        // Horizontal layout was seeded around this same logical center.
+        originX = viewportWidth / 2 * (1 - columnPitch / fitLifeWidth(viewportWidth, toSize).pitch);
         originY = (Math.max(0, window.scrollY) + viewportHeight / 2) * (1 - scale);
         clock.reset(now);
         lastStep = now;
@@ -179,23 +196,24 @@ function initializeLifeBackground(page) {
         introReveal.onfinish = () => { introReveal = null; };
     }
 
-    function applyZoom(size) {
+    function applyZoom(size, progress = 1) {
         const scale = size / transition.fromSize;
-        originX = transition.anchorX - (transition.anchorX - transition.fromOriginX) * scale;
+        columnPitch = transition.fromColumnPitch + (transition.toColumnPitch - transition.fromColumnPitch) * progress;
+        originX = transition.anchorX - (transition.anchorX - transition.fromOriginX) * columnPitch / transition.fromColumnPitch;
         originY = transition.anchorY - (transition.anchorY - transition.fromOriginY) * scale;
         cellSize = size;
     }
 
     function reseed() {
         // Discard the previous seed's stored edges too, so they cannot reappear later.
-        world = createLifeWorld(world.columns, world.rows);
+        world = createLifeWorld(world.columns, world.rows, Math.random, world.firstColumn);
         loop = createLifeLoopMonitor(world.board);
         reseeded = true;
     }
 
     function draw() {
         if (immersed && !transition && fadeElapsed === null && canAnimate()
-            && renderer?.draw(world, cellSize, originX, originY, Math.max(0, window.scrollY))) {
+            && renderer?.draw(world, cellSize, originX, originY, Math.max(0, window.scrollY), columnPitch)) {
             dirty = false;
             generationPaintPending = false;
             return;
@@ -207,16 +225,16 @@ function initializeLifeBackground(page) {
         const scrollY = Math.max(0, window.scrollY);
         const firstRow = Math.floor((scrollY - originY) / cellSize);
         const lastRow = Math.ceil((scrollY + viewportHeight - originY) / cellSize);
-        const firstColumn = Math.floor(-originX / cellSize);
-        const lastColumn = Math.ceil((viewportWidth - originX) / cellSize);
+        const firstColumn = Math.floor(-originX / columnPitch);
+        const lastColumn = Math.ceil((viewportWidth - originX) / columnPitch);
         const squareSize = cellSize * 0.58;
         for (let y = firstRow; y < lastRow; y++) {
             // The simulation is toroidal; wrap newly exposed edges rather than leaving gaps.
             const row = ((y % world.rows) + world.rows) % world.rows;
             for (let x = firstColumn; x < lastColumn; x++) {
-                const column = ((x % world.columns) + world.columns) % world.columns;
+                const column = (((x - world.firstColumn) % world.columns) + world.columns) % world.columns;
                 if (world.board[row * world.columns + column]) {
-                    context.fillRect(originX + x * cellSize, originY + y * cellSize - scrollY, squareSize, squareSize);
+                    context.fillRect(originX + x * columnPitch, originY + y * cellSize - scrollY, squareSize, squareSize);
                 }
             }
         }
@@ -252,12 +270,12 @@ function initializeLifeBackground(page) {
                 const progress = transition.elapsed / 4000;
                 const eased = progress * progress * (3 - 2 * progress);
                 applyZoom(progress === 1 ? transition.toSize
-                    : transition.fromSize + (transition.toSize - transition.fromSize) * eased);
+                    : transition.fromSize + (transition.toSize - transition.fromSize) * eased, eased);
                 if (transition.rampSpeed) updateSpeed(transition.fromSpeed + (transition.toSpeed - transition.fromSpeed) * eased, now);
                 dirty = true;
                 if (progress === 1) {
                     transition = null;
-                    if (!immersed) measure();
+                    measure();
                 }
             }
             if (fadeElapsed !== null) {

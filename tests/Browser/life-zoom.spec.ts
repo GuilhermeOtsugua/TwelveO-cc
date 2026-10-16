@@ -95,11 +95,17 @@ test('background zoom preserves website width, height and maximum scroll', async
     expect(await geometry()).toEqual(before);
 });
 
-test('clicking out of background mode retains the expanded Life state without cropping at completion', async ({ page }) => {
+test('exit narrows active columns and re-entry restores frozen cells without reseeding', async ({ page }) => {
     test.setTimeout(60_000);
     await page.clock.install();
     await page.addInitScript(() => {
         (window as any).lifeBoardAllocations = [];
+        (window as any).lifeSeeds = 0;
+        const from = Uint8Array.from;
+        Uint8Array.from = function (...args) {
+            if (args[0]?.length > 1000) (window as any).lifeSeeds++;
+            return from.apply(this, args);
+        };
         window.Uint8Array = new Proxy(Uint8Array, {
             construct(target, args) {
                 if (typeof args[0] === 'number' && args[0] > 1000) {
@@ -115,15 +121,19 @@ test('clicking out of background mode retains the expanded Life state without cr
     await page.clock.runFor(4100);
     const allocations = await page.evaluate(() => (window as any).lifeBoardAllocations);
     expect(allocations.length).toBeGreaterThan(0);
+    const seeds = await page.evaluate(() => (window as any).lifeSeeds);
     await page.locator('[data-life-exit]').click({ position: { x: 30, y: 30 } });
     await page.clock.runFor(4100);
     await expect(page.locator('html')).not.toHaveClass(/life-immersed/);
     await expect(page.locator('[data-life-speed]')).toHaveValue('1');
-    expect(await page.evaluate(() => (window as any).lifeBoardAllocations)).toEqual(allocations);
-    // A subsequent entry also reuses the same living world rather than expanding anew.
+    const narrowed = await page.evaluate(() => (window as any).lifeBoardAllocations.at(-1));
+    expect(narrowed).toBeLessThan(allocations.at(-1));
+    expect(await page.evaluate(() => (window as any).lifeSeeds)).toBe(seeds);
+    // Re-entering restores the saved range, rather than seeding another universe.
     await page.locator('[data-life-enter]').click();
     await page.clock.runFor(100);
-    expect(await page.evaluate(() => (window as any).lifeBoardAllocations)).toEqual(allocations);
+    expect(await page.evaluate(() => (window as any).lifeBoardAllocations.at(-1))).toBe(allocations.at(-1));
+    expect(await page.evaluate(() => (window as any).lifeSeeds)).toBe(seeds);
 });
 
 test('manual speed input overrides the automatic ramp', async ({ page }) => {

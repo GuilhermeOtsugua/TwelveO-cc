@@ -3,41 +3,46 @@ export function createLifeBoard(columns, rows, random = Math.random) {
     return Uint8Array.from({ length: columns * rows }, () => random() < 0.3 ? 1 : 0);
 }
 
-export function createLifeWorld(columns, rows, random = Math.random) {
+export function createLifeWorld(columns, rows, random = Math.random, firstColumn = 0) {
     const board = createLifeBoard(columns, rows, random);
     return {
         board, columns, rows,
         storedBoard: board.slice(),
         storedColumns: columns,
         storedRows: rows,
+        firstColumn, storedFirstColumn: firstColumn,
     };
 }
 
 // Evolve only the active board. Keep excluded cells frozen until they fit again.
-export function resizeLifeWorld(world, columns, rows, random = Math.random) {
-    if (columns === world.columns && rows === world.rows) return world;
-    const storedColumns = Math.max(columns, world.storedColumns);
+export function resizeLifeWorld(world, columns, rows, random = Math.random, firstColumn = world.firstColumn) {
+    if (columns === world.columns && rows === world.rows && firstColumn === world.firstColumn) return world;
+    const storedFirstColumn = Math.min(firstColumn, world.storedFirstColumn);
+    const storedColumns = Math.max(firstColumn + columns, world.storedFirstColumn + world.storedColumns) - storedFirstColumn;
     const storedRows = Math.max(rows, world.storedRows);
     let storedBoard = world.storedBoard;
-    if (storedColumns !== world.storedColumns || storedRows !== world.storedRows) {
+    if (storedColumns !== world.storedColumns || storedRows !== world.storedRows || storedFirstColumn !== world.storedFirstColumn) {
         storedBoard = new Uint8Array(storedColumns * storedRows);
         for (let y = 0; y < storedRows; y++) {
             for (let x = 0; x < storedColumns; x++) {
-                storedBoard[y * storedColumns + x] = x < world.storedColumns && y < world.storedRows
-                    ? world.storedBoard[y * world.storedColumns + x]
+                const oldX = x + storedFirstColumn - world.storedFirstColumn;
+                storedBoard[y * storedColumns + x] = oldX >= 0 && oldX < world.storedColumns && y < world.storedRows
+                    ? world.storedBoard[y * world.storedColumns + oldX]
                     : (random() < 0.3 ? 1 : 0);
             }
         }
     }
     // Save the current generation before changing the viewport's active bounds.
     for (let y = 0; y < world.rows; y++) {
-        storedBoard.set(world.board.subarray(y * world.columns, (y + 1) * world.columns), y * storedColumns);
+        storedBoard.set(world.board.subarray(y * world.columns, (y + 1) * world.columns),
+            y * storedColumns + world.firstColumn - storedFirstColumn);
     }
     const board = new Uint8Array(columns * rows);
     for (let y = 0; y < rows; y++) {
-        board.set(storedBoard.subarray(y * storedColumns, y * storedColumns + columns), y * columns);
+        const start = y * storedColumns + firstColumn - storedFirstColumn;
+        board.set(storedBoard.subarray(start, start + columns), y * columns);
     }
-    return { board, columns, rows, storedBoard, storedColumns, storedRows };
+    return { board, columns, rows, storedBoard, storedColumns, storedRows, firstColumn, storedFirstColumn };
 }
 
 export function stepLife(board, next, columns, rows) {

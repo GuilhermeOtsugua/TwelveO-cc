@@ -1,32 +1,42 @@
 const littleEndian = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
 
-// Steady-mode pitch is an integer >= 3 CSS pixels. Every cell therefore has
-// the same fractional edge coverage: calculate one tiny stamp, then copy its
-// packed RGBA pixels. Zoom/fade rendering stays on the original fillRect path.
-export function rasterizeLife(pixels, width, height, world, pitch, originX, originY, color) {
+// Vertical pitch remains integer in steady mode. Fractional horizontal spacing
+// fits the torus exactly to the viewport without stretching the cached bitmap.
+export function rasterizeLife(pixels, width, height, world, pitch, originX, originY, color, columnPitch = pitch) {
     pixels.fill(0);
     const square = pitch * 0.58;
-    const fractionX = originX - Math.floor(originX);
     const fractionY = originY - Math.floor(originY);
-    const stampWidth = Math.ceil(fractionX + square);
     const stampHeight = Math.ceil(fractionY + square);
-    const stamp = new Uint32Array(stampWidth * stampHeight);
     const rgb = littleEndian ? color[0] | color[1] << 8 | color[2] << 16
         : color[0] << 24 | color[1] << 16 | color[2] << 8;
     const alphaShift = littleEndian ? 24 : 0;
-    for (let y = 0; y < stampHeight; y++) {
-        const coverageY = Math.min(fractionY + square, y + 1) - Math.max(fractionY, y);
-        for (let x = 0; x < stampWidth; x++) {
-            const coverageX = Math.min(fractionX + square, x + 1) - Math.max(fractionX, x);
-            const alpha = Math.round(255 * coverageX * coverageY);
-            stamp[y * stampWidth + x] = rgb | alpha << alphaShift;
+    function makeStamp(fractionX) {
+        const width = Math.ceil(fractionX + square);
+        const data = new Uint32Array(width * stampHeight);
+        for (let y = 0; y < stampHeight; y++) {
+            const coverageY = Math.min(fractionY + square, y + 1) - Math.max(fractionY, y);
+            for (let x = 0; x < width; x++) {
+                const coverageX = Math.min(fractionX + square, x + 1) - Math.max(fractionX, x);
+                const alpha = Math.round(255 * coverageX * coverageY);
+                data[y * width + x] = alpha ? rgb | alpha << alphaShift : 0;
+            }
         }
+        return { width, data };
     }
+    const uniformStamp = Number.isInteger(columnPitch) ? makeStamp(originX - Math.floor(originX)) : null;
     const firstRow = Math.floor(-originY / pitch);
     const lastRow = Math.ceil((height - originY) / pitch);
-    const firstColumn = Math.floor(-originX / pitch);
-    const lastColumn = Math.ceil((width - originX) / pitch);
-    const firstWrappedColumn = ((firstColumn % world.columns) + world.columns) % world.columns;
+    const firstColumn = Math.floor(-originX / columnPitch);
+    const lastColumn = Math.ceil((width - originX) / columnPitch);
+    const offset = world.firstColumn ?? 0;
+    const firstWrappedColumn = (((firstColumn - offset) % world.columns) + world.columns) % world.columns;
+    // Prepare each column's coverage once, not once per living cell or row.
+    const stamps = [];
+    for (let x = firstColumn; x < lastColumn; x++) {
+        const position = originX + x * columnPitch;
+        const left = Math.floor(position);
+        stamps.push({ left, stamp: uniformStamp ?? makeStamp(position - left) });
+    }
     for (let y = firstRow; y < lastRow; y++) {
         const row = ((y % world.rows) + world.rows) % world.rows;
         const top = Math.floor(originY + y * pitch);
@@ -35,13 +45,13 @@ export function rasterizeLife(pixels, width, height, world, pitch, originX, orig
         let column = firstWrappedColumn;
         for (let x = firstColumn; x < lastColumn; x++) {
             if (world.board[row * world.columns + column]) {
-                const left = Math.floor(originX + x * pitch);
+                const { left, stamp } = stamps[x - firstColumn];
                 const firstStampX = Math.max(0, -left);
-                const lastStampX = Math.min(stampWidth, width - left);
+                const lastStampX = Math.min(stamp.width, width - left);
                 for (let sy = firstStampY; sy < lastStampY; sy++) {
                     let pixel = (top + sy) * width + left + firstStampX;
-                    let sample = sy * stampWidth + firstStampX;
-                    for (let sx = firstStampX; sx < lastStampX; sx++) pixels[pixel++] = stamp[sample++];
+                    let sample = sy * stamp.width + firstStampX;
+                    for (let sx = firstStampX; sx < lastStampX; sx++) pixels[pixel++] = stamp.data[sample++];
                 }
             }
             column = column === world.columns - 1 ? 0 : column + 1;
@@ -136,7 +146,7 @@ export function createLifeRenderer(context) {
             colorValue = value;
             invalidate();
         },
-        draw(world, pitch, originX, originY, scrollY) {
+        draw(world, pitch, originX, originY, scrollY, columnPitch = pitch) {
             if (!image) return false;
             if (!surfaceExpanded) {
                 canvas.width = image.width;
@@ -148,7 +158,7 @@ export function createLifeRenderer(context) {
                 surfaceExpanded = true;
             }
             rasterizeLife(pixels, image.width, image.height, world,
-                pitch * rasterRatio, originX * rasterRatio, (originY - scrollY + overscan) * rasterRatio, color);
+                pitch * rasterRatio, originX * rasterRatio, (originY - scrollY + overscan) * rasterRatio, color, columnPitch * rasterRatio);
             context.putImageData(image, 0, 0);
             cachedScroll = scrollY;
             return present(scrollY);

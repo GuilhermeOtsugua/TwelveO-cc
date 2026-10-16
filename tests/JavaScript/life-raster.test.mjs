@@ -2,19 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { rasterizeLife } from '../../resources/js/life-renderer.js';
 
-function reference(width, height, world, pitch, originX, originY, color) {
+function reference(width, height, world, pitch, originX, originY, color, columnPitch = pitch) {
     const data = new Uint8ClampedArray(width * height * 4);
     const square = pitch * 0.58;
     for (let py = 0; py < height; py++) {
         for (let px = 0; px < width; px++) {
             // The >= 3px pitch leaves over one pixel between squares, so a
             // pixel can intersect at most one square on each axis.
-            const x = Math.floor((px + 1 - originX) / pitch);
+            const x = Math.floor((px + 1 - originX) / columnPitch);
             const y = Math.floor((py + 1 - originY) / pitch);
-            const column = ((x % world.columns) + world.columns) % world.columns;
+            const column = (((x - (world.firstColumn ?? 0)) % world.columns) + world.columns) % world.columns;
             const row = ((y % world.rows) + world.rows) % world.rows;
             if (!world.board[row * world.columns + column]) continue;
-            const left = originX + x * pitch;
+            const left = originX + x * columnPitch;
             const top = originY + y * pitch;
             const coverageX = Math.max(0, Math.min(left + square, px + 1) - Math.max(left, px));
             const coverageY = Math.max(0, Math.min(top + square, py + 1) - Math.max(top, py));
@@ -48,6 +48,31 @@ for (const pitch of [3, 4, 6, 8, 10, 20]) {
             world.board.fill(0);
             rasterizeLife(pixels, width, height, world, pitch, originX, originY, color);
             assert.equal(actual.some(Boolean), false);
+        });
+    }
+}
+
+for (const cssWidth of [393, 1264, 1283]) {
+    for (const scale of [1, 2]) {
+        test(`fractional horizontal coverage matches the reference at width ${cssWidth}, scale ${scale}`, () => {
+            const columns = Math.ceil(cssWidth / 3);
+            const world = { columns, rows: 5, firstColumn: -73,
+                board: Uint8Array.from({ length: columns * 5 }, (_, i) => Number(i % 7 < 3)) };
+            const width = cssWidth * scale;
+            const height = 47;
+            const originX = -19.37 * scale;
+            const originY = -11.25 * scale;
+            const pitch = 3 * scale;
+            const columnPitch = width / columns;
+            const color = [155, 184, 168];
+            const pixels = new Uint32Array(width * height);
+            rasterizeLife(pixels, width, height, world, pitch, originX, originY, color, columnPitch);
+            const actual = new Uint8ClampedArray(pixels.buffer);
+            const expected = reference(width, height, world, pitch, originX, originY, color, columnPitch);
+            for (let i = 0; i < actual.length; i += 4) {
+                assert.ok(Math.abs(actual[i + 3] - expected[i + 3]) <= 1, `alpha at pixel ${i / 4}`);
+                if (actual[i + 3] && expected[i + 3]) assert.deepEqual(actual.slice(i, i + 3), expected.slice(i, i + 3));
+            }
         });
     }
 }
