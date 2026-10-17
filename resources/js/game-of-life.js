@@ -73,21 +73,43 @@ export function stepLife(board, next, columns, rows) {
 
 // Exact two/six-generation comparisons cover periods 1, 2, 3 and 6, not 4 or 5.
 // Confirm two complete lag-length sequences before counting 30 active seconds.
-// Callers exclude inactive time and replace the monitor on resize/repopulation.
+// Callers exclude inactive time. A cyclic span can restrict comparisons to the
+// visible rows; history still owns its buffers, independent of simulation swaps.
 export function createLifeLoopMonitor(initialBoard) {
     const history = Array.from({ length: 6 }, () => new Uint8Array(initialBoard.length));
     history[0].set(initialBoard);
     const checks = [2, 6].map(period => ({ period, matches: 0, elapsed: 0 }));
     let slot = 1;
     let samples = 1;
+    let spanStart = 0;
+    let spanLength = initialBoard.length;
+
+    function reset() {
+        slot = samples = 0;
+        for (const check of checks) check.matches = check.elapsed = 0;
+    }
 
     return {
-        record(board, elapsedMs) {
+        reset,
+        record(board, elapsedMs, start = 0, length = board.length) {
+            if (length === 0) {
+                reset();
+                return false;
+            }
+            if (start !== spanStart || length !== spanLength) {
+                reset();
+                spanStart = start;
+                spanLength = length;
+            }
             let reseed = false;
             for (const check of checks) {
                 const previous = history[(slot + history.length - check.period) % history.length];
                 let equal = samples >= check.period;
-                for (let i = 0; equal && i < board.length; i++) {
+                const end = Math.min(board.length, start + length);
+                for (let i = start; equal && i < end; i++) {
+                    if (board[i] !== previous[i]) equal = false;
+                }
+                for (let i = 0; equal && i < start + length - board.length; i++) {
                     if (board[i] !== previous[i]) equal = false;
                 }
                 if (equal) {

@@ -2,6 +2,7 @@ import { createLifeLoopMonitor, createLifeWorld, resizeLifeWorld, stepLife } fro
 
 import { createLifeClock } from './life-clock';
 import { fitLifeWidth } from './life-layout.js';
+import { visibleLifeSpan } from './life-viewport.js';
 import { createLifeRenderer } from './life-renderer.js';
 
 const page = document.querySelector('.otsugua-page');
@@ -43,6 +44,7 @@ function initializeLifeBackground(page) {
     let dirty = true;
     let suspended = false;
     let loop;
+    let loopViewKey;
     let fadeElapsed = null;
     let reseeded = false;
     const clock = createLifeClock();
@@ -122,7 +124,17 @@ function initializeLifeBackground(page) {
         if (immersed && !reducedMotion.matches) renderer?.resize(viewportWidth, viewportHeight, ratio, window.innerWidth);
         else renderer?.release();
         renderer?.setColor(cellColor);
+        updateLoopView();
         dirty = true;
+    }
+
+    function updateLoopView() {
+        const key = [viewportWidth, viewportHeight, Math.max(0, window.scrollY),
+            originX, originY, cellSize, columnPitch].join(':');
+        if (key !== loopViewKey) {
+            loop?.reset();
+            loopViewKey = key;
+        }
     }
 
     function targetPitch(worldHeight, expanded = immersed) {
@@ -290,7 +302,12 @@ function initializeLifeBackground(page) {
                 generationPaintPending = true;
                 stepLife(world.board, next, world.columns, world.rows);
                 [world.board, next] = [next, world.board];
-                if (loop.record(world.board, now - lastStep)) {
+                updateLoopView();
+                // A zoom is not a stable view, even when its endpoints happen
+                // to use the same pitch. Start confirmation after it settles.
+                if (transition) loop.reset();
+                const span = visibleLifeSpan(world, cellSize, originY, Math.max(0, window.scrollY), viewportHeight);
+                if (loop.record(world.board, now - lastStep, span.start, span.length)) {
                     fadeElapsed = 0;
                     reseeded = false;
                 }
@@ -335,7 +352,10 @@ function initializeLifeBackground(page) {
         }
     }
 
-    window.addEventListener('scroll', requestDraw, { passive: true });
+    window.addEventListener('scroll', () => {
+        updateLoopView();
+        requestDraw();
+    }, { passive: true });
     window.addEventListener('resize', sync, { passive: true });
     document.addEventListener('visibilitychange', sync);
     reducedMotion.addEventListener('change', sync);
